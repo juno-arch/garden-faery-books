@@ -9,7 +9,6 @@
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root {
   --green: #2E7D32;
@@ -408,6 +407,24 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
       <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
     </div>
     <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Receipt Scanner Setup
+      </div>
+      <p style="font-size: 12px; color: var(--gray); margin-bottom: 12px;">
+        Uses Google Cloud Vision to read receipts automatically. Free for up to 1,000 receipts/month.
+      </p>
+      <div class="form-group">
+        <label>Google Cloud Vision API Key</label>
+        <input type="password" id="settingsVisionKey" placeholder="Paste your API key here">
+      </div>
+      <p style="font-size: 11px; color: var(--gray); margin-bottom: 12px;">
+        <a href="https://console.cloud.google.com/apis/library/vision.googleapis.com" target="_blank" style="color: var(--green);">Get a free API key from Google Cloud</a> — enable the Vision API, then create an API key under Credentials.
+      </p>
+      <button class="btn btn-primary" onclick="saveVisionKey()">Save API Key</button>
+      <div id="visionKeyStatus" style="margin-top: 8px;"></div>
+    </div>
+    <div class="card">
       <div class="card-title">Cards & Accounts</div>
       <div class="form-row">
         <div class="form-group"><label>Card Name</label><input type="text" id="cardName" placeholder="e.g. Chase Visa"></div>
@@ -470,7 +487,7 @@ let state = {
   expenses: [],
   receipts: [],
   cards: [],
-  settings: { rate: 25, goal: 1000 },
+  settings: { rate: 25, goal: 1000, visionKey: '' },
   version: 1
 };
 
@@ -718,24 +735,42 @@ function showOCRStatus(msg, type) {
 }
 
 async function runReceiptOCR(imageData) {
+  const key = state.settings.visionKey;
+  if (!key) {
+    showOCRStatus('Set up your Google Vision API key in Settings to auto-read receipts', 'error');
+    return;
+  }
   showOCRStatus('Reading receipt...', 'loading');
   try {
-    const result = await Tesseract.recognize(imageData, 'eng', {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          const pct = Math.round((m.progress || 0) * 100);
-          showOCRStatus(`Reading receipt... ${pct}%`, 'loading');
-        }
-      }
+    // Strip the data:image/...;base64, prefix
+    const base64 = imageData.replace(/^data:image\/[^;]+;base64,/, '');
+    const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{
+          image: { content: base64 },
+          features: [{ type: 'TEXT_DETECTION', maxResults: 1 }]
+        }]
+      })
     });
-    const text = result.data.text;
-    const confidence = Math.round(result.data.confidence);
-    console.log('OCR raw text:', text);
+    const data = await response.json();
+    if (data.error) {
+      showOCRStatus('API error: ' + data.error.message, 'error');
+      return;
+    }
+    const annotations = data.responses && data.responses[0] && data.responses[0].textAnnotations;
+    if (!annotations || annotations.length === 0) {
+      showOCRStatus('No text found on receipt — fill in manually below', 'error');
+      return;
+    }
+    const text = annotations[0].description;
+    console.log('Vision API raw text:', text);
     const parsed = parseReceiptText(text);
-    applyOCRResults(parsed, confidence);
+    applyOCRResults(parsed, 0);
   } catch (err) {
-    console.error('OCR error:', err);
-    showOCRStatus('Could not read receipt — fill in manually below', 'error');
+    console.error('Vision API error:', err);
+    showOCRStatus('Could not connect to Vision API — check internet and try again', 'error');
   }
 }
 
@@ -852,8 +887,7 @@ function applyOCRResults(parsed, confidence) {
   }
 
   if (filled.length > 0) {
-    const confStr = confidence > 0 ? ` (${confidence}% confident)` : '';
-    showOCRStatus(`Auto-filled: ${filled.join(', ')}${confStr} — double-check and save!`, 'success');
+    showOCRStatus(`Auto-filled: ${filled.join(', ')} — double-check and save!`, 'success');
   } else {
     showOCRStatus('Could not read receipt clearly — fill in manually below', 'error');
   }
@@ -947,6 +981,30 @@ function saveSettings() {
   state.settings.goal = parseFloat(document.getElementById('settingsGoal').value) || 1000;
   document.getElementById('incRate').value = state.settings.rate;
   saveState(); refreshDashboard(); showToast('Settings saved');
+}
+
+function saveVisionKey() {
+  const key = document.getElementById('settingsVisionKey').value.trim();
+  if (!key) { showToast('Paste your API key first'); return; }
+  state.settings.visionKey = key;
+  saveState();
+  // Test the key with a tiny request
+  const statusEl = document.getElementById('visionKeyStatus');
+  statusEl.innerHTML = '<div class="ocr-status"><div class="ocr-spinner"></div>Testing key...</div>';
+  fetch(`https://vision.googleapis.com/v1/images:annotate?key=${key}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ image: { content: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' }, features: [{ type: 'TEXT_DETECTION' }] }] })
+  }).then(r => r.json()).then(data => {
+    if (data.error) {
+      statusEl.innerHTML = '<div class="ocr-status error">Key not working: ' + esc(data.error.message) + '</div>';
+    } else {
+      statusEl.innerHTML = '<div class="ocr-status success">API key is working! Receipt scanner is ready.</div>';
+      showToast('Vision API connected!');
+    }
+  }).catch(() => {
+    statusEl.innerHTML = '<div class="ocr-status error">Could not connect — check your internet</div>';
+  });
 }
 
 function addCard() {
@@ -1072,6 +1130,9 @@ function refreshAll() {
   renderReceiptList(); renderCardsList();
   document.getElementById('settingsRate').value = state.settings.rate || 25;
   document.getElementById('settingsGoal').value = state.settings.goal || 1000;
+  if (state.settings.visionKey) {
+    document.getElementById('settingsVisionKey').value = state.settings.visionKey;
+  }
 }
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
