@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2E7D32">
+<title>Garden Faery Books</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --green: #2E7D32;
+  --green-light: #E8F5E9;
+  --green-med: #81C784;
+  --green-dark: #1B5E20;
+  --gold: #FFF8E1;
+  --gold-accent: #FFD54F;
+  --red: #E53935;
+  --red-light: #FFEBEE;
+  --gray: #757575;
+  --gray-light: #F5F5F5;
+  --white: #FFFFFF;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --radius: 12px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { font-family: var(--font); background: var(--gray-light); color: #333; height: 100%; overflow: hidden; }
+
+/* ─── HEADER ─── */
+.app-header {
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  color: white; padding: 12px 20px; display: flex; align-items: center;
+  justify-content: space-between; position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100; box-shadow: var(--shadow);
+}
+.app-header h1 { font-size: 18px; font-weight: 700; }
+.app-header .subtitle { font-size: 11px; opacity: 0.8; }
+.sync-indicator { font-size: 10px; padding: 4px 8px; border-radius: 12px; cursor: pointer; }
+.sync-indicator.local { background: rgba(255,255,255,0.2); }
+.sync-indicator.synced { background: rgba(129,199,132,0.4); }
+
+/* ─── MAIN CONTENT ─── */
+.main-content {
+  position: fixed; top: 52px; bottom: 64px; left: 0; right: 0;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 16px; padding-bottom: 24px;
+}
+
+/* ─── TAB BAR ─── */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; background: white;
+  display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-btn {
+  flex: 1; padding: 8px 4px 6px; display: flex; flex-direction: column;
+  align-items: center; border: none; background: none; color: var(--gray);
+  font-size: 10px; font-family: var(--font); cursor: pointer; transition: color 0.2s;
+}
+.tab-btn.active { color: var(--green); }
+.tab-btn svg { width: 24px; height: 24px; margin-bottom: 2px; }
+
+/* ─── CARDS ─── */
+.card { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+.card-title { font-size: 14px; font-weight: 700; color: var(--green-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card-title svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* ─── GOAL BAR ─── */
+.goal-bar { height: 28px; background: var(--gray-light); border-radius: 14px; overflow: hidden; position: relative; }
+.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-med)); border-radius: 14px; transition: width 0.5s ease; min-width: 4px; }
+.goal-bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: #333; }
+.goal-numbers { display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px; color: var(--gray); }
+
+/* ─── STATS GRID ─── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-box { background: var(--green-light); border-radius: 10px; padding: 12px; text-align: center; }
+.stat-box .value { font-size: 22px; font-weight: 800; color: var(--green-dark); }
+.stat-box .label { font-size: 11px; color: var(--gray); margin-top: 2px; }
+.stat-box.gold { background: var(--gold); }
+.stat-box.gold .value { color: #F57F17; }
+.stat-box.red { background: var(--red-light); }
+.stat-box.red .value { color: var(--red); }
+
+/* ─── FORMS ─── */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 10px 12px; border: 2px solid #E0E0E0; border-radius: 8px;
+  font-size: 16px; font-family: var(--font); background: white; transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--green); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ─── BUTTONS ─── */
+.btn {
+  width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px;
+  font-weight: 700; font-family: var(--font); cursor: pointer; transition: transform 0.1s, opacity 0.2s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--green); color: white; }
+.btn-outline { background: white; color: var(--green); border: 2px solid var(--green); }
+.btn-small { padding: 8px 16px; font-size: 13px; width: auto; }
+
+/* ─── ENTRY LIST ─── */
+.entry-list { list-style: none; }
+.entry-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
+.entry-item:last-child { border-bottom: none; }
+.entry-info .entry-name { font-weight: 600; font-size: 14px; }
+.entry-info .entry-detail { font-size: 12px; color: var(--gray); }
+.entry-amount { font-weight: 700; font-size: 16px; }
+.entry-amount.income { color: var(--green); }
+.entry-amount.expense { color: var(--red); }
+.entry-actions { display: flex; gap: 6px; align-items: center; }
+.delete-btn { background: none; border: none; color: var(--red); cursor: pointer; padding: 4px; font-size: 18px; opacity: 0.4; }
+.delete-btn:hover { opacity: 1; }
+
+/* ─── RECEIPT CAMERA ─── */
+.camera-area {
+  border: 3px dashed #CCC; border-radius: var(--radius); padding: 40px 20px; text-align: center;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden;
+}
+.camera-area:hover, .camera-area.dragover { border-color: var(--green); background: var(--green-light); }
+.camera-area svg { width: 48px; height: 48px; color: var(--gray); }
+.camera-area p { color: var(--gray); font-size: 14px; margin-top: 8px; }
+.camera-area input { display: none; }
+.receipt-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 12px; }
+.receipt-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #E0E0E0; }
+
+/* ─── MONTH SELECTOR ─── */
+.month-selector { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
+.month-selector button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--green); padding: 4px 8px; }
+.month-selector .month-label { font-size: 16px; font-weight: 700; color: var(--green-dark); min-width: 140px; text-align: center; }
+
+/* ─── FILTER PILLS ─── */
+.filter-pills { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; -webkit-overflow-scrolling: touch; }
+.filter-pill {
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid #E0E0E0; background: white;
+  font-size: 12px; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; color: var(--gray);
+}
+.filter-pill.active { background: var(--green); color: white; border-color: var(--green); }
+
+/* ─── CATEGORY BREAKDOWN ─── */
+.cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cat-label { font-size: 12px; font-weight: 600; color: #555; min-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-bar-bg { flex: 1; height: 20px; background: var(--gray-light); border-radius: 10px; overflow: hidden; }
+.cat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--red), #FF7043); border-radius: 10px; transition: width 0.4s ease; min-width: 2px; }
+.cat-amount { font-size: 12px; font-weight: 700; color: var(--red); min-width: 55px; text-align: right; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: #333; color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px;
+  z-index: 200; transition: transform 0.3s ease; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── TAB PANES ─── */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ─── QUICK LOG BANNER ─── */
+.quick-log {
+  background: linear-gradient(135deg, var(--green-light), var(--gold));
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.quick-log-icon { font-size: 28px; }
+.quick-log-text { font-size: 14px; font-weight: 600; color: var(--green-dark); }
+.quick-log-sub { font-size: 11px; color: var(--gray); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div>
+    <h1>Garden Faery Books</h1>
+    <div class="subtitle">Taya's Bookkeeping</div>
+  </div>
+  <div class="sync-indicator local" id="syncStatus" onclick="manualSync()">Offline OK</div>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- ─── DASHBOARD ─── -->
+  <div class="tab-pane active" id="tab-dashboard">
+    <div class="quick-log" onclick="switchTab('income', document.querySelectorAll('.tab-btn')[1])">
+      <div class="quick-log-icon">+</div>
+      <div>
+        <div class="quick-log-text">Quick Log a Job</div>
+        <div class="quick-log-sub">Tap to log income from today's work</div>
+      </div>
+    </div>
+
+    <div class="month-selector">
+      <button onclick="changeMonth(-1)">&larr;</button>
+      <div class="month-label" id="monthLabel">March 2026</div>
+      <button onclick="changeMonth(1)">&rarr;</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Monthly Goal
+      </div>
+      <div class="goal-bar">
+        <div class="goal-bar-fill" id="goalFill" style="width: 0%"></div>
+        <div class="goal-bar-text" id="goalText">0%</div>
+      </div>
+      <div class="goal-numbers">
+        <span id="goalEarned">$0</span>
+        <span id="goalTarget">$1,000</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="value" id="statIncome">$0</div><div class="label">Income</div></div>
+      <div class="stat-box red"><div class="value" id="statExpenses">$0</div><div class="label">Expenses</div></div>
+      <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net Profit</div></div>
+      <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
+      <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
+      <div class="stat-box"><div class="value" id="statAvgRate">$0</div><div class="label">Avg $/Hr</div></div>
+    </div>
+
+    <div class="card" style="margin-top: 12px;">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Rate Comparison
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="value" id="hrsAt22">0</div><div class="label">Hrs/mo @ $22</div></div>
+        <div class="stat-box gold"><div class="value" id="hrsAt25">0</div><div class="label">Hrs/mo @ $25</div></div>
+      </div>
+      <p style="font-size: 12px; color: var(--gray); margin-top: 8px; text-align: center;" id="hrsSaved"></p>
+    </div>
+
+    <div class="card" id="catBreakdownCard" style="margin-top: 12px; display: none;">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>
+        Expenses by Category
+      </div>
+      <div id="catBreakdownList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <ul class="entry-list" id="recentActivity">
+        <li style="text-align:center; color: var(--gray); padding: 20px; font-size: 13px;">No entries yet</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─── INCOME ─── -->
+  <div class="tab-pane" id="tab-income">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Log Income
+      </div>
+      <div class="form-group">
+        <label>Client Name</label>
+        <input type="text" id="incClient" placeholder="e.g. Elizabeth" list="clientList">
+        <datalist id="clientList"></datalist>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="incDate"></div>
+        <div class="form-group"><label>Hours</label><input type="number" id="incHours" step="0.25" placeholder="4.5" inputmode="decimal"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Rate ($/hr)</label><input type="number" id="incRate" step="0.5" value="25" inputmode="decimal"></div>
+        <div class="form-group"><label>Total</label><input type="text" id="incTotal" readonly placeholder="Auto" style="background: var(--gray-light);"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment</label>
+          <select id="incPayment"><option>Cash</option><option>Check</option><option>Venmo</option><option>Zelle</option><option>Other</option></select>
+        </div>
+        <div class="form-group">
+          <label>Service</label>
+          <select id="incService"><option>Weeding</option><option>Garden Care</option><option>Beekeeping</option><option>Pet Care</option><option>Raised Beds</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes (optional)</label><input type="text" id="incNotes" placeholder="e.g. front yard only"></div>
+      <button class="btn btn-primary" onclick="saveIncome()">Log Income</button>
+    </div>
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        Income History
+        <span style="font-size: 12px; color: var(--gray); font-weight: 400;" id="incomeCount">0 entries</span>
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill active" onclick="filterIncome('all', this)">All</button>
+        <button class="filter-pill" onclick="filterIncome('week', this)">This Week</button>
+        <button class="filter-pill" onclick="filterIncome('month', this)">This Month</button>
+      </div>
+      <ul class="entry-list" id="incomeList"></ul>
+    </div>
+  </div>
+
+  <!-- ─── EXPENSES ─── -->
+  <div class="tab-pane" id="tab-expenses">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Log Expense
+      </div>
+      <div class="form-group"><label>Vendor / Store</label><input type="text" id="expVendor" placeholder="e.g. Amquist Lumber"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="expDate"></div>
+        <div class="form-group"><label>Amount</label><input type="number" id="expAmount" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="expCategory">
+            <option>Lumber & Hardware</option><option>Soil & Amendments</option><option>Plants & Seeds</option>
+            <option>Tools & Equipment</option><option>Transportation</option><option>Supplies</option>
+            <option>Marketing</option><option>Insurance</option><option>Phone/Internet</option>
+            <option>Education</option><option>Meals</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Card Used</label><input type="text" id="expCard" placeholder="e.g. Visa 1234" list="cardList"><datalist id="cardList"></datalist></div>
+      </div>
+      <div class="form-group"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Cedar boards"></div>
+      <button class="btn btn-primary" onclick="saveExpense()">Log Expense</button>
+    </div>
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        Expense History
+        <span style="font-size: 12px; color: var(--gray); font-weight: 400;" id="expenseCount">0 entries</span>
+      </div>
+      <div class="filter-pills" id="expFilterPills">
+        <button class="filter-pill active" onclick="filterExpenses('all', this)">All</button>
+      </div>
+      <ul class="entry-list" id="expenseList"></ul>
+    </div>
+  </div>
+
+  <!-- ─── RECEIPTS ─── -->
+  <div class="tab-pane" id="tab-receipts">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Snap Receipt
+      </div>
+      <div class="camera-area" id="cameraArea" onclick="document.getElementById('receiptInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p>Tap to take photo or upload receipt</p>
+        <input type="file" id="receiptInput" accept="image/*" capture="environment" onchange="handleReceipt(this)">
+      </div>
+      <div id="receiptPreviewArea" style="display:none; margin-top: 12px;">
+        <img id="receiptPreview" class="receipt-preview">
+        <div class="form-row" style="margin-top: 12px;">
+          <div class="form-group"><label>Vendor</label><input type="text" id="recVendor" placeholder="Store name"></div>
+          <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Date</label><input type="date" id="recDate"></div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="recCategory">
+              <option>Lumber & Hardware</option><option>Soil & Amendments</option><option>Plants & Seeds</option>
+              <option>Tools & Equipment</option><option>Transportation</option><option>Supplies</option>
+              <option>Marketing</option><option>Insurance</option><option>Phone/Internet</option>
+              <option>Education</option><option>Meals</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Card Used</label><input type="text" id="recCard" placeholder="e.g. Visa 1234"></div>
+        <button class="btn btn-primary" onclick="saveReceipt()" style="margin-top: 8px;">Save Receipt + Log Expense</button>
+        <button class="btn btn-outline" onclick="cancelReceipt()" style="margin-top: 8px;">Cancel</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Saved Receipts</div>
+      <ul class="entry-list" id="receiptList"></ul>
+    </div>
+  </div>
+
+  <!-- ─── SETTINGS ─── -->
+  <div class="tab-pane" id="tab-settings">
+    <div class="card">
+      <div class="card-title">Business Settings</div>
+      <div class="form-group"><label>Current Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
+      <div class="form-group"><label>Monthly Income Goal ($)</label><input type="number" id="settingsGoal" step="50" value="1000" inputmode="decimal"></div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Cards & Accounts</div>
+      <div class="form-row">
+        <div class="form-group"><label>Card Name</label><input type="text" id="cardName" placeholder="e.g. Chase Visa"></div>
+        <div class="form-group"><label>Last 4 Digits</label><input type="text" id="cardDigits" maxlength="4" placeholder="1234" inputmode="numeric"></div>
+      </div>
+      <button class="btn btn-outline" onclick="addCard()">Add Card</button>
+      <ul class="entry-list" id="cardsList" style="margin-top: 12px;"></ul>
+    </div>
+    <div class="card">
+      <div class="card-title">Data Management</div>
+      <p style="font-size: 12px; color: var(--gray); margin-bottom: 12px;">Your data is stored on this device. Export regularly as a backup, or share it with me in Cowork to update your books.</p>
+      <button class="btn btn-outline" onclick="exportData()" style="margin-bottom: 8px;">Export All Data (JSON)</button>
+      <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import Data (JSON)</button>
+      <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
+    </div>
+    <div class="card">
+      <div class="card-title">About</div>
+      <p style="font-size: 12px; color: var(--gray);">Garden Faery Books v1.0<br>Offline-first bookkeeping for Taya's garden business.<br>Data is stored locally on your device. Works without internet.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('dashboard', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="tab-btn" onclick="switchTab('income', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    Income
+  </button>
+  <button class="tab-btn" onclick="switchTab('expenses', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Expenses
+  </button>
+  <button class="tab-btn" onclick="switchTab('receipts', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    Receipts
+  </button>
+  <button class="tab-btn" onclick="switchTab('settings', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// OFFLINE-FIRST DATA LAYER
+// All data lives in localStorage. No server needed.
+// Export JSON to back up to Mac. Import to restore.
+// ═══════════════════════════════════════
+const STORAGE_KEY = 'garden_faery_books';
+
+let state = {
+  income: [],
+  expenses: [],
+  receipts: [],
+  cards: [],
+  settings: { rate: 25, goal: 1000 },
+  version: 1
+};
+
+let viewMonth = new Date().getMonth();
+let viewYear = new Date().getFullYear();
+let currentReceiptData = null;
+let incomeFilterMode = 'all';
+
+// ─── PERSISTENCE ───
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+    }
+  } catch (e) { console.warn('Load error:', e); }
+  refreshAll();
+}
+
+function saveState() {
+  try {
+    state.lastModified = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateSyncBadge();
+  } catch (e) { console.warn('Save error:', e); }
+}
+
+function updateSyncBadge() {
+  const el = document.getElementById('syncStatus');
+  el.textContent = 'Saved';
+  el.className = 'sync-indicator synced';
+  setTimeout(() => { el.textContent = 'Local'; el.className = 'sync-indicator local'; }, 2000);
+}
+
+function manualSync() { showToast('Data is stored locally on this device. Use Export in Settings to backup.'); }
+
+// ─── TABS ───
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.main-content').scrollTop = 0;
+}
+
+// ─── MONTH NAV ───
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  document.getElementById('monthLabel').textContent =
+    new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  refreshDashboard();
+}
+
+// ═══════════════════════════════════════
+// INCOME
+// ═══════════════════════════════════════
+function setupIncomeForm() {
+  document.getElementById('incDate').value = todayStr();
+  document.getElementById('incRate').value = state.settings.rate || 25;
+  ['incHours', 'incRate'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calcTotal);
+  });
+  updateClientList();
+}
+
+function calcTotal() {
+  const h = parseFloat(document.getElementById('incHours').value) || 0;
+  const r = parseFloat(document.getElementById('incRate').value) || 0;
+  document.getElementById('incTotal').value = h > 0 ? '$' + (h * r).toFixed(2) : '';
+}
+
+function updateClientList() {
+  const clients = [...new Set(state.income.map(i => i.client))].filter(Boolean);
+  document.getElementById('clientList').innerHTML = clients.map(c => `<option value="${esc(c)}">`).join('');
+}
+
+function saveIncome() {
+  const client = document.getElementById('incClient').value.trim();
+  const date = document.getElementById('incDate').value;
+  const hours = parseFloat(document.getElementById('incHours').value);
+  const rate = parseFloat(document.getElementById('incRate').value);
+  const payment = document.getElementById('incPayment').value;
+  const service = document.getElementById('incService').value;
+  const notes = document.getElementById('incNotes').value.trim();
+  if (!client || !date || !hours) { showToast('Fill in client, date & hours'); return; }
+  state.income.push({ id: uid(), client, date, hours, rate, total: hours * rate, payment, service, notes });
+  saveState(); refreshAll();
+  showToast(`$${(hours * rate).toFixed(0)} logged for ${client}`);
+  document.getElementById('incClient').value = '';
+  document.getElementById('incHours').value = '';
+  document.getElementById('incTotal').value = '';
+  document.getElementById('incNotes').value = '';
+  updateClientList();
+}
+
+function filterIncome(mode, btn) {
+  incomeFilterMode = mode;
+  btn.parentElement.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderIncomeList();
+}
+
+function renderIncomeList() {
+  const list = document.getElementById('incomeList');
+  let items = [...state.income].sort((a, b) => b.date.localeCompare(a.date));
+  const now = new Date();
+  if (incomeFilterMode === 'week') {
+    const w = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    items = items.filter(i => new Date(i.date + 'T00:00:00') >= w);
+  } else if (incomeFilterMode === 'month') {
+    items = items.filter(i => { const d = new Date(i.date + 'T00:00:00'); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  }
+  document.getElementById('incomeCount').textContent = items.length + ' entries';
+  if (!items.length) { list.innerHTML = emptyMsg('No income entries'); return; }
+  list.innerHTML = items.map(i => `
+    <li class="entry-item">
+      <div class="entry-info">
+        <div class="entry-name">${esc(i.client)}</div>
+        <div class="entry-detail">${fmtDate(i.date)} · ${i.hours}hrs @ $${i.rate}/hr · ${i.payment} · ${i.service}</div>
+        ${i.notes ? `<div class="entry-detail" style="font-style:italic">${esc(i.notes)}</div>` : ''}
+      </div>
+      <div class="entry-actions">
+        <span class="entry-amount income">$${i.total.toFixed(0)}</span>
+        <button class="delete-btn" onclick="delIncome('${i.id}')">&times;</button>
+      </div>
+    </li>`).join('');
+}
+
+function delIncome(id) {
+  if (!confirm('Delete this entry?')) return;
+  state.income = state.income.filter(i => i.id !== id);
+  saveState(); refreshAll(); showToast('Deleted');
+}
+
+// ═══════════════════════════════════════
+// EXPENSES
+// ═══════════════════════════════════════
+function setupExpenseForm() {
+  document.getElementById('expDate').value = todayStr();
+  updateCardDatalist();
+}
+
+function updateCardDatalist() {
+  document.getElementById('cardList').innerHTML = state.cards.map(c => `<option value="${esc(c.name)}${c.digits ? ' ' + esc(c.digits) : ''}">`).join('');
+}
+
+function saveExpense() {
+  const vendor = document.getElementById('expVendor').value.trim();
+  const date = document.getElementById('expDate').value;
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const category = document.getElementById('expCategory').value;
+  const card = document.getElementById('expCard').value.trim();
+  const desc = document.getElementById('expDesc').value.trim();
+  if (!vendor || !date || !amount) { showToast('Fill in vendor, date & amount'); return; }
+  state.expenses.push({ id: uid(), vendor, date, amount, category, card, description: desc });
+  saveState(); refreshAll();
+  showToast(`$${amount.toFixed(2)} expense logged`);
+  document.getElementById('expVendor').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expDesc').value = '';
+}
+
+function renderExpenseList() {
+  buildExpenseFilterPills();
+  const list = document.getElementById('expenseList');
+  let items = [...state.expenses].sort((a, b) => b.date.localeCompare(a.date));
+  if (expenseFilterCat !== 'all') {
+    items = items.filter(e => e.category === expenseFilterCat);
+  }
+  const total = items.reduce((s, e) => s + (e.amount || 0), 0);
+  document.getElementById('expenseCount').textContent = items.length + ' entries' + (expenseFilterCat !== 'all' ? ' · $' + total.toFixed(2) : '');
+  if (!items.length) { list.innerHTML = emptyMsg(expenseFilterCat !== 'all' ? 'No ' + expenseFilterCat + ' expenses' : 'No expenses yet'); return; }
+  list.innerHTML = items.map(e => `
+    <li class="entry-item">
+      <div class="entry-info">
+        <div class="entry-name">${esc(e.vendor)}</div>
+        <div class="entry-detail">${fmtDate(e.date)} · ${e.category}${e.card ? ' · ' + esc(e.card) : ''}</div>
+        ${e.description ? `<div class="entry-detail">${esc(e.description)}</div>` : ''}
+      </div>
+      <div class="entry-actions">
+        <span class="entry-amount expense">-$${e.amount.toFixed(2)}</span>
+        <button class="delete-btn" onclick="delExpense('${e.id}')">&times;</button>
+      </div>
+    </li>`).join('');
+}
+
+function delExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  saveState(); refreshAll(); showToast('Deleted');
+}
+
+let expenseFilterCat = 'all';
+
+function filterExpenses(cat, btn) {
+  expenseFilterCat = cat;
+  document.querySelectorAll('#expFilterPills .filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderExpenseList();
+}
+
+function buildExpenseFilterPills() {
+  const cats = [...new Set(state.expenses.map(e => e.category))].filter(Boolean).sort();
+  const container = document.getElementById('expFilterPills');
+  const allBtn = '<button class="filter-pill' + (expenseFilterCat === 'all' ? ' active' : '') + '" onclick="filterExpenses(\'all\', this)">All</button>';
+  const catBtns = cats.map(c => {
+    const active = expenseFilterCat === c ? ' active' : '';
+    return `<button class="filter-pill${active}" onclick="filterExpenses('${esc(c)}', this)">${esc(c)}</button>`;
+  }).join('');
+  container.innerHTML = allBtn + catBtns;
+}
+
+// ═══════════════════════════════════════
+// RECEIPTS
+// ═══════════════════════════════════════
+function handleReceipt(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentReceiptData = e.target.result;
+    document.getElementById('receiptPreview').src = currentReceiptData;
+    document.getElementById('receiptPreviewArea').style.display = 'block';
+    document.getElementById('cameraArea').style.display = 'none';
+    document.getElementById('recDate').value = todayStr();
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveReceipt() {
+  const vendor = document.getElementById('recVendor').value.trim();
+  const amount = parseFloat(document.getElementById('recAmount').value);
+  const date = document.getElementById('recDate').value;
+  const category = document.getElementById('recCategory').value;
+  const card = document.getElementById('recCard').value.trim();
+  if (!vendor || !amount || !date) { showToast('Fill in vendor, amount & date'); return; }
+
+  const id = uid();
+  // Store receipt image as base64 in localStorage (small images only)
+  // For large images we compress first
+  let imgData = currentReceiptData;
+  if (imgData && imgData.length > 500000) {
+    // Compress large images
+    imgData = compressImage(imgData);
+  }
+
+  state.receipts.push({ id, vendor, amount, date, category, card, image: imgData });
+  state.expenses.push({ id: uid(), vendor, date, amount, category, card, description: 'From receipt photo', receiptId: id });
+  saveState(); refreshAll(); cancelReceipt();
+  showToast('Receipt saved + expense logged');
+}
+
+function compressImage(dataUrl) {
+  // For now store as-is; could add canvas compression later
+  return dataUrl;
+}
+
+function cancelReceipt() {
+  currentReceiptData = null;
+  document.getElementById('receiptPreviewArea').style.display = 'none';
+  document.getElementById('cameraArea').style.display = 'block';
+  document.getElementById('receiptInput').value = '';
+  ['recVendor', 'recAmount', 'recCard'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderReceiptList() {
+  const list = document.getElementById('receiptList');
+  const items = [...state.receipts].sort((a, b) => b.date.localeCompare(a.date));
+  if (!items.length) { list.innerHTML = emptyMsg('No receipts yet'); return; }
+  list.innerHTML = items.map(r => `
+    <li class="entry-item">
+      ${r.image ? `<img src="${r.image}" class="receipt-thumb" onclick="viewReceipt('${r.id}')">` : ''}
+      <div class="entry-info" style="flex:1; margin-left:12px;">
+        <div class="entry-name">${esc(r.vendor)}</div>
+        <div class="entry-detail">${fmtDate(r.date)} · ${r.category}</div>
+      </div>
+      <div class="entry-actions">
+        <span class="entry-amount expense">-$${r.amount.toFixed(2)}</span>
+        <button class="delete-btn" onclick="delReceipt('${r.id}')">&times;</button>
+      </div>
+    </li>`).join('');
+}
+
+function viewReceipt(id) {
+  const r = state.receipts.find(x => x.id === id);
+  if (r && r.image) window.open(r.image, '_blank');
+}
+
+function delReceipt(id) {
+  if (!confirm('Delete this receipt?')) return;
+  state.receipts = state.receipts.filter(r => r.id !== id);
+  saveState(); refreshAll(); showToast('Deleted');
+}
+
+// Drag & drop
+const ca = document.getElementById('cameraArea');
+ca.addEventListener('dragover', e => { e.preventDefault(); ca.classList.add('dragover'); });
+ca.addEventListener('dragleave', () => ca.classList.remove('dragover'));
+ca.addEventListener('drop', e => {
+  e.preventDefault(); ca.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const dt = new DataTransfer(); dt.items.add(file);
+    const input = document.getElementById('receiptInput');
+    input.files = dt.files; handleReceipt(input);
+  }
+});
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+function saveSettings() {
+  state.settings.rate = parseFloat(document.getElementById('settingsRate').value) || 25;
+  state.settings.goal = parseFloat(document.getElementById('settingsGoal').value) || 1000;
+  document.getElementById('incRate').value = state.settings.rate;
+  saveState(); refreshDashboard(); showToast('Settings saved');
+}
+
+function addCard() {
+  const name = document.getElementById('cardName').value.trim();
+  const digits = document.getElementById('cardDigits').value.trim();
+  if (!name) { showToast('Enter card name'); return; }
+  state.cards.push({ id: uid(), name, digits });
+  saveState(); renderCardsList(); updateCardDatalist();
+  document.getElementById('cardName').value = '';
+  document.getElementById('cardDigits').value = '';
+  showToast('Card added');
+}
+
+function renderCardsList() {
+  const list = document.getElementById('cardsList');
+  if (!state.cards.length) { list.innerHTML = '<li style="color:var(--gray);font-size:13px;padding:8px 0">No cards yet</li>'; return; }
+  list.innerHTML = state.cards.map(c => `
+    <li class="entry-item">
+      <div class="entry-info"><div class="entry-name">${esc(c.name)}${c.digits ? ' ···· ' + esc(c.digits) : ''}</div></div>
+      <button class="delete-btn" onclick="delCard('${c.id}')">&times;</button>
+    </li>`).join('');
+}
+
+function delCard(id) {
+  state.cards = state.cards.filter(c => c.id !== id);
+  saveState(); renderCardsList(); updateCardDatalist();
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+function refreshDashboard() {
+  const mi = state.income.filter(i => { const d = new Date(i.date + 'T00:00:00'); return d.getMonth() === viewMonth && d.getFullYear() === viewYear; });
+  const me = state.expenses.filter(e => { const d = new Date(e.date + 'T00:00:00'); return d.getMonth() === viewMonth && d.getFullYear() === viewYear; });
+
+  const totI = mi.reduce((s, i) => s + (i.total || 0), 0);
+  const totE = me.reduce((s, e) => s + (e.amount || 0), 0);
+  const totH = mi.reduce((s, i) => s + (i.hours || 0), 0);
+  const goal = state.settings.goal || 1000;
+  const pct = Math.min(100, (totI / goal) * 100);
+
+  document.getElementById('goalFill').style.width = pct + '%';
+  document.getElementById('goalText').textContent = Math.round(pct) + '%';
+  document.getElementById('goalEarned').textContent = '$' + totI.toFixed(0);
+  document.getElementById('goalTarget').textContent = '$' + goal.toLocaleString();
+  document.getElementById('statIncome').textContent = '$' + totI.toFixed(0);
+  document.getElementById('statExpenses').textContent = '$' + totE.toFixed(0);
+  document.getElementById('statProfit').textContent = '$' + (totI - totE).toFixed(0);
+  document.getElementById('statHours').textContent = totH.toFixed(1);
+  document.getElementById('statJobs').textContent = mi.length;
+  document.getElementById('statAvgRate').textContent = totH > 0 ? '$' + (totI / totH).toFixed(0) : '$0';
+
+  const h22 = Math.ceil((goal / 22) * 2) / 2;
+  const h25 = Math.ceil((goal / 25) * 2) / 2;
+  document.getElementById('hrsAt22').textContent = h22;
+  document.getElementById('hrsAt25').textContent = h25;
+  document.getElementById('hrsSaved').textContent = `$25/hr saves ${(h22 - h25).toFixed(1)} hours/month — that's time back for you`;
+
+  // Category breakdown
+  const catCard = document.getElementById('catBreakdownCard');
+  const catList = document.getElementById('catBreakdownList');
+  if (me.length > 0) {
+    catCard.style.display = 'block';
+    const byCat = {};
+    me.forEach(e => { byCat[e.category || 'Other'] = (byCat[e.category || 'Other'] || 0) + e.amount; });
+    const sorted = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const maxAmt = sorted[0][1];
+    catList.innerHTML = sorted.map(([cat, amt]) => `
+      <div class="cat-row">
+        <div class="cat-label">${esc(cat)}</div>
+        <div class="cat-bar-bg"><div class="cat-bar-fill" style="width: ${(amt / maxAmt * 100).toFixed(0)}%"></div></div>
+        <div class="cat-amount">$${amt.toFixed(0)}</div>
+      </div>`).join('');
+  } else {
+    catCard.style.display = 'none';
+  }
+
+  // Recent activity
+  const recent = [
+    ...state.income.map(i => ({ ...i, type: 'income', sortDate: i.date })),
+    ...state.expenses.map(e => ({ ...e, type: 'expense', sortDate: e.date }))
+  ].sort((a, b) => b.sortDate.localeCompare(a.sortDate)).slice(0, 6);
+
+  const ra = document.getElementById('recentActivity');
+  if (!recent.length) { ra.innerHTML = emptyMsg('No entries yet'); return; }
+  ra.innerHTML = recent.map(r => r.type === 'income'
+    ? `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.client)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.service}</div></div><span class="entry-amount income">+$${r.total.toFixed(0)}</span></li>`
+    : `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.vendor)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.category}</div></div><span class="entry-amount expense">-$${r.amount.toFixed(2)}</span></li>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `garden-faery-books-${todayStr()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Data exported — save to your Mac!');
+}
+
+function importData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      state = { ...state, ...data };
+      saveState(); refreshAll();
+      showToast('Data imported!');
+    } catch (err) { showToast('Invalid file'); }
+  };
+  reader.readAsText(file); input.value = '';
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function refreshAll() {
+  refreshDashboard(); renderIncomeList(); renderExpenseList();
+  renderReceiptList(); renderCardsList();
+  document.getElementById('settingsRate').value = state.settings.rate || 25;
+  document.getElementById('settingsGoal').value = state.settings.goal || 1000;
+}
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function fmtDate(s) { return new Date(s + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function emptyMsg(t) { return `<li style="text-align:center;color:var(--gray);padding:20px;font-size:13px">${t}</li>`; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  setupIncomeForm();
+  setupExpenseForm();
+
+  // Seed initial data if empty
+  if (state.income.length === 0) {
+    state.income = [
+      { id: 'seed1', client: 'Dena', date: '2026-03-16', hours: 4, rate: 20, total: 80, payment: 'Cash', service: 'Weeding', notes: '10am-2pm, Spear Ave Arcata' },
+      { id: 'seed2', client: 'Elizabeth', date: '2026-03-19', hours: 4.5, rate: 20, total: 90, payment: 'Cash', service: 'Weeding', notes: '9:30am-2pm, 3168 Deer Fern Ct' }
+    ];
+    saveState();
+    refreshAll();
+  }
+});
+
+// Register service worker for offline
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

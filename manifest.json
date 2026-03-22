@@ -1,0 +1,14 @@
+{
+  "name": "Garden Faery Books",
+  "short_name": "GF Books",
+  "description": "Bookkeeping for Garden Faery",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8F5E9",
+  "theme_color": "#2E7D32",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
