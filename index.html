@@ -176,6 +176,63 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
+/* ─── P&L REPORT ─── */
+.pnl-section { margin-bottom: 16px; }
+.pnl-section-title { font-size: 13px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.pnl-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+.pnl-row.indent { padding-left: 16px; color: #555; }
+.pnl-row.total { font-weight: 700; border-top: 2px solid #E0E0E0; padding-top: 8px; margin-top: 4px; }
+.pnl-row.grand-total { font-weight: 800; font-size: 16px; border-top: 3px double var(--green-dark); padding-top: 10px; margin-top: 8px; }
+.pnl-row .pnl-amount { font-weight: 600; }
+.pnl-row .pnl-amount.positive { color: var(--green); }
+.pnl-row .pnl-amount.negative { color: var(--red); }
+.period-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--green); margin-bottom: 12px; }
+.period-toggle button { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--green); cursor: pointer; }
+.period-toggle button.active { background: var(--green); color: white; }
+.period-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
+.period-nav button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--green); padding: 4px 8px; }
+.period-nav .period-label { font-size: 16px; font-weight: 700; color: var(--green-dark); min-width: 160px; text-align: center; }
+.compare-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray); margin-top: 2px; }
+.compare-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.compare-badge.up { background: var(--green-light); color: var(--green-dark); }
+.compare-badge.down { background: var(--red-light); color: var(--red); }
+
+/* ─── TAX ESTIMATE ─── */
+.tax-card { background: linear-gradient(135deg, var(--gold), #FFF3E0); }
+.tax-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.tax-row:last-child { border-bottom: none; }
+.tax-row.highlight { font-weight: 700; font-size: 15px; background: rgba(255,255,255,0.5); margin: 4px -12px; padding: 10px 12px; border-radius: 8px; }
+.tax-due { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 10px; margin-top: 12px; }
+.tax-due-date { font-weight: 700; color: var(--green-dark); }
+.tax-due-status { font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+.tax-due-status.upcoming { background: var(--gold); color: #F57F17; }
+.tax-due-status.overdue { background: var(--red-light); color: var(--red); }
+.tax-due-status.paid { background: var(--green-light); color: var(--green-dark); }
+
+/* ─── INVOICES ─── */
+.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.invoice-number { font-size: 18px; font-weight: 800; color: var(--green-dark); }
+.invoice-status { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.invoice-status.draft { background: var(--gray-light); color: var(--gray); }
+.invoice-status.sent { background: #E3F2FD; color: #1565C0; }
+.invoice-status.paid { background: var(--green-light); color: var(--green-dark); }
+.invoice-status.unpaid { background: var(--gold); color: #F57F17; }
+.line-items-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.line-items-table th { text-align: left; font-size: 11px; color: var(--gray); font-weight: 600; padding: 6px 4px; border-bottom: 2px solid #E0E0E0; }
+.line-items-table td { padding: 8px 4px; font-size: 13px; border-bottom: 1px solid #F0F0F0; }
+.line-items-table td:last-child, .line-items-table th:last-child { text-align: right; }
+.line-item-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: end; }
+.line-item-row .form-group { margin-bottom: 0; }
+.add-line-btn { background: none; border: 2px dashed #CCC; border-radius: 8px; padding: 10px; width: 100%; font-family: var(--font); font-size: 13px; color: var(--gray); cursor: pointer; margin-bottom: 12px; }
+.add-line-btn:hover { border-color: var(--green); color: var(--green); }
+.invoice-total-section { text-align: right; padding-top: 8px; border-top: 2px solid #E0E0E0; }
+.invoice-total-section .total-line { font-size: 14px; margin-bottom: 4px; }
+.invoice-total-section .total-line.grand { font-size: 18px; font-weight: 800; color: var(--green-dark); }
+
+/* ─── SCROLLABLE TAB BAR ─── */
+.tab-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+.tab-btn { min-width: 64px; flex: 0 0 auto; }
+
 /* ─── QUICK LOG BANNER ─── */
 .quick-log {
   background: linear-gradient(135deg, var(--green-light), var(--gold));
@@ -242,16 +299,16 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
       <div class="stat-box"><div class="value" id="statAvgRate">$0</div><div class="label">Avg $/Hr</div></div>
     </div>
 
-    <div class="card" style="margin-top: 12px;">
+    <div class="card" style="margin-top: 12px; cursor: pointer;" onclick="switchTab('mileage', document.querySelectorAll('.tab-btn')[4])">
       <div class="card-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Rate Comparison
+        Mileage This Month
       </div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="value" id="hrsAt22">0</div><div class="label">Hrs/mo @ $22</div></div>
-        <div class="stat-box gold"><div class="value" id="hrsAt25">0</div><div class="label">Hrs/mo @ $25</div></div>
+        <div class="stat-box"><div class="value" id="dashMiles">0</div><div class="label">Miles</div></div>
+        <div class="stat-box gold"><div class="value" id="dashMilDeduction">$0</div><div class="label">Deduction</div></div>
       </div>
-      <p style="font-size: 12px; color: var(--gray); margin-top: 8px; text-align: center;" id="hrsSaved"></p>
+      <p style="font-size: 11px; color: var(--gray); margin-top: 8px; text-align: center;">Tap to log trips &rarr;</p>
     </div>
 
     <div class="card" id="catBreakdownCard" style="margin-top: 12px; display: none;">
@@ -398,6 +455,207 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
     </div>
   </div>
 
+  <!-- ─── MILEAGE ─── -->
+  <div class="tab-pane" id="tab-mileage">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Log a Trip
+      </div>
+      <div class="form-group"><label>Date</label><input type="date" id="milDate"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Destination</label>
+          <input type="text" id="milDest" placeholder="e.g. Almquist Lumber" list="destList">
+          <datalist id="destList"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Purpose</label>
+          <select id="milPurpose">
+            <option>Client Visit</option><option>Supply Run</option><option>Equipment Pickup</option>
+            <option>Dump / Disposal</option><option>Nursery / Garden Center</option><option>Other Business</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Miles (round trip)</label><input type="number" id="milMiles" step="0.1" placeholder="0.0" inputmode="decimal"></div>
+        <div class="form-group">
+          <label>Deduction</label>
+          <input type="text" id="milDeduction" readonly placeholder="Auto" style="background: var(--gray-light);">
+        </div>
+      </div>
+      <div class="form-group"><label>Notes (optional)</label><input type="text" id="milNotes" placeholder="e.g. picked up cedar boards"></div>
+      <button class="btn btn-primary" onclick="saveMileage()">Log Trip</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        <span>Mileage Summary</span>
+        <span style="font-size: 12px; color: var(--gray); font-weight: 400;" id="milSummaryPeriod"></span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="value" id="milTotalMiles">0</div><div class="label">Total Miles</div></div>
+        <div class="stat-box gold"><div class="value" id="milTotalDeduction">$0</div><div class="label">Tax Deduction</div></div>
+        <div class="stat-box"><div class="value" id="milTotalTrips">0</div><div class="label">Trips</div></div>
+        <div class="stat-box"><div class="value" id="milAvgTrip">0</div><div class="label">Avg Miles/Trip</div></div>
+      </div>
+      <p style="font-size: 11px; color: var(--gray); margin-top: 8px; text-align: center;">
+        IRS rate: $0.70/mile (2026) — every business mile = money back at tax time
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        Trip History
+        <span style="font-size: 12px; color: var(--gray); font-weight: 400;" id="milCount">0 trips</span>
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill active" onclick="filterMileage('all', this)">All</button>
+        <button class="filter-pill" onclick="filterMileage('week', this)">This Week</button>
+        <button class="filter-pill" onclick="filterMileage('month', this)">This Month</button>
+      </div>
+      <ul class="entry-list" id="mileageList"></ul>
+    </div>
+  </div>
+
+  <!-- ─── REPORTS ─── -->
+  <div class="tab-pane" id="tab-reports">
+    <div class="period-toggle">
+      <button class="active" onclick="setReportPeriod('monthly', this)">Monthly</button>
+      <button onclick="setReportPeriod('quarterly', this)">Quarterly</button>
+      <button onclick="setReportPeriod('yearly', this)">Yearly</button>
+    </div>
+    <div class="period-nav">
+      <button onclick="changeReportPeriod(-1)">&larr;</button>
+      <div class="period-label" id="reportPeriodLabel">March 2026</div>
+      <button onclick="changeReportPeriod(1)">&rarr;</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        <span>Profit & Loss Statement</span>
+        <button class="btn btn-small btn-outline" onclick="exportPnL()">Export</button>
+      </div>
+
+      <div class="pnl-section">
+        <div class="pnl-section-title">Income</div>
+        <div id="pnlIncomeRows"></div>
+        <div class="pnl-row total">
+          <span>Total Income</span>
+          <span class="pnl-amount positive" id="pnlTotalIncome">$0</span>
+        </div>
+      </div>
+
+      <div class="pnl-section">
+        <div class="pnl-section-title">Expenses</div>
+        <div id="pnlExpenseRows"></div>
+        <div class="pnl-row total">
+          <span>Total Expenses</span>
+          <span class="pnl-amount negative" id="pnlTotalExpenses">$0</span>
+        </div>
+      </div>
+
+      <div class="pnl-section">
+        <div class="pnl-section-title">Deductions</div>
+        <div id="pnlDeductionRows"></div>
+        <div class="pnl-row total">
+          <span>Total Deductions</span>
+          <span class="pnl-amount" id="pnlTotalDeductions">$0</span>
+        </div>
+      </div>
+
+      <div class="pnl-row grand-total">
+        <span>Net Profit</span>
+        <span class="pnl-amount" id="pnlNetProfit">$0</span>
+      </div>
+      <div class="compare-row" id="pnlCompare" style="display: none;">
+        <span id="pnlCompareText"></span>
+        <span class="compare-badge" id="pnlCompareBadge"></span>
+      </div>
+    </div>
+
+    <!-- Tax Estimates Section -->
+    <div class="card tax-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Estimated Taxes
+      </div>
+      <p style="font-size: 12px; color: var(--gray); margin-bottom: 12px;">
+        Sole proprietor estimates for <span id="taxPeriodLabel">2026</span>. These are rough estimates — consult a tax professional for exact amounts.
+      </p>
+      <div id="taxEstimateRows"></div>
+      <div class="tax-row highlight" style="margin-top: 8px;">
+        <span>Total Estimated Tax</span>
+        <span id="taxTotal">$0</span>
+      </div>
+      <div style="margin-top: 12px;">
+        <div class="pnl-section-title">Quarterly Due Dates (2026)</div>
+        <div id="taxDueDates"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── INVOICES ─── -->
+  <div class="tab-pane" id="tab-invoices">
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Create Invoice
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Client Name</label><input type="text" id="invClient" placeholder="e.g. Elizabeth" list="clientList"></div>
+        <div class="form-group"><label>Date</label><input type="date" id="invDate"></div>
+      </div>
+      <div class="form-group"><label>Project Description</label><input type="text" id="invProject" placeholder="e.g. Custom raised bed 4×8"></div>
+
+      <div style="margin-top: 12px;">
+        <label style="font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 8px; display: block;">Line Items</label>
+        <div id="lineItemsContainer"></div>
+        <button class="add-line-btn" onclick="addLineItem()">+ Add Line Item</button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quick Add Materials</label>
+          <select id="invQuickAdd" onchange="quickAddMaterial()">
+            <option value="">Choose material...</option>
+            <option value="cedar2x12">Cedar 2×12 ($4.75/ft)</option>
+            <option value="hwcloth3">Hardware cloth 3ft ($2.90/ft)</option>
+            <option value="hwcloth4">Hardware cloth 4ft ($3.80/ft)</option>
+            <option value="fircompost">Fir compost ($60/yd)</option>
+            <option value="pottingsoil">Potting soil ($200/yd)</option>
+            <option value="labor">Labor ($25/hr)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="invoice-total-section">
+        <div class="total-line">Subtotal: <strong id="invSubtotal">$0.00</strong></div>
+        <div class="total-line grand">Total: <span id="invTotal">$0.00</span></div>
+      </div>
+
+      <div class="form-group" style="margin-top: 12px;">
+        <label>Notes</label>
+        <textarea id="invNotes" rows="2" placeholder="e.g. Payment due upon completion. Cash or check."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveInvoice()">Create Invoice</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="justify-content: space-between;">
+        Invoices
+        <span style="font-size: 12px; color: var(--gray); font-weight: 400;" id="invoiceCount">0 invoices</span>
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill active" onclick="filterInvoices('all', this)">All</button>
+        <button class="filter-pill" onclick="filterInvoices('unpaid', this)">Unpaid</button>
+        <button class="filter-pill" onclick="filterInvoices('paid', this)">Paid</button>
+      </div>
+      <ul class="entry-list" id="invoiceList"></ul>
+    </div>
+  </div>
+
   <!-- ─── SETTINGS ─── -->
   <div class="tab-pane" id="tab-settings">
     <div class="card">
@@ -442,7 +700,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
     </div>
     <div class="card">
       <div class="card-title">About</div>
-      <p style="font-size: 12px; color: var(--gray);">Garden Faery Books v1.0<br>Offline-first bookkeeping for Taya's garden business.<br>Data is stored locally on your device. Works without internet.</p>
+      <p style="font-size: 12px; color: var(--gray);">Garden Faery Books v3.0<br>Offline-first bookkeeping for Taya's garden business.<br>Data is stored locally on your device. Works without internet.</p>
     </div>
   </div>
 
@@ -466,6 +724,18 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
     Receipts
   </button>
+  <button class="tab-btn" onclick="switchTab('mileage', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 18H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.19M15 6h2.81a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2M9 18h6"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M14 2l-4 6h6l-4 6"/></svg>
+    Miles
+  </button>
+  <button class="tab-btn" onclick="switchTab('reports', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Reports
+  </button>
+  <button class="tab-btn" onclick="switchTab('invoices', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Invoices
+  </button>
   <button class="tab-btn" onclick="switchTab('settings', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Settings
@@ -486,9 +756,11 @@ let state = {
   income: [],
   expenses: [],
   receipts: [],
+  mileage: [],
+  invoices: [],
   cards: [],
-  settings: { rate: 25, goal: 1000, visionKey: '' },
-  version: 1
+  settings: { rate: 25, goal: 1000, visionKey: '', irsRate: 0.70 },
+  version: 3
 };
 
 let viewMonth = new Date().getMonth();
@@ -503,6 +775,9 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
+      // Ensure arrays exist for newer features
+      if (!state.invoices) state.invoices = [];
+      if (!state.mileage) state.mileage = [];
     }
   } catch (e) { console.warn('Load error:', e); }
   refreshAll();
@@ -974,6 +1249,610 @@ ca.addEventListener('drop', e => {
 });
 
 // ═══════════════════════════════════════
+// MILEAGE
+// ═══════════════════════════════════════
+const IRS_RATE = 0.70; // 2026 standard mileage rate
+
+let mileageFilterMode = 'all';
+
+function setupMileageForm() {
+  document.getElementById('milDate').value = todayStr();
+  document.getElementById('milMiles').addEventListener('input', calcDeduction);
+  updateDestList();
+}
+
+function calcDeduction() {
+  const miles = parseFloat(document.getElementById('milMiles').value) || 0;
+  document.getElementById('milDeduction').value = miles > 0 ? '$' + (miles * IRS_RATE).toFixed(2) : '';
+}
+
+function updateDestList() {
+  const dests = [...new Set(state.mileage.map(m => m.destination))].filter(Boolean);
+  document.getElementById('destList').innerHTML = dests.map(d => `<option value="${esc(d)}">`).join('');
+}
+
+function saveMileage() {
+  const date = document.getElementById('milDate').value;
+  const destination = document.getElementById('milDest').value.trim();
+  const purpose = document.getElementById('milPurpose').value;
+  const miles = parseFloat(document.getElementById('milMiles').value);
+  const notes = document.getElementById('milNotes').value.trim();
+  if (!date || !destination || !miles) { showToast('Fill in date, destination & miles'); return; }
+  const deduction = miles * IRS_RATE;
+  state.mileage.push({ id: uid(), date, destination, purpose, miles, deduction, notes });
+  saveState(); refreshAll();
+  showToast(`${miles} mi logged — $${deduction.toFixed(2)} deduction`);
+  document.getElementById('milDest').value = '';
+  document.getElementById('milMiles').value = '';
+  document.getElementById('milDeduction').value = '';
+  document.getElementById('milNotes').value = '';
+  updateDestList();
+}
+
+function filterMileage(mode, btn) {
+  mileageFilterMode = mode;
+  btn.parentElement.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderMileageList();
+}
+
+function renderMileageList() {
+  const list = document.getElementById('mileageList');
+  let items = [...state.mileage].sort((a, b) => b.date.localeCompare(a.date));
+  const now = new Date();
+  if (mileageFilterMode === 'week') {
+    const w = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    items = items.filter(m => new Date(m.date + 'T00:00:00') >= w);
+  } else if (mileageFilterMode === 'month') {
+    items = items.filter(m => { const d = new Date(m.date + 'T00:00:00'); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  }
+  document.getElementById('milCount').textContent = items.length + ' trips';
+  if (!items.length) { list.innerHTML = emptyMsg('No trips logged yet'); return; }
+  list.innerHTML = items.map(m => `
+    <li class="entry-item">
+      <div class="entry-info">
+        <div class="entry-name">${esc(m.destination)}</div>
+        <div class="entry-detail">${fmtDate(m.date)} · ${m.miles} mi · ${m.purpose}</div>
+        ${m.notes ? `<div class="entry-detail" style="font-style:italic">${esc(m.notes)}</div>` : ''}
+      </div>
+      <div class="entry-actions">
+        <span class="entry-amount income">$${m.deduction.toFixed(2)}</span>
+        <button class="delete-btn" onclick="delMileage('${m.id}')">&times;</button>
+      </div>
+    </li>`).join('');
+}
+
+function renderMileageSummary() {
+  const now = new Date();
+  const monthTrips = state.mileage.filter(m => {
+    const d = new Date(m.date + 'T00:00:00');
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const totalMiles = monthTrips.reduce((s, m) => s + m.miles, 0);
+  const totalDeduction = monthTrips.reduce((s, m) => s + m.deduction, 0);
+  document.getElementById('milTotalMiles').textContent = totalMiles.toFixed(1);
+  document.getElementById('milTotalDeduction').textContent = '$' + totalDeduction.toFixed(0);
+  document.getElementById('milTotalTrips').textContent = monthTrips.length;
+  document.getElementById('milAvgTrip').textContent = monthTrips.length > 0 ? (totalMiles / monthTrips.length).toFixed(1) : '0';
+  document.getElementById('milSummaryPeriod').textContent = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Dashboard mileage card
+  document.getElementById('dashMiles').textContent = totalMiles.toFixed(0);
+  document.getElementById('dashMilDeduction').textContent = '$' + totalDeduction.toFixed(0);
+}
+
+function delMileage(id) {
+  if (!confirm('Delete this trip?')) return;
+  state.mileage = state.mileage.filter(m => m.id !== id);
+  saveState(); refreshAll(); showToast('Deleted');
+}
+
+// ═══════════════════════════════════════
+// REPORTS — P&L + TAX ESTIMATES
+// ═══════════════════════════════════════
+let reportPeriodType = 'monthly'; // monthly | quarterly | yearly
+let reportMonth = new Date().getMonth();
+let reportYear = new Date().getFullYear();
+let reportQuarter = Math.floor(new Date().getMonth() / 3); // 0-3
+
+function setReportPeriod(type, btn) {
+  reportPeriodType = type;
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateReportPeriodLabel();
+  renderReports();
+}
+
+function changeReportPeriod(delta) {
+  if (reportPeriodType === 'monthly') {
+    reportMonth += delta;
+    if (reportMonth > 11) { reportMonth = 0; reportYear++; }
+    if (reportMonth < 0) { reportMonth = 11; reportYear--; }
+  } else if (reportPeriodType === 'quarterly') {
+    reportQuarter += delta;
+    if (reportQuarter > 3) { reportQuarter = 0; reportYear++; }
+    if (reportQuarter < 0) { reportQuarter = 3; reportYear--; }
+  } else {
+    reportYear += delta;
+  }
+  updateReportPeriodLabel();
+  renderReports();
+}
+
+function updateReportPeriodLabel() {
+  const el = document.getElementById('reportPeriodLabel');
+  if (reportPeriodType === 'monthly') {
+    el.textContent = new Date(reportYear, reportMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } else if (reportPeriodType === 'quarterly') {
+    el.textContent = 'Q' + (reportQuarter + 1) + ' ' + reportYear;
+  } else {
+    el.textContent = reportYear.toString();
+  }
+}
+
+function getReportDateRange() {
+  let startMonth, endMonth;
+  if (reportPeriodType === 'monthly') {
+    startMonth = reportMonth; endMonth = reportMonth;
+  } else if (reportPeriodType === 'quarterly') {
+    startMonth = reportQuarter * 3; endMonth = startMonth + 2;
+  } else {
+    startMonth = 0; endMonth = 11;
+  }
+  const start = new Date(reportYear, startMonth, 1);
+  const end = new Date(reportYear, endMonth + 1, 0, 23, 59, 59);
+  return { start, end };
+}
+
+function getPrevReportDateRange() {
+  let pMonth = reportMonth, pYear = reportYear, pQuarter = reportQuarter;
+  if (reportPeriodType === 'monthly') {
+    pMonth--; if (pMonth < 0) { pMonth = 11; pYear--; }
+    const start = new Date(pYear, pMonth, 1);
+    const end = new Date(pYear, pMonth + 1, 0, 23, 59, 59);
+    return { start, end };
+  } else if (reportPeriodType === 'quarterly') {
+    pQuarter--; if (pQuarter < 0) { pQuarter = 3; pYear--; }
+    const startMonth = pQuarter * 3;
+    return { start: new Date(pYear, startMonth, 1), end: new Date(pYear, startMonth + 3, 0, 23, 59, 59) };
+  } else {
+    return { start: new Date(pYear - 1, 0, 1), end: new Date(pYear - 1, 11, 31, 23, 59, 59) };
+  }
+}
+
+function filterByDateRange(items, dateField, range) {
+  return items.filter(item => {
+    const d = new Date(item[dateField] + 'T00:00:00');
+    return d >= range.start && d <= range.end;
+  });
+}
+
+function renderReports() {
+  const range = getReportDateRange();
+  const prevRange = getPrevReportDateRange();
+
+  // Filter data for current period
+  const periodIncome = filterByDateRange(state.income, 'date', range);
+  const periodExpenses = filterByDateRange(state.expenses, 'date', range);
+  const periodMileage = filterByDateRange(state.mileage, 'date', range);
+
+  // Previous period for comparison
+  const prevIncome = filterByDateRange(state.income, 'date', prevRange);
+  const prevExpenses = filterByDateRange(state.expenses, 'date', prevRange);
+
+  // ─── INCOME BY SERVICE ───
+  const incByService = {};
+  periodIncome.forEach(i => {
+    const svc = i.service || 'Other';
+    incByService[svc] = (incByService[svc] || 0) + (i.total || 0);
+  });
+  const totalIncome = periodIncome.reduce((s, i) => s + (i.total || 0), 0);
+
+  const incRows = document.getElementById('pnlIncomeRows');
+  if (Object.keys(incByService).length > 0) {
+    incRows.innerHTML = Object.entries(incByService).sort((a, b) => b[1] - a[1]).map(([svc, amt]) =>
+      `<div class="pnl-row indent"><span>${esc(svc)}</span><span class="pnl-amount">$${amt.toFixed(2)}</span></div>`
+    ).join('');
+  } else {
+    incRows.innerHTML = '<div class="pnl-row indent" style="color:var(--gray)"><span>No income this period</span></div>';
+  }
+  document.getElementById('pnlTotalIncome').textContent = '$' + totalIncome.toFixed(2);
+
+  // ─── EXPENSES BY CATEGORY ───
+  const expByCat = {};
+  periodExpenses.forEach(e => {
+    const cat = e.category || 'Other';
+    expByCat[cat] = (expByCat[cat] || 0) + (e.amount || 0);
+  });
+  const totalExpenses = periodExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+
+  const expRows = document.getElementById('pnlExpenseRows');
+  if (Object.keys(expByCat).length > 0) {
+    expRows.innerHTML = Object.entries(expByCat).sort((a, b) => b[1] - a[1]).map(([cat, amt]) =>
+      `<div class="pnl-row indent"><span>${esc(cat)}</span><span class="pnl-amount">$${amt.toFixed(2)}</span></div>`
+    ).join('');
+  } else {
+    expRows.innerHTML = '<div class="pnl-row indent" style="color:var(--gray)"><span>No expenses this period</span></div>';
+  }
+  document.getElementById('pnlTotalExpenses').textContent = '-$' + totalExpenses.toFixed(2);
+
+  // ─── DEDUCTIONS ───
+  const totalMiles = periodMileage.reduce((s, m) => s + m.miles, 0);
+  const mileageDeduction = periodMileage.reduce((s, m) => s + m.deduction, 0);
+  const dedRows = document.getElementById('pnlDeductionRows');
+  dedRows.innerHTML = `<div class="pnl-row indent"><span>Mileage (${totalMiles.toFixed(0)} mi @ $${IRS_RATE}/mi)</span><span class="pnl-amount">$${mileageDeduction.toFixed(2)}</span></div>`;
+  document.getElementById('pnlTotalDeductions').textContent = '$' + mileageDeduction.toFixed(2);
+
+  // ─── NET PROFIT ───
+  const netProfit = totalIncome - totalExpenses;
+  const netEl = document.getElementById('pnlNetProfit');
+  netEl.textContent = (netProfit >= 0 ? '$' : '-$') + Math.abs(netProfit).toFixed(2);
+  netEl.className = 'pnl-amount ' + (netProfit >= 0 ? 'positive' : 'negative');
+
+  // ─── COMPARISON ───
+  const prevTotalIncome = prevIncome.reduce((s, i) => s + (i.total || 0), 0);
+  const prevTotalExpenses = prevExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+  const prevNet = prevTotalIncome - prevTotalExpenses;
+  const compareEl = document.getElementById('pnlCompare');
+  if (prevTotalIncome > 0 || prevTotalExpenses > 0) {
+    compareEl.style.display = 'flex';
+    const diff = netProfit - prevNet;
+    const pctChange = prevNet !== 0 ? ((diff / Math.abs(prevNet)) * 100).toFixed(0) : '—';
+    const isUp = diff >= 0;
+    document.getElementById('pnlCompareText').textContent = `vs previous period: ${isUp ? '+' : ''}$${diff.toFixed(0)}`;
+    const badge = document.getElementById('pnlCompareBadge');
+    badge.textContent = pctChange !== '—' ? (isUp ? '+' : '') + pctChange + '%' : 'New';
+    badge.className = 'compare-badge ' + (isUp ? 'up' : 'down');
+  } else {
+    compareEl.style.display = 'none';
+  }
+
+  // ─── TAX ESTIMATES ───
+  renderTaxEstimates(totalIncome, totalExpenses, mileageDeduction);
+}
+
+function renderTaxEstimates(income, expenses, mileageDeduction) {
+  // For tax purposes, we calculate on annual basis regardless of view period
+  // Get full year data for accurate estimates
+  const yearRange = { start: new Date(reportYear, 0, 1), end: new Date(reportYear, 11, 31, 23, 59, 59) };
+  const yearIncome = filterByDateRange(state.income, 'date', yearRange);
+  const yearExpenses = filterByDateRange(state.expenses, 'date', yearRange);
+  const yearMileage = filterByDateRange(state.mileage, 'date', yearRange);
+
+  const annualIncome = yearIncome.reduce((s, i) => s + (i.total || 0), 0);
+  const annualExpenses = yearExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+  const annualMileageDed = yearMileage.reduce((s, m) => s + m.deduction, 0);
+
+  const netBusiness = annualIncome - annualExpenses - annualMileageDed;
+  const taxableIncome = Math.max(0, netBusiness);
+
+  // Self-employment tax: 15.3% on 92.35% of net earnings
+  const seBase = taxableIncome * 0.9235;
+  const seTax = seBase * 0.153;
+  const seDeduction = seTax / 2; // Half of SE tax is deductible
+
+  // Federal income tax (simplified 2026 brackets for single filer)
+  const fedTaxableIncome = Math.max(0, taxableIncome - seDeduction - 14600); // Standard deduction ~$14,600
+  let fedTax = 0;
+  if (fedTaxableIncome > 0) {
+    // Simplified brackets
+    if (fedTaxableIncome <= 11600) fedTax = fedTaxableIncome * 0.10;
+    else if (fedTaxableIncome <= 47150) fedTax = 1160 + (fedTaxableIncome - 11600) * 0.12;
+    else if (fedTaxableIncome <= 100525) fedTax = 5426 + (fedTaxableIncome - 47150) * 0.22;
+    else fedTax = 17168.5 + (fedTaxableIncome - 100525) * 0.24;
+  }
+
+  // California state tax (simplified brackets for single filer)
+  const caTaxableIncome = Math.max(0, taxableIncome - seDeduction - 5540); // CA standard deduction ~$5,540
+  let caTax = 0;
+  if (caTaxableIncome > 0) {
+    if (caTaxableIncome <= 10412) caTax = caTaxableIncome * 0.01;
+    else if (caTaxableIncome <= 24684) caTax = 104.12 + (caTaxableIncome - 10412) * 0.02;
+    else if (caTaxableIncome <= 38959) caTax = 389.56 + (caTaxableIncome - 24684) * 0.04;
+    else if (caTaxableIncome <= 54081) caTax = 960.56 + (caTaxableIncome - 38959) * 0.06;
+    else if (caTaxableIncome <= 68350) caTax = 1867.88 + (caTaxableIncome - 54081) * 0.08;
+    else caTax = 3009.4 + (caTaxableIncome - 68350) * 0.093;
+  }
+
+  const totalTax = seTax + fedTax + caTax;
+  const quarterlyPayment = totalTax / 4;
+
+  document.getElementById('taxPeriodLabel').textContent = reportYear;
+  const taxRows = document.getElementById('taxEstimateRows');
+  taxRows.innerHTML = `
+    <div class="tax-row"><span>Gross Income (YTD)</span><span>$${annualIncome.toFixed(2)}</span></div>
+    <div class="tax-row"><span>Business Expenses</span><span>-$${annualExpenses.toFixed(2)}</span></div>
+    <div class="tax-row"><span>Mileage Deduction</span><span>-$${annualMileageDed.toFixed(2)}</span></div>
+    <div class="tax-row" style="font-weight:600"><span>Net Business Income</span><span>$${netBusiness.toFixed(2)}</span></div>
+    <div style="height: 8px"></div>
+    <div class="tax-row"><span>Self-Employment Tax (15.3%)</span><span>$${seTax.toFixed(2)}</span></div>
+    <div class="tax-row"><span>Est. Federal Income Tax</span><span>$${fedTax.toFixed(2)}</span></div>
+    <div class="tax-row"><span>Est. CA State Tax</span><span>$${caTax.toFixed(2)}</span></div>
+  `;
+  document.getElementById('taxTotal').textContent = '$' + totalTax.toFixed(2);
+
+  // Quarterly due dates
+  const dueDates = [
+    { q: 'Q1', due: 'Apr 15, ' + reportYear, month: 3, day: 15 },
+    { q: 'Q2', due: 'Jun 15, ' + reportYear, month: 5, day: 15 },
+    { q: 'Q3', due: 'Sep 15, ' + reportYear, month: 8, day: 15 },
+    { q: 'Q4', due: 'Jan 15, ' + (reportYear + 1), month: 0, day: 15, nextYear: true }
+  ];
+  const now = new Date();
+  const dueEl = document.getElementById('taxDueDates');
+  dueEl.innerHTML = dueDates.map(dd => {
+    const dueDate = new Date(dd.nextYear ? reportYear + 1 : reportYear, dd.month, dd.day);
+    let statusClass = 'upcoming', statusText = 'Upcoming';
+    if (now > dueDate) { statusClass = 'overdue'; statusText = 'Past Due'; }
+    return `<div class="tax-due">
+      <span style="font-weight:700; min-width:30px;">${dd.q}</span>
+      <span class="tax-due-date" style="flex:1;">${dd.due}</span>
+      <span style="font-weight:600;">$${quarterlyPayment.toFixed(0)}</span>
+      <span class="tax-due-status ${statusClass}">${statusText}</span>
+    </div>`;
+  }).join('');
+}
+
+function exportPnL() {
+  const label = document.getElementById('reportPeriodLabel').textContent;
+  const range = getReportDateRange();
+  const periodIncome = filterByDateRange(state.income, 'date', range);
+  const periodExpenses = filterByDateRange(state.expenses, 'date', range);
+  const periodMileage = filterByDateRange(state.mileage, 'date', range);
+
+  const totalI = periodIncome.reduce((s, i) => s + (i.total || 0), 0);
+  const totalE = periodExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+  const totalMileDed = periodMileage.reduce((s, m) => s + m.deduction, 0);
+
+  let text = `GARDEN FAERY — PROFIT & LOSS\n${label}\n${'═'.repeat(40)}\n\n`;
+  text += `INCOME\n`;
+  const incBySvc = {};
+  periodIncome.forEach(i => { incBySvc[i.service || 'Other'] = (incBySvc[i.service || 'Other'] || 0) + (i.total || 0); });
+  Object.entries(incBySvc).sort((a, b) => b[1] - a[1]).forEach(([s, a]) => { text += `  ${s.padEnd(25)} $${a.toFixed(2)}\n`; });
+  text += `  ${'─'.repeat(36)}\n  TOTAL INCOME${' '.repeat(14)}$${totalI.toFixed(2)}\n\n`;
+
+  text += `EXPENSES\n`;
+  const expByCat = {};
+  periodExpenses.forEach(e => { expByCat[e.category || 'Other'] = (expByCat[e.category || 'Other'] || 0) + (e.amount || 0); });
+  Object.entries(expByCat).sort((a, b) => b[1] - a[1]).forEach(([c, a]) => { text += `  ${c.padEnd(25)} $${a.toFixed(2)}\n`; });
+  text += `  ${'─'.repeat(36)}\n  TOTAL EXPENSES${' '.repeat(12)}-$${totalE.toFixed(2)}\n\n`;
+
+  text += `DEDUCTIONS\n  Mileage${' '.repeat(20)}$${totalMileDed.toFixed(2)}\n\n`;
+  text += `${'═'.repeat(40)}\nNET PROFIT${' '.repeat(17)}$${(totalI - totalE).toFixed(2)}\n`;
+
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `garden-faery-pnl-${label.replace(/\s+/g, '-').toLowerCase()}.txt`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('P&L exported!');
+}
+
+// ═══════════════════════════════════════
+// INVOICES
+// ═══════════════════════════════════════
+let lineItems = [];
+let invoiceFilterMode = 'all';
+
+const MATERIAL_PRESETS = {
+  cedar2x12: { desc: 'Cedar 2×12', unit: 'ft', price: 4.75 },
+  hwcloth3: { desc: 'Hardware cloth 3ft roll', unit: 'ft', price: 2.90 },
+  hwcloth4: { desc: 'Hardware cloth 4ft roll', unit: 'ft', price: 3.80 },
+  fircompost: { desc: 'Fir compost', unit: 'yd', price: 60.00 },
+  pottingsoil: { desc: 'Potting soil', unit: 'yd', price: 200.00 },
+  labor: { desc: 'Labor', unit: 'hrs', price: 25.00 }
+};
+
+function setupInvoiceForm() {
+  document.getElementById('invDate').value = todayStr();
+  if (lineItems.length === 0) addLineItem();
+}
+
+function addLineItem(desc, qty, unit, price) {
+  const idx = lineItems.length;
+  lineItems.push({ desc: desc || '', qty: qty || 1, unit: unit || '', price: price || 0 });
+  renderLineItems();
+}
+
+function renderLineItems() {
+  const container = document.getElementById('lineItemsContainer');
+  container.innerHTML = lineItems.map((item, i) => `
+    <div class="line-item-row" data-idx="${i}">
+      <div class="form-group" style="flex:3"><input type="text" placeholder="Description" value="${esc(item.desc)}" onchange="updateLineItem(${i}, 'desc', this.value)"></div>
+      <div class="form-group" style="flex:1"><input type="number" placeholder="Qty" value="${item.qty || ''}" step="0.1" inputmode="decimal" onchange="updateLineItem(${i}, 'qty', this.value)"></div>
+      <div class="form-group" style="flex:1"><input type="number" placeholder="Price" value="${item.price || ''}" step="0.01" inputmode="decimal" onchange="updateLineItem(${i}, 'price', this.value)"></div>
+      <button class="delete-btn" onclick="removeLineItem(${i})" style="margin-bottom:12px">&times;</button>
+    </div>
+  `).join('');
+  updateInvoiceTotals();
+}
+
+function updateLineItem(idx, field, value) {
+  if (field === 'desc') lineItems[idx].desc = value;
+  else if (field === 'qty') lineItems[idx].qty = parseFloat(value) || 0;
+  else if (field === 'price') lineItems[idx].price = parseFloat(value) || 0;
+  updateInvoiceTotals();
+}
+
+function removeLineItem(idx) {
+  lineItems.splice(idx, 1);
+  if (lineItems.length === 0) addLineItem();
+  else renderLineItems();
+}
+
+function quickAddMaterial() {
+  const sel = document.getElementById('invQuickAdd');
+  const key = sel.value;
+  if (!key) return;
+  const preset = MATERIAL_PRESETS[key];
+  addLineItem(preset.desc, 1, preset.unit, preset.price);
+  sel.value = '';
+}
+
+function updateInvoiceTotals() {
+  const subtotal = lineItems.reduce((s, item) => s + (item.qty * item.price), 0);
+  document.getElementById('invSubtotal').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('invTotal').textContent = '$' + subtotal.toFixed(2);
+}
+
+function getNextInvoiceNumber() {
+  const existing = state.invoices.map(inv => {
+    const m = inv.number.match(/GF-(\d+)/);
+    return m ? parseInt(m[1]) : 0;
+  });
+  const maxNum = existing.length > 0 ? Math.max(...existing) : 0;
+  return 'GF-' + String(maxNum + 1).padStart(3, '0');
+}
+
+function saveInvoice() {
+  const client = document.getElementById('invClient').value.trim();
+  const date = document.getElementById('invDate').value;
+  const project = document.getElementById('invProject').value.trim();
+  const notes = document.getElementById('invNotes').value.trim();
+  const validItems = lineItems.filter(li => li.desc && li.qty > 0 && li.price > 0);
+  if (!client || !date) { showToast('Fill in client and date'); return; }
+  if (validItems.length === 0) { showToast('Add at least one line item'); return; }
+  const total = validItems.reduce((s, li) => s + (li.qty * li.price), 0);
+  const invoice = {
+    id: uid(),
+    number: getNextInvoiceNumber(),
+    client, date, project, notes,
+    items: validItems.map(li => ({ ...li })),
+    total,
+    status: 'unpaid',
+    created: new Date().toISOString()
+  };
+  state.invoices.push(invoice);
+  saveState(); refreshAll();
+  showToast(`Invoice ${invoice.number} created — $${total.toFixed(2)}`);
+
+  // Reset form
+  document.getElementById('invClient').value = '';
+  document.getElementById('invProject').value = '';
+  document.getElementById('invNotes').value = '';
+  lineItems = [];
+  addLineItem();
+}
+
+function filterInvoices(mode, btn) {
+  invoiceFilterMode = mode;
+  btn.parentElement.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderInvoiceList();
+}
+
+function renderInvoiceList() {
+  const list = document.getElementById('invoiceList');
+  let items = [...(state.invoices || [])].sort((a, b) => b.date.localeCompare(a.date));
+  if (invoiceFilterMode !== 'all') items = items.filter(inv => inv.status === invoiceFilterMode);
+  document.getElementById('invoiceCount').textContent = items.length + ' invoices';
+  if (!items.length) { list.innerHTML = emptyMsg(invoiceFilterMode === 'all' ? 'No invoices yet' : 'No ' + invoiceFilterMode + ' invoices'); return; }
+  list.innerHTML = items.map(inv => `
+    <li class="entry-item" style="flex-wrap: wrap;">
+      <div class="entry-info" style="flex:1;">
+        <div class="entry-name">${esc(inv.number)} — ${esc(inv.client)}</div>
+        <div class="entry-detail">${fmtDate(inv.date)}${inv.project ? ' · ' + esc(inv.project) : ''} · ${inv.items.length} items</div>
+      </div>
+      <div class="entry-actions" style="gap: 8px;">
+        <span class="invoice-status ${inv.status}">${inv.status}</span>
+        <span class="entry-amount ${inv.status === 'paid' ? 'income' : ''}" style="font-size:15px">$${inv.total.toFixed(2)}</span>
+      </div>
+      <div style="width:100%; display:flex; gap:8px; margin-top:8px;">
+        ${inv.status === 'unpaid' ? `<button class="btn btn-small btn-primary" onclick="markInvoicePaid('${inv.id}')">Mark Paid</button>` : ''}
+        ${inv.status === 'paid' ? `<button class="btn btn-small btn-outline" onclick="markInvoiceUnpaid('${inv.id}')">Mark Unpaid</button>` : ''}
+        <button class="btn btn-small btn-outline" onclick="viewInvoice('${inv.id}')">View</button>
+        <button class="btn btn-small btn-outline" style="color:var(--red);border-color:var(--red);" onclick="delInvoice('${inv.id}')">Delete</button>
+      </div>
+    </li>`).join('');
+}
+
+function markInvoicePaid(id) {
+  const inv = state.invoices.find(i => i.id === id);
+  if (inv) {
+    inv.status = 'paid';
+    inv.paidDate = todayStr();
+    // Also log as income
+    state.income.push({
+      id: uid(), client: inv.client, date: inv.paidDate,
+      hours: 0, rate: 0, total: inv.total,
+      payment: 'Invoice', service: inv.project || 'Raised Beds',
+      notes: 'Invoice ' + inv.number
+    });
+    saveState(); refreshAll();
+    showToast(`Invoice ${inv.number} marked paid — $${inv.total.toFixed(2)} logged as income`);
+  }
+}
+
+function markInvoiceUnpaid(id) {
+  const inv = state.invoices.find(i => i.id === id);
+  if (inv) {
+    inv.status = 'unpaid';
+    delete inv.paidDate;
+    saveState(); refreshAll();
+    showToast('Invoice marked unpaid');
+  }
+}
+
+function delInvoice(id) {
+  if (!confirm('Delete this invoice?')) return;
+  state.invoices = state.invoices.filter(i => i.id !== id);
+  saveState(); refreshAll(); showToast('Invoice deleted');
+}
+
+function viewInvoice(id) {
+  const inv = state.invoices.find(i => i.id === id);
+  if (!inv) return;
+  // Generate printable invoice in new window
+  const itemRows = inv.items.map(li =>
+    `<tr><td style="padding:8px;border-bottom:1px solid #eee">${li.desc}</td>
+     <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${li.qty}${li.unit ? ' ' + li.unit : ''}</td>
+     <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">$${li.price.toFixed(2)}</td>
+     <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;font-weight:600">$${(li.qty * li.price).toFixed(2)}</td></tr>`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html><head><title>Invoice ${inv.number}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>body{font-family:-apple-system,system-ui,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px}
+  .brand{font-size:24px;font-weight:800;color:#2E7D32}
+  .brand-sub{font-size:12px;color:#757575}
+  .inv-num{font-size:28px;font-weight:800;color:#1B5E20;text-align:right}
+  .inv-date{font-size:13px;color:#757575;text-align:right}
+  .client-box{background:#F5F5F5;padding:16px;border-radius:10px;margin-bottom:20px}
+  .client-label{font-size:11px;color:#757575;font-weight:600}
+  .client-name{font-size:18px;font-weight:700}
+  table{width:100%;border-collapse:collapse;margin:20px 0}
+  th{text-align:left;font-size:12px;color:#757575;padding:8px;border-bottom:2px solid #333}
+  th:nth-child(2),th:nth-child(3),th:last-child{text-align:right}
+  td:nth-child(2){text-align:center}
+  .total-row{text-align:right;font-size:20px;font-weight:800;color:#1B5E20;padding:16px 0;border-top:3px double #1B5E20}
+  .status{display:inline-block;padding:4px 16px;border-radius:12px;font-weight:600;font-size:13px}
+  .status.paid{background:#E8F5E9;color:#1B5E20}
+  .status.unpaid{background:#FFF8E1;color:#F57F17}
+  .notes{background:#FFF8E1;padding:12px;border-radius:8px;font-size:13px;margin-top:20px}
+  .footer{margin-top:30px;text-align:center;font-size:12px;color:#757575}
+  @media print{body{padding:0}.no-print{display:none}}</style></head>
+  <body>
+  <div class="header">
+    <div><div class="brand">Garden Faery</div><div class="brand-sub">Arcata, CA · gardenfaery.love</div></div>
+    <div><div class="inv-num">${inv.number}</div><div class="inv-date">${fmtDate(inv.date)}</div>
+    <div style="margin-top:8px"><span class="status ${inv.status}">${inv.status.toUpperCase()}</span></div></div>
+  </div>
+  <div class="client-box"><div class="client-label">BILL TO</div><div class="client-name">${inv.client}</div>
+  ${inv.project ? '<div style="font-size:13px;color:#555;margin-top:4px">' + inv.project + '</div>' : ''}</div>
+  <table><thead><tr><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>${itemRows}</tbody></table>
+  <div class="total-row">Total: $${inv.total.toFixed(2)}</div>
+  ${inv.notes ? '<div class="notes"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
+  <div class="footer">Payment: Cash or Check · Thank you for your business!</div>
+  <div class="no-print" style="text-align:center;margin-top:20px"><button onclick="window.print()" style="padding:12px 30px;background:#2E7D32;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer">Print / Save PDF</button></div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ═══════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════
 function saveSettings() {
@@ -1057,12 +1936,6 @@ function refreshDashboard() {
   document.getElementById('statJobs').textContent = mi.length;
   document.getElementById('statAvgRate').textContent = totH > 0 ? '$' + (totI / totH).toFixed(0) : '$0';
 
-  const h22 = Math.ceil((goal / 22) * 2) / 2;
-  const h25 = Math.ceil((goal / 25) * 2) / 2;
-  document.getElementById('hrsAt22').textContent = h22;
-  document.getElementById('hrsAt25').textContent = h25;
-  document.getElementById('hrsSaved').textContent = `$25/hr saves ${(h22 - h25).toFixed(1)} hours/month — that's time back for you`;
-
   // Category breakdown
   const catCard = document.getElementById('catBreakdownCard');
   const catList = document.getElementById('catBreakdownList');
@@ -1127,7 +2000,8 @@ function importData(input) {
 // ═══════════════════════════════════════
 function refreshAll() {
   refreshDashboard(); renderIncomeList(); renderExpenseList();
-  renderReceiptList(); renderCardsList();
+  renderReceiptList(); renderMileageList(); renderMileageSummary();
+  renderReports(); renderInvoiceList(); renderCardsList();
   document.getElementById('settingsRate').value = state.settings.rate || 25;
   document.getElementById('settingsGoal').value = state.settings.goal || 1000;
   if (state.settings.visionKey) {
@@ -1154,6 +2028,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadState();
   setupIncomeForm();
   setupExpenseForm();
+  setupMileageForm();
+  setupInvoiceForm();
+  updateReportPeriodLabel();
 
   // Seed initial data if empty
   if (state.income.length === 0) {

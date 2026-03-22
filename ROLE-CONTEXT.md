@@ -35,6 +35,9 @@ You handle all financial tracking for Garden Faery. You build and maintain the b
 
 ## What Needs Work
 - [x] Build out expense categorization
-- [ ] Receipt OCR / photo-to-data pipeline
-- [ ] Quarterly tax summary reports
+- [x] Receipt OCR / photo-to-data pipeline (Google Cloud Vision API)
+- [x] Mileage tracking (IRS $0.70/mi rate, trip logging, deduction calculator)
+- [x] P&L reports (monthly/quarterly/yearly with period comparison)
+- [x] Tax estimates (SE tax, federal, CA state, quarterly due dates)
+- [x] Invoicing (line-item for raised bed projects, material presets, print/PDF view)
 - [ ] Gusto integration for payroll tracking
