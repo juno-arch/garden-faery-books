@@ -9,6 +9,7 @@
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
 :root {
   --green: #2E7D32;
@@ -142,6 +143,20 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   font-size: 12px; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; color: var(--gray);
 }
 .filter-pill.active { background: var(--green); color: white; border-color: var(--green); }
+
+/* ─── OCR STATUS ─── */
+.ocr-status {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: var(--gold); border-radius: 10px; margin-bottom: 12px; font-size: 13px; color: #333;
+}
+.ocr-status.success { background: var(--green-light); }
+.ocr-status.error { background: var(--red-light); }
+.ocr-spinner {
+  width: 18px; height: 18px; border: 3px solid #E0E0E0; border-top-color: var(--green);
+  border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ocr-confidence { font-size: 11px; color: var(--gray); margin-top: 4px; }
 
 /* ─── CATEGORY BREAKDOWN ─── */
 .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -356,6 +371,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
       </div>
       <div id="receiptPreviewArea" style="display:none; margin-top: 12px;">
         <img id="receiptPreview" class="receipt-preview">
+        <div id="ocrStatus" style="display:none; margin-top: 12px;"></div>
         <div class="form-row" style="margin-top: 12px;">
           <div class="form-group"><label>Vendor</label><input type="text" id="recVendor" placeholder="Store name"></div>
           <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" placeholder="0.00" inputmode="decimal"></div>
@@ -683,8 +699,164 @@ function handleReceipt(input) {
     document.getElementById('receiptPreviewArea').style.display = 'block';
     document.getElementById('cameraArea').style.display = 'none';
     document.getElementById('recDate').value = todayStr();
+    runReceiptOCR(currentReceiptData);
   };
   reader.readAsDataURL(file);
+}
+
+// ─── OCR ENGINE ───
+function showOCRStatus(msg, type) {
+  const el = document.getElementById('ocrStatus');
+  el.style.display = 'block';
+  if (type === 'loading') {
+    el.innerHTML = `<div class="ocr-status"><div class="ocr-spinner"></div><div>${msg}</div></div>`;
+  } else if (type === 'success') {
+    el.innerHTML = `<div class="ocr-status success">${msg}</div>`;
+  } else if (type === 'error') {
+    el.innerHTML = `<div class="ocr-status error">${msg}</div>`;
+  }
+}
+
+async function runReceiptOCR(imageData) {
+  showOCRStatus('Reading receipt...', 'loading');
+  try {
+    const result = await Tesseract.recognize(imageData, 'eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const pct = Math.round((m.progress || 0) * 100);
+          showOCRStatus(`Reading receipt... ${pct}%`, 'loading');
+        }
+      }
+    });
+    const text = result.data.text;
+    const confidence = Math.round(result.data.confidence);
+    console.log('OCR raw text:', text);
+    const parsed = parseReceiptText(text);
+    applyOCRResults(parsed, confidence);
+  } catch (err) {
+    console.error('OCR error:', err);
+    showOCRStatus('Could not read receipt — fill in manually below', 'error');
+  }
+}
+
+function parseReceiptText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const result = { vendor: '', amount: 0, date: '' };
+
+  // ─── VENDOR: usually the first substantial text line (store name) ───
+  // Skip very short lines, numbers-only lines, common receipt headers
+  const skipWords = /^(receipt|transaction|sale|order|invoice|date|time|tel|phone|fax|www|http|thank|cashier|register|terminal|store\s*#)/i;
+  for (const line of lines) {
+    const clean = line.replace(/[^a-zA-Z\s&'.-]/g, '').trim();
+    if (clean.length >= 3 && !skipWords.test(clean)) {
+      result.vendor = clean.split(/\s+/).slice(0, 4).map(w =>
+        w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+      ).join(' ');
+      break;
+    }
+  }
+
+  // ─── AMOUNT: find the largest dollar amount (likely the total) ───
+  // Look for patterns like TOTAL $12.34 or $12.34 or 12.34
+  const totalLineRegex = /(?:total|amount\s*due|balance|grand\s*total|sale)[:\s]*\$?\s*(\d+[.,]\d{2})/i;
+  const totalMatch = text.match(totalLineRegex);
+  if (totalMatch) {
+    result.amount = parseFloat(totalMatch[1].replace(',', '.'));
+  } else {
+    // Fallback: find all dollar amounts and pick the largest
+    const amountRegex = /\$\s*(\d+[.,]\d{2})/g;
+    let match, amounts = [];
+    while ((match = amountRegex.exec(text)) !== null) {
+      amounts.push(parseFloat(match[1].replace(',', '.')));
+    }
+    // Also look for amounts without $ sign that have .XX pattern
+    const plainRegex = /(?:^|\s)(\d{1,6}\.\d{2})(?:\s|$)/gm;
+    while ((match = plainRegex.exec(text)) !== null) {
+      const val = parseFloat(match[1]);
+      if (val > 0.50 && val < 50000) amounts.push(val);
+    }
+    if (amounts.length > 0) {
+      result.amount = Math.max(...amounts);
+    }
+  }
+
+  // ─── DATE: look for common date formats ───
+  const datePatterns = [
+    /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/,          // MM/DD/YYYY or DD/MM/YYYY
+    /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})(?!\d)/,     // MM/DD/YY
+    /(\w{3,9})\s+(\d{1,2}),?\s+(\d{4})/i,                 // March 22, 2026
+    /(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/,            // YYYY-MM-DD
+  ];
+  for (const pat of datePatterns) {
+    const m = text.match(pat);
+    if (m) {
+      try {
+        let dateStr = m[0];
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime()) && d.getFullYear() >= 2020 && d.getFullYear() <= 2030) {
+          result.date = d.toISOString().split('T')[0];
+          break;
+        }
+        // Try MM/DD/YY format
+        if (m[3] && m[3].length === 2) {
+          const yr = 2000 + parseInt(m[3]);
+          const dt = new Date(yr, parseInt(m[1]) - 1, parseInt(m[2]));
+          if (!isNaN(dt.getTime())) {
+            result.date = dt.toISOString().split('T')[0];
+            break;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  // ─── CATEGORY: guess from vendor name and line items ───
+  const fullText = text.toLowerCase();
+  if (/lumber|hardware|home\s*depot|lowes|lowe's|almquist|ace\s*hardware|screw|nail|board|cedar|plywood/i.test(fullText)) {
+    result.category = 'Lumber & Hardware';
+  } else if (/nursery|garden|plant|seed|bulb|mad\s*river/i.test(fullText)) {
+    result.category = 'Plants & Seeds';
+  } else if (/soil|compost|mulch|amend|fertiliz|potting/i.test(fullText)) {
+    result.category = 'Soil & Amendments';
+  } else if (/gas|fuel|shell|chevron|76|arco|diesel|valero/i.test(fullText)) {
+    result.category = 'Transportation';
+  } else if (/food|restaurant|cafe|coffee|deli|pizza|taco|burger|sandwich|bakery/i.test(fullText)) {
+    result.category = 'Meals';
+  } else if (/tool|drill|saw|shovel|rake|pruner|glove/i.test(fullText)) {
+    result.category = 'Tools & Equipment';
+  }
+
+  return result;
+}
+
+function applyOCRResults(parsed, confidence) {
+  let filled = [];
+  if (parsed.vendor) {
+    document.getElementById('recVendor').value = parsed.vendor;
+    filled.push('vendor');
+  }
+  if (parsed.amount > 0) {
+    document.getElementById('recAmount').value = parsed.amount.toFixed(2);
+    filled.push('amount');
+  }
+  if (parsed.date) {
+    document.getElementById('recDate').value = parsed.date;
+    filled.push('date');
+  }
+  if (parsed.category) {
+    const sel = document.getElementById('recCategory');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
+    }
+    filled.push('category');
+  }
+
+  if (filled.length > 0) {
+    const confStr = confidence > 0 ? ` (${confidence}% confident)` : '';
+    showOCRStatus(`Auto-filled: ${filled.join(', ')}${confStr} — double-check and save!`, 'success');
+  } else {
+    showOCRStatus('Could not read receipt clearly — fill in manually below', 'error');
+  }
 }
 
 function saveReceipt() {
@@ -720,6 +892,7 @@ function cancelReceipt() {
   document.getElementById('receiptPreviewArea').style.display = 'none';
   document.getElementById('cameraArea').style.display = 'block';
   document.getElementById('receiptInput').value = '';
+  document.getElementById('ocrStatus').style.display = 'none';
   ['recVendor', 'recAmount', 'recCard'].forEach(id => document.getElementById(id).value = '');
 }
 
