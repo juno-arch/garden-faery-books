@@ -5,39 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#2E7D32">
+<meta name="theme-color" content="#2a4a1a">
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+@font-face {
+  font-family: 'Blueberry';
+  src: url('https://fonts.cdnfonts.com/css/blueberry-2');
+  font-display: swap;
+}
 :root {
-  --green: #2E7D32;
-  --green-light: #E8F5E9;
-  --green-med: #81C784;
-  --green-dark: #1B5E20;
-  --gold: #FFF8E1;
-  --gold-accent: #FFD54F;
-  --red: #E53935;
-  --red-light: #FFEBEE;
-  --gray: #757575;
-  --gray-light: #F5F5F5;
+  /* Garden Faery Brand Colors */
+  --green: #4a7c28;           /* Forest Mid */
+  --green-light: #f0f5e8;     /* Sage tinted light */
+  --green-med: #8fae6b;       /* Sage */
+  --green-dark: #2a4a1a;      /* Forest Dark */
+  --gold: #fffbf0;            /* Cream */
+  --gold-accent: #d4a843;     /* Sparkle Gold */
+  --pink: #d4a0b0;            /* Fairy Pink */
+  --lavender: #b8a9c9;        /* Lavender */
+  --brown: #c4956a;           /* Mushroom Brown */
+  --red: #c0392b;
+  --red-light: #fdecea;
+  --gray: #6b6b6b;
+  --gray-light: #fffbf0;      /* Cream background */
   --white: #FFFFFF;
-  --shadow: 0 2px 8px rgba(0,0,0,0.1);
-  --radius: 12px;
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --shadow: 0 2px 12px rgba(42,74,26,0.12);
+  --radius: 14px;
+  --font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Blueberry', 'Nunito', -apple-system, sans-serif;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { font-family: var(--font); background: var(--gray-light); color: #333; height: 100%; overflow: hidden; }
+html, body { font-family: var(--font); background: var(--gray-light); color: #3a3a3a; height: 100%; overflow: hidden; }
 
 /* ─── HEADER ─── */
 .app-header {
-  background: linear-gradient(135deg, var(--green-dark), var(--green));
-  color: white; padding: 12px 20px; display: flex; align-items: center;
+  background: linear-gradient(135deg, var(--green-dark), #3a6620);
+  color: white; padding: 14px 20px; display: flex; align-items: center;
   justify-content: space-between; position: fixed; top: 0; left: 0; right: 0;
-  z-index: 100; box-shadow: var(--shadow);
+  z-index: 100; box-shadow: 0 3px 16px rgba(42,74,26,0.25);
 }
-.app-header h1 { font-size: 18px; font-weight: 700; }
-.app-header .subtitle { font-size: 11px; opacity: 0.8; }
+.app-header h1 { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+.app-header .subtitle { font-size: 11px; opacity: 0.7; letter-spacing: 0.3px; }
 .sync-indicator { font-size: 10px; padding: 4px 8px; border-radius: 12px; cursor: pointer; }
 .sync-indicator.local { background: rgba(255,255,255,0.2); }
 .sync-indicator.synced { background: rgba(129,199,132,0.4); }
@@ -60,28 +73,28 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   align-items: center; border: none; background: none; color: var(--gray);
   font-size: 10px; font-family: var(--font); cursor: pointer; transition: color 0.2s;
 }
-.tab-btn.active { color: var(--green); }
+.tab-btn.active { color: var(--green-dark); }
 .tab-btn svg { width: 24px; height: 24px; margin-bottom: 2px; }
 
 /* ─── CARDS ─── */
-.card { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
-.card-title { font-size: 14px; font-weight: 700; color: var(--green-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid rgba(143,174,107,0.15); }
+.card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--green-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .card-title svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* ─── GOAL BAR ─── */
-.goal-bar { height: 28px; background: var(--gray-light); border-radius: 14px; overflow: hidden; position: relative; }
-.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-med)); border-radius: 14px; transition: width 0.5s ease; min-width: 4px; }
+.goal-bar { height: 28px; background: #eee8dd; border-radius: 14px; overflow: hidden; position: relative; }
+.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green-dark), var(--green), var(--green-med)); border-radius: 14px; transition: width 0.5s ease; min-width: 4px; }
 .goal-bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: #333; }
 .goal-numbers { display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px; color: var(--gray); }
 
 /* ─── STATS GRID ─── */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stat-box { background: var(--green-light); border-radius: 10px; padding: 12px; text-align: center; }
-.stat-box .value { font-size: 22px; font-weight: 800; color: var(--green-dark); }
+.stat-box { background: var(--green-light); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid rgba(143,174,107,0.2); }
+.stat-box .value { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--green-dark); }
 .stat-box .label { font-size: 11px; color: var(--gray); margin-top: 2px; }
-.stat-box.gold { background: var(--gold); }
-.stat-box.gold .value { color: #F57F17; }
-.stat-box.red { background: var(--red-light); }
+.stat-box.gold { background: var(--gold); border-color: rgba(212,168,67,0.25); }
+.stat-box.gold .value { color: #b8922e; }
+.stat-box.red { background: var(--red-light); border-color: rgba(192,57,43,0.15); }
 .stat-box.red .value { color: var(--red); }
 
 /* ─── FORMS ─── */
@@ -92,7 +105,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   font-size: 16px; font-family: var(--font); background: white; transition: border-color 0.2s;
   -webkit-appearance: none;
 }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--green); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--green-med); box-shadow: 0 0 0 3px rgba(143,174,107,0.2); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* ─── BUTTONS ─── */
@@ -101,8 +114,8 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   font-weight: 700; font-family: var(--font); cursor: pointer; transition: transform 0.1s, opacity 0.2s;
 }
 .btn:active { transform: scale(0.98); }
-.btn-primary { background: var(--green); color: white; }
-.btn-outline { background: white; color: var(--green); border: 2px solid var(--green); }
+.btn-primary { background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; }
+.btn-outline { background: white; color: var(--green-dark); border: 2px solid var(--green-med); }
 .btn-small { padding: 8px 16px; font-size: 13px; width: auto; }
 
 /* ─── ENTRY LIST ─── */
@@ -112,7 +125,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 .entry-info .entry-name { font-weight: 600; font-size: 14px; }
 .entry-info .entry-detail { font-size: 12px; color: var(--gray); }
 .entry-amount { font-weight: 700; font-size: 16px; }
-.entry-amount.income { color: var(--green); }
+.entry-amount.income { color: var(--green-dark); }
 .entry-amount.expense { color: var(--red); }
 .entry-actions { display: flex; gap: 6px; align-items: center; }
 .delete-btn { background: none; border: none; color: var(--red); cursor: pointer; padding: 4px; font-size: 18px; opacity: 0.4; }
@@ -123,7 +136,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   border: 3px dashed #CCC; border-radius: var(--radius); padding: 40px 20px; text-align: center;
   cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden;
 }
-.camera-area:hover, .camera-area.dragover { border-color: var(--green); background: var(--green-light); }
+.camera-area:hover, .camera-area.dragover { border-color: var(--green-med); background: var(--green-light); }
 .camera-area svg { width: 48px; height: 48px; color: var(--gray); }
 .camera-area p { color: var(--gray); font-size: 14px; margin-top: 8px; }
 .camera-area input { display: none; }
@@ -132,7 +145,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 
 /* ─── MONTH SELECTOR ─── */
 .month-selector { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
-.month-selector button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--green); padding: 4px 8px; }
+.month-selector button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--green-dark); padding: 4px 8px; }
 .month-selector .month-label { font-size: 16px; font-weight: 700; color: var(--green-dark); min-width: 140px; text-align: center; }
 
 /* ─── FILTER PILLS ─── */
@@ -141,7 +154,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   padding: 6px 14px; border-radius: 20px; border: 1.5px solid #E0E0E0; background: white;
   font-size: 12px; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; color: var(--gray);
 }
-.filter-pill.active { background: var(--green); color: white; border-color: var(--green); }
+.filter-pill.active { background: var(--green-dark); color: white; border-color: var(--green-dark); }
 
 /* ─── OCR STATUS ─── */
 .ocr-status {
@@ -161,14 +174,15 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .cat-label { font-size: 12px; font-weight: 600; color: #555; min-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cat-bar-bg { flex: 1; height: 20px; background: var(--gray-light); border-radius: 10px; overflow: hidden; }
-.cat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--red), #FF7043); border-radius: 10px; transition: width 0.4s ease; min-width: 2px; }
+.cat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--brown), var(--pink)); border-radius: 10px; transition: width 0.4s ease; min-width: 2px; }
 .cat-amount { font-size: 12px; font-weight: 700; color: var(--red); min-width: 55px; text-align: right; }
 
 /* ─── TOAST ─── */
 .toast {
   position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
-  background: #333; color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px;
+  background: var(--green-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px;
   z-index: 200; transition: transform 0.3s ease; white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(42,74,26,0.3);
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -186,9 +200,9 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 .pnl-row .pnl-amount { font-weight: 600; }
 .pnl-row .pnl-amount.positive { color: var(--green); }
 .pnl-row .pnl-amount.negative { color: var(--red); }
-.period-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--green); margin-bottom: 12px; }
-.period-toggle button { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--green); cursor: pointer; }
-.period-toggle button.active { background: var(--green); color: white; }
+.period-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--green-dark); margin-bottom: 12px; }
+.period-toggle button { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--green-dark); cursor: pointer; }
+.period-toggle button.active { background: var(--green-dark); color: white; }
 .period-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
 .period-nav button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--green); padding: 4px 8px; }
 .period-nav .period-label { font-size: 16px; font-weight: 700; color: var(--green-dark); min-width: 160px; text-align: center; }
@@ -198,7 +212,7 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
 .compare-badge.down { background: var(--red-light); color: var(--red); }
 
 /* ─── TAX ESTIMATE ─── */
-.tax-card { background: linear-gradient(135deg, var(--gold), #FFF3E0); }
+.tax-card { background: linear-gradient(135deg, var(--gold), #fff5e0); border-color: rgba(212,168,67,0.2); }
 .tax-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .tax-row:last-child { border-bottom: none; }
 .tax-row.highlight { font-weight: 700; font-size: 15px; background: rgba(255,255,255,0.5); margin: 4px -12px; padding: 10px 12px; border-radius: 8px; }
@@ -238,10 +252,10 @@ html, body { font-family: var(--font); background: var(--gray-light); color: #33
   background: linear-gradient(135deg, var(--green-light), var(--gold));
   border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
   display: flex; align-items: center; gap: 12px; cursor: pointer;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow); border: 1px solid rgba(143,174,107,0.3);
 }
 .quick-log-icon { font-size: 28px; }
-.quick-log-text { font-size: 14px; font-weight: 600; color: var(--green-dark); }
+.quick-log-text { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--green-dark); }
 .quick-log-sub { font-size: 11px; color: var(--gray); }
 </style>
 </head>
