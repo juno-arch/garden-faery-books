@@ -4,8 +4,8 @@
   "description": "Bookkeeping for Garden Faery",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#E8F5E9",
-  "theme_color": "#2E7D32",
+  "background_color": "#fffbf0",
+  "theme_color": "#4a3520",
   "orientation": "portrait",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
