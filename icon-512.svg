@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#f0e6d0"/>
+      <stop offset="100%" stop-color="#4a3520"/>
+    </radialGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#4a3520"/>
+  <circle cx="256" cy="256" r="230" fill="url(#bg)"/>
+
+  <!-- Mushroom/fairy cap shape -->
+  <ellipse cx="256" cy="220" rx="120" ry="85" fill="#c4956a" opacity="0.3"/>
+
+  <!-- Leaf/fern decorative elements -->
+  <g opacity="0.4" fill="none" stroke="#4a3520" stroke-width="2.5" stroke-linecap="round">
+    <!-- Left fern -->
+    <path d="M140 340 Q160 290 180 260"/>
+    <path d="M150 320 Q165 300 170 285"/>
+    <path d="M145 335 Q155 315 155 305"/>
+    <!-- Right fern -->
+    <path d="M372 340 Q352 290 332 260"/>
+    <path d="M362 320 Q347 300 342 285"/>
+    <path d="M367 335 Q357 315 357 305"/>
+  </g>
+
+  <!-- Central fairy wing shapes -->
+  <g opacity="0.25">
+    <ellipse cx="220" cy="200" rx="45" ry="70" fill="#d4a0b0" transform="rotate(-15 220 200)"/>
+    <ellipse cx="292" cy="200" rx="45" ry="70" fill="#d4a0b0" transform="rotate(15 292 200)"/>
+  </g>
+
+  <!-- Sparkle dots -->
+  <circle cx="180" cy="160" r="4" fill="#d4a843" opacity="0.8"/>
+  <circle cx="330" cy="170" r="3" fill="#d4a843" opacity="0.7"/>
+  <circle cx="210" cy="140" r="2.5" fill="#d4a843" opacity="0.6"/>
+  <circle cx="300" cy="145" r="3.5" fill="#d4a843" opacity="0.7"/>
+  <circle cx="256" cy="125" r="3" fill="#d4a843" opacity="0.9"/>
+  <circle cx="165" cy="190" r="2" fill="#d4a843" opacity="0.5"/>
+  <circle cx="345" cy="195" r="2.5" fill="#d4a843" opacity="0.5"/>
+
+  <!-- GF monogram -->
+  <text x="256" y="275" text-anchor="middle" font-family="serif" font-weight="700" font-size="110" fill="#4a3520" opacity="0.9">GF</text>
+
+  <!-- "Books" subtitle -->
+  <text x="256" y="330" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="36" fill="#c4956a" letter-spacing="8">BOOKS</text>
+
+  <!-- Bottom decorative line -->
+  <line x1="180" y1="355" x2="332" y2="355" stroke="#d4a843" stroke-width="2" opacity="0.5"/>
+
+  <!-- Tiny mushroom icon -->
+  <g transform="translate(256 385)" opacity="0.6">
+    <rect x="-3" y="-5" width="6" height="15" rx="2" fill="#c4956a"/>
+    <ellipse cx="0" cy="-8" rx="14" ry="10" fill="#d4a0b0"/>
+    <circle cx="-5" cy="-10" r="2" fill="#fffbf0" opacity="0.5"/>
+    <circle cx="4" cy="-6" r="1.5" fill="#fffbf0" opacity="0.4"/>
+  </g>
+</svg>
