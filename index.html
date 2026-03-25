@@ -200,6 +200,14 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .client-table .actions-cell .tbl-edit:hover { background: var(--fairy-glow); }
 .client-table .actions-cell .tbl-del { color: #c44; }
 .client-table .actions-cell .tbl-del:hover { background: #fee; }
+#autoSyncToggle:checked + #syncSlider { background: var(--sparkle-gold); }
+#autoSyncToggle:checked + #syncSlider::before { transform: translateX(20px); }
+#syncSlider::before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+.sync-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+.sync-dot.green { background:#34A853; }
+.sync-dot.yellow { background:#FBBC05; }
+.sync-dot.red { background:#EA4335; }
+.sync-dot.gray { background:#999; }
 .entry-amount { font-weight: 700; font-size: 15px; }
 .entry-amount.income { color: var(--warm-dark); }
 .entry-amount.expense { color: var(--red); }
@@ -515,9 +523,45 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
       <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
     </div>
+    <div class="card" id="cloudSyncCard">
+      <div class="card-title">Cloud Sync</div>
+      <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with Firebase.</p>
+      <div id="syncSignedOut">
+        <div class="form-group"><label>Firebase API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
+        <div class="form-group"><label>Firebase Project ID</label><input type="text" id="fbProjectId" placeholder="garden-faery-books"></div>
+        <div class="form-group"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="garden-faery-books.firebaseapp.com" style="color:var(--gray);"></div>
+        <button class="btn btn-outline" onclick="saveFirebaseConfig()" style="margin-bottom:10px;">Save Config</button>
+        <button class="btn btn-primary" onclick="signInWithGoogle()" id="googleSignInBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:middle;margin-right:6px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <div id="syncSignedIn" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:var(--fairy-glow);border-radius:8px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--sparkle-gold);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;" id="syncUserAvatar">?</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:13px;" id="syncUserName"></div>
+            <div style="font-size:11px;color:var(--gray);" id="syncUserEmail"></div>
+          </div>
+          <button class="btn btn-outline" onclick="signOutFirebase()" style="font-size:11px;padding:4px 10px;">Sign Out</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:13px;font-weight:600;">Auto-sync</span>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+            <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()" style="opacity:0;width:0;height:0;">
+            <span style="position:absolute;inset:0;background:#ccc;border-radius:24px;transition:.3s;" id="syncSlider"></span>
+          </label>
+        </div>
+        <div id="syncStatus" style="font-size:12px;color:var(--gray);margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="syncToCloud()" style="flex:1;font-size:12px;">Push to Cloud</button>
+          <button class="btn btn-outline" onclick="syncFromCloud()" style="flex:1;font-size:12px;">Pull from Cloud</button>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <div class="card-title">About</div>
-      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.0<br>Chat-first bookkeeping for Taya's garden business.<br>All data stored locally. Works offline.</p>
+      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.2<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
     </div>
   </div>
 
@@ -592,6 +636,10 @@ function saveState() {
   try {
     state.lastModified = new Date().toISOString();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // Auto-sync to cloud if enabled
+    if (typeof firebaseReady !== 'undefined' && firebaseReady && autoSyncEnabled) {
+      debouncedSyncToCloud();
+    }
   } catch (e) { console.warn('Save error:', e); }
 }
 
@@ -781,15 +829,18 @@ function seedCalendarFromKnown() {
 
 function getCalendarSyncData() {
   return [
-    { summary: 'Weeding (Dena\'s Yard)', client: 'Dena', service: 'Weeding', start: '2026-03-16T10:00:00-07:00', end: '2026-03-16T15:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
-    { summary: 'Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-19T09:30:00-07:00', end: '2026-03-19T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'Dena', client: 'Dena', service: 'Garden Care', start: '2026-03-23T10:00:00-07:00', end: '2026-03-23T14:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
-    { summary: 'Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-24T09:00:00-07:00', end: '2026-03-24T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'Consultation (Edith)', client: 'Edith', service: 'Consultation', start: '2026-03-26T11:00:00-07:00', end: '2026-03-26T12:00:00-07:00', location: '1641 Old Arcata Road, Bayside CA 95524', allDay: false },
-    { summary: '(TBD) Weeding (Sarah)', client: 'Sarah', service: 'Weeding', start: '2026-03-30T02:00:00-07:00', end: '2026-03-30T04:00:00-07:00', location: 'Sarah T', allDay: false },
-    { summary: 'Consultation - Anna Peck', client: 'Anna Peck', service: 'Consultation', start: '2026-04-01T09:00:00-07:00', end: '2026-04-01T09:30:00-07:00', location: '565 Hilton LN, Arcata CA 95521', allDay: false },
-    { summary: 'Elizabeth (Recurring)', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-02T09:00:00-07:00', end: '2026-04-02T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'Elizabeth (Recurring)', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-09T09:00:00-07:00', end: '2026-04-09T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false }
+    { summary: 'GF - Dena', client: 'Dena', service: 'Weeding', start: '2026-03-16T10:00:00-07:00', end: '2026-03-16T15:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-19T09:00:00-07:00', end: '2026-03-19T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Dena', client: 'Dena', service: 'Garden Care', start: '2026-03-23T10:00:00-07:00', end: '2026-03-23T14:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-24T09:00:00-07:00', end: '2026-03-24T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Consultation (Edith)', client: 'Edith', service: 'Consultation', start: '2026-03-26T11:00:00-07:00', end: '2026-03-26T12:00:00-07:00', location: '1641 Old Arcata Road, Bayside CA 95524', allDay: false },
+    { summary: 'GF - (TBD) Weeding (Sarah)', client: 'Sarah', service: 'Weeding', start: '2026-03-30T02:00:00-07:00', end: '2026-03-30T04:00:00-07:00', location: '', allDay: false },
+    { summary: 'Garden Faery (Consultation) - Anna Peck', client: 'Anna Peck', service: 'Consultation', start: '2026-04-01T09:00:00-07:00', end: '2026-04-01T09:30:00-07:00', location: '565 Hilton LN, Arcata CA 95521', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-02T09:00:00-07:00', end: '2026-04-02T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-09T09:00:00-07:00', end: '2026-04-09T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-16T09:00:00-07:00', end: '2026-04-16T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-23T09:00:00-07:00', end: '2026-04-23T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
+    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-30T09:00:00-07:00', end: '2026-04-30T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false }
   ];
 }
 
@@ -824,6 +875,7 @@ function syncClientsFromCalendar() {
     { name: 'Dena', phone: '(707) 599-5014', address: '1112 Spear Ave, Arcata CA 95521' },
     { name: 'Elizabeth', address: '3168 Deer Fern Ct' },
     { name: 'Edith', address: '1641 Old Arcata Road, Bayside CA 95524' },
+    { name: 'Sarah', address: '' },
     { name: 'Anna Peck', address: '565 Hilton LN, Arcata CA 95521' },
   ];
   for (const cd of calClients) {
@@ -2598,6 +2650,218 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// ═══════════════════════════════════════
+// FIREBASE CLOUD SYNC
+// ═══════════════════════════════════════
+let firebaseReady = false;
+let autoSyncEnabled = false;
+let db = null;
+let currentUser = null;
+let syncDebounceTimer = null;
+
+function debouncedSyncToCloud() {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => syncToCloud(), 2000);
+}
+
+function getFirebaseConfig() {
+  try {
+    return JSON.parse(localStorage.getItem('firebaseConfig')) || null;
+  } catch (e) { return null; }
+}
+
+function saveFirebaseConfig() {
+  const apiKey = document.getElementById('fbApiKey').value.trim();
+  const projectId = document.getElementById('fbProjectId').value.trim();
+  let authDomain = document.getElementById('fbAuthDomain').value.trim();
+  if (!apiKey || !projectId) { showToast('Enter API Key and Project ID'); return; }
+  if (!authDomain) authDomain = projectId + '.firebaseapp.com';
+  const config = { apiKey, authDomain, projectId };
+  localStorage.setItem('firebaseConfig', JSON.stringify(config));
+  showToast('Firebase config saved');
+  initFirebase();
+}
+
+function initFirebase() {
+  const config = getFirebaseConfig();
+  if (!config || !config.apiKey) return false;
+
+  // Fill in the config fields if present
+  const apiKeyEl = document.getElementById('fbApiKey');
+  const projIdEl = document.getElementById('fbProjectId');
+  const authDomEl = document.getElementById('fbAuthDomain');
+  if (apiKeyEl && config.apiKey) apiKeyEl.value = config.apiKey;
+  if (projIdEl && config.projectId) projIdEl.value = config.projectId;
+  if (authDomEl && config.authDomain) authDomEl.value = config.authDomain;
+
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(config);
+    }
+    db = firebase.firestore();
+    firebaseReady = true;
+    document.getElementById('googleSignInBtn').style.display = 'block';
+
+    // Check for existing auth state
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        showSignedInUI(user);
+        // Auto-sync on sign-in
+        autoSyncEnabled = localStorage.getItem('autoSync') === 'true';
+        const toggle = document.getElementById('autoSyncToggle');
+        if (toggle) toggle.checked = autoSyncEnabled;
+        syncFromCloud();
+      } else {
+        currentUser = null;
+        showSignedOutUI();
+      }
+    });
+    return true;
+  } catch (e) {
+    console.warn('Firebase init error:', e);
+    updateSyncStatus('red', 'Config error: ' + e.message);
+    return false;
+  }
+}
+
+function signInWithGoogle() {
+  if (!firebaseReady) { showToast('Save Firebase config first'); return; }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).then(result => {
+    showToast('Signed in as ' + result.user.displayName);
+  }).catch(err => {
+    console.warn('Sign-in error:', err);
+    if (err.code === 'auth/popup-blocked') {
+      showToast('Popup blocked — allow popups for this site');
+    } else if (err.code === 'auth/popup-closed-by-user') {
+      // User closed the popup, no error needed
+    } else {
+      showToast('Sign-in failed: ' + err.message);
+    }
+  });
+}
+
+function signOutFirebase() {
+  firebase.auth().signOut().then(() => {
+    currentUser = null;
+    firebaseReady = false;
+    autoSyncEnabled = false;
+    showSignedOutUI();
+    showToast('Signed out');
+  });
+}
+
+function showSignedInUI(user) {
+  document.getElementById('syncSignedOut').style.display = 'none';
+  document.getElementById('syncSignedIn').style.display = 'block';
+  document.getElementById('syncUserName').textContent = user.displayName || 'User';
+  document.getElementById('syncUserEmail').textContent = user.email || '';
+  const avatar = document.getElementById('syncUserAvatar');
+  if (user.displayName) avatar.textContent = user.displayName.charAt(0).toUpperCase();
+  updateSyncStatus('green', 'Connected');
+}
+
+function showSignedOutUI() {
+  document.getElementById('syncSignedOut').style.display = 'block';
+  document.getElementById('syncSignedIn').style.display = 'none';
+  updateSyncStatus('gray', 'Not signed in');
+}
+
+function updateSyncStatus(color, text) {
+  const el = document.getElementById('syncStatus');
+  if (el) el.innerHTML = '<span class="sync-dot ' + color + '"></span>' + text;
+}
+
+function toggleAutoSync() {
+  autoSyncEnabled = document.getElementById('autoSyncToggle').checked;
+  localStorage.setItem('autoSync', autoSyncEnabled ? 'true' : 'false');
+  showToast(autoSyncEnabled ? 'Auto-sync enabled' : 'Auto-sync disabled');
+  if (autoSyncEnabled && currentUser) syncToCloud();
+}
+
+function syncToCloud() {
+  if (!firebaseReady || !currentUser || !db) {
+    updateSyncStatus('red', 'Not connected');
+    return Promise.resolve();
+  }
+  updateSyncStatus('yellow', 'Syncing...');
+  const dataToSync = JSON.parse(JSON.stringify(state));
+  dataToSync.lastModified = new Date().toISOString();
+  dataToSync.syncedFrom = navigator.userAgent.includes('Mobile') ? 'phone' : 'desktop';
+
+  return db.collection('users').doc(currentUser.uid).set({
+    state: dataToSync,
+    lastModified: firebase.firestore.FieldValue.serverTimestamp(),
+    email: currentUser.email
+  }, { merge: true }).then(() => {
+    updateSyncStatus('green', 'Synced ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+  }).catch(err => {
+    console.warn('Sync push error:', err);
+    updateSyncStatus('red', 'Push failed');
+    // Queue for retry when online
+    localStorage.setItem('syncPending', 'true');
+  });
+}
+
+function syncFromCloud() {
+  if (!firebaseReady || !currentUser || !db) return Promise.resolve();
+  updateSyncStatus('yellow', 'Pulling...');
+
+  return db.collection('users').doc(currentUser.uid).get().then(doc => {
+    if (!doc.exists || !doc.data().state) {
+      // No cloud data — push local to cloud
+      updateSyncStatus('green', 'First sync — pushing local data');
+      return syncToCloud();
+    }
+    const cloudState = doc.data().state;
+    const localTime = new Date(state.lastModified || 0).getTime();
+    const cloudTime = new Date(cloudState.lastModified || 0).getTime();
+
+    if (cloudTime > localTime) {
+      // Cloud is newer — pull it
+      const mergedState = { ...state, ...cloudState };
+      // Preserve arrays properly (merge by id, cloud wins for conflicts)
+      ['income', 'expenses', 'mileage', 'receipts', 'invoices', 'clients', 'cards'].forEach(key => {
+        if (cloudState[key] && Array.isArray(cloudState[key])) {
+          const merged = new Map();
+          (state[key] || []).forEach(item => { if (item.id) merged.set(item.id, item); });
+          cloudState[key].forEach(item => { if (item.id) merged.set(item.id, item); }); // Cloud wins
+          mergedState[key] = Array.from(merged.values());
+        }
+      });
+      // Merge learned data
+      if (cloudState.learned) {
+        mergedState.learned = mergedState.learned || { vendors: {}, aliases: {}, categories: {} };
+        ['vendors', 'aliases', 'categories'].forEach(k => {
+          mergedState.learned[k] = { ...(state.learned || {})[k], ...(cloudState.learned || {})[k] };
+        });
+      }
+      state = mergedState;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      refreshAll();
+      updateSyncStatus('green', 'Pulled cloud data');
+      showToast('Synced from cloud');
+    } else {
+      updateSyncStatus('green', 'Local is up to date');
+    }
+  }).catch(err => {
+    console.warn('Sync pull error:', err);
+    updateSyncStatus('red', 'Pull failed');
+  });
+}
+
+// Retry sync when coming back online
+window.addEventListener('online', () => {
+  if (localStorage.getItem('syncPending') === 'true' && firebaseReady && currentUser) {
+    localStorage.removeItem('syncPending');
+    syncToCloud();
+  }
+});
+
+// Init Firebase on page load if config exists
+setTimeout(() => { initFirebase(); }, 500);
 </script>
 </body>
 </html>
