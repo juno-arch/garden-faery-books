@@ -12,6 +12,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --warm-dark: #4a3520;
@@ -185,6 +188,18 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .entry-item:last-child { border-bottom: none; }
 .entry-info .entry-name { font-weight: 600; font-size: 14px; }
 .entry-info .entry-detail { font-size: 12px; color: var(--gray); }
+.client-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.client-table th { background: var(--fairy-glow); color: var(--warm-dark); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 6px; text-align: left; border-bottom: 2px solid var(--mushroom); white-space: nowrap; position: sticky; top: 0; }
+.client-table td { padding: 7px 6px; border-bottom: 1px solid #f0e6d0; vertical-align: top; }
+.client-table tr:hover { background: #fffdf7; }
+.client-table a { color: var(--mushroom); text-decoration: none; }
+.client-table a:hover { text-decoration: underline; }
+.client-table .actions-cell { white-space: nowrap; text-align: right; }
+.client-table .actions-cell button { border: none; background: none; cursor: pointer; padding: 2px 5px; font-size: 12px; border-radius: 4px; }
+.client-table .actions-cell .tbl-edit { color: var(--mushroom); }
+.client-table .actions-cell .tbl-edit:hover { background: var(--fairy-glow); }
+.client-table .actions-cell .tbl-del { color: #c44; }
+.client-table .actions-cell .tbl-del:hover { background: #fee; }
 .entry-amount { font-weight: 700; font-size: 15px; }
 .entry-amount.income { color: var(--warm-dark); }
 .entry-amount.expense { color: var(--red); }
@@ -316,7 +331,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <span class="sub">or paste from clipboard (Ctrl+V)</span>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-hint" id="chatHint">type an entry or snap a receipt photo</div>
+    <div class="chat-hint" id="chatHint">type an entry, a date, snap a receipt, or /help for commands</div>
     <div class="chat-input-row">
       <button class="chat-photo-btn" onclick="document.getElementById('chatReceiptInput').click()" title="Add receipt photo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -437,16 +452,9 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   </div>
 
   <!-- ═══ SETTINGS TAB ═══ -->
-  <div class="tab-pane" id="tab-settings">
+  <div class="tab-pane" id="tab-clients">
     <div class="card">
-      <div class="card-title">Business Settings</div>
-      <div class="form-group"><label>Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
-      <div class="form-group"><label>Monthly Income Goal ($)</label><input type="number" id="settingsGoal" step="50" value="2000" inputmode="decimal"></div>
-      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-    </div>
-    <div class="card">
-      <div class="card-title">Contacts / Clients</div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Save clients with contact info and round-trip miles for auto-mileage prompts.</p>
+      <div class="card-title">Add / Edit Client</div>
       <div class="form-group"><label>Name</label><input type="text" id="newClientName" placeholder="e.g. Dena"></div>
       <div class="form-row">
         <div class="form-group"><label>Phone</label><input type="tel" id="newClientPhone" placeholder="(707) 555-1234"></div>
@@ -456,8 +464,21 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <div class="form-group"><label>Address</label><input type="text" id="newClientAddr" placeholder="123 Spear Ave, Arcata"></div>
         <div class="form-group"><label>Round-Trip Miles</label><input type="number" id="newClientMiles" step="0.1" placeholder="8.4" inputmode="decimal"></div>
       </div>
+      <div class="form-group"><label>Hidy Spot (cash drop location)</label><input type="text" id="newClientHidySpot" placeholder="e.g. under the blue pot on the porch"></div>
       <button class="btn btn-outline" onclick="addClient()">Save Client</button>
-      <ul class="entry-list" id="clientsList" style="margin-top:12px;"></ul>
+    </div>
+    <div class="card" style="overflow-x:auto;padding:8px;">
+      <div class="card-title">Your Clients</div>
+      <div id="clientsList"></div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-settings">
+    <div class="card">
+      <div class="card-title">Business Settings</div>
+      <div class="form-group"><label>Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
+      <div class="form-group"><label>Monthly Income Goal ($)</label><input type="number" id="settingsGoal" step="50" value="2000" inputmode="decimal"></div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
     </div>
     <div class="card">
       <div class="card-title">Receipt Scanner</div>
@@ -515,6 +536,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   <button class="tab-btn" onclick="switchTab('calendar',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     Calendar
+  </button>
+  <button class="tab-btn" onclick="switchTab('clients',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Clients
   </button>
   <button class="tab-btn" onclick="switchTab('history',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -917,12 +942,450 @@ function guessCategory(vendor) {
   return 'Supplies';
 }
 
+// ═══════════════════════════════════════
+// CHAT COMMANDS
+// ═══════════════════════════════════════
+function handleCommand(text) {
+  const lower = text.toLowerCase().trim();
+
+  // ─── SLASH COMMANDS ───
+  if (lower.startsWith('/')) {
+    const cmd = lower.split(/\s+/)[0];
+    const args = text.slice(cmd.length).trim();
+
+    if (cmd === '/help' || cmd === '/commands') {
+      addChatBubble('<div style="font-weight:700;margin-bottom:8px;">Chat Commands</div>' +
+        '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin-bottom:4px;">ON THE JOB</div>' +
+        '<div class="parsed-data">' +
+        parsedRow('/clockin', 'Arrive at a job — pulls today\'s calendar event') +
+        parsedRow('/clockout', 'Finish a job — drafts income entry with actual hours') +
+        parsedRow('/yesterday', 'Forgot to clock in? Log yesterday\'s job from calendar') +
+        '</div>' +
+        '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin:8px 0 4px;">TRACKING</div>' +
+        '<div class="parsed-data">' +
+        parsedRow('/miles', 'Find & log missing mileage this week') +
+        parsedRow('/invoice Dena', 'End-of-day message to text your client') +
+        parsedRow('/today', 'Show today\'s calendar events') +
+        parsedRow('/undo', 'Remove the last entry you saved') +
+        '</div>', 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/today') {
+      const today = dateStr(new Date());
+      const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === today);
+      if (!events.length) { addChatBubble('Nothing on the calendar for today.', 'bot'); return true; }
+      let html = '<div style="font-weight:700;margin-bottom:6px;">Today\'s Schedule</div>';
+      events.forEach(evt => { html += renderEventCard(evt); });
+      addChatBubble(html, 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/clockin' || cmd === '/clock-in' || cmd === '/in') {
+      if (clockedIn) {
+        addChatBubble('You\'re already clocked in at <b>' + (clockedIn.evt.client || clockedIn.evt.summary) + '</b> since ' +
+          clockedIn.clockInTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) +
+          '.<br>Type <b>/clockout</b> to finish this job first.', 'bot', true);
+        return true;
+      }
+      const today = dateStr(new Date());
+      const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === today);
+      if (!events.length) {
+        addChatBubble('No calendar events for today. You can clock in manually by typing what you\'re working on.', 'bot');
+        return true;
+      }
+      if (events.length === 1) {
+        clockedIn = { evt: events[0], date: today, clockInTime: new Date() };
+        const evt = events[0];
+        let html = '<div style="font-weight:700;margin-bottom:8px;">Clocked In</div>';
+        html += '<div class="parsed-data">';
+        html += parsedRow('Client', evt.client || evt.summary);
+        html += parsedRow('Service', evt.service || 'Garden Care');
+        if (evt.location) html += parsedRow('Location', evt.location);
+        html += parsedRow('Started', clockedIn.clockInTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+        html += '</div>';
+        html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Type <b>/clockout</b> when you\'re done!</div>';
+        addChatBubble(html, 'bot', true);
+      } else {
+        let html = '<div style="font-weight:700;margin-bottom:6px;">Which job are you starting?</div>';
+        events.forEach((evt, i) => {
+          html += '<div class="upcoming-event" style="cursor:pointer;" onclick="clockInToEvent(' + i + ')">';
+          html += '<div class="event-title">' + (evt.client || evt.summary) + '</div>';
+          html += '<div class="event-time">' + (evt.service || 'Garden Care') + '</div>';
+          if (evt.location) html += '<div class="event-location">' + evt.location + '</div>';
+          html += '</div>';
+        });
+        addChatBubble(html, 'bot', true);
+      }
+      return true;
+    }
+
+    if (cmd === '/clockout' || cmd === '/clock-out' || cmd === '/out') {
+      if (!clockedIn) {
+        addChatBubble('You\'re not clocked in. Type <b>/clockin</b> when you arrive at a job.', 'bot', true);
+        return true;
+      }
+      const now = new Date();
+      const hours = Math.round((now - clockedIn.clockInTime) / 3600000 * 100) / 100;
+      const rate = state.settings.rate || 25;
+      const total = hours * rate;
+      const startTime = clockedIn.clockInTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const endTime = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const clientName = clockedIn.evt.client || '';
+      const entry = {
+        type: 'income',
+        client: clientName,
+        date: clockedIn.date,
+        hours: hours,
+        rate: rate,
+        total: total,
+        service: clockedIn.evt.service || 'Garden Care',
+        notes: startTime + ' - ' + endTime + ' (clocked)',
+        payment: 'Cash',
+        calendarMatch: true,
+        calendarLocation: clockedIn.evt.location || ''
+      };
+      // Auto-add mileage if client has miles saved
+      const client = (state.clients || []).find(c => c.name.toLowerCase() === clientName.toLowerCase());
+      if (client && client.miles > 0) {
+        const alreadyLogged = state.mileage.some(m => m.destination === clientName && m.date === clockedIn.date);
+        if (!alreadyLogged) {
+          const miles = client.miles;
+          state.mileage.push({
+            id: uid(), date: clockedIn.date, destination: clientName,
+            purpose: 'Client Visit', miles: miles,
+            deduction: miles * (state.settings.irsRate || 0.70), notes: ''
+          });
+          saveState();
+          entry._milesAdded = miles;
+        }
+      }
+      clockedIn = null;
+      pendingEntry = entry;
+      showParsedResult(entry);
+      // Show mileage note after the parsed result
+      if (entry._milesAdded) {
+        addChatBubble('<div style="font-size:13px;">Also logged <b>' + entry._milesAdded + ' mi</b> round-trip to ' + esc(clientName) + ' ($' + (entry._milesAdded * (state.settings.irsRate || 0.70)).toFixed(2) + ' deduction)</div>', 'bot', true);
+      }
+      return true;
+    }
+
+    if (cmd === '/yesterday') {
+      const yest = new Date();
+      yest.setDate(yest.getDate() - 1);
+      const yestStr = dateStr(yest);
+      const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === yestStr);
+      if (!events.length) {
+        addChatBubble('No calendar events found for yesterday (' + fmtDate(yestStr) + '). You can type the entry manually instead.', 'bot');
+        return true;
+      }
+      if (events.length === 1) {
+        addChatBubble('Found yesterday\'s job — drafting entry:', 'bot');
+        draftFromCalendarEvent(events[0], yestStr);
+      } else {
+        let html = '<div style="font-weight:700;margin-bottom:6px;">Yesterday\'s Jobs (' + fmtDate(yestStr) + ')</div>';
+        events.forEach((evt, i) => {
+          const hours = getCalendarHours(evt);
+          const time = getCalendarTimeRange(evt);
+          html += '<div class="upcoming-event" style="cursor:pointer;" onclick="draftFromCalendarEvent(getCalendarSyncData().filter(e=>e.start.split(\'T\')[0]===\'' + yestStr + '\')[' + i + '],\'' + yestStr + '\')">';
+          html += '<div class="event-title">' + (evt.client || evt.summary) + '</div>';
+          html += '<div class="event-time">' + time + ' · ' + hours + ' hrs</div>';
+          if (evt.location) html += '<div class="event-location">' + evt.location + '</div>';
+          html += '</div>';
+        });
+        html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Tap one to draft the entry</div>';
+        addChatBubble(html, 'bot', true);
+      }
+      return true;
+    }
+
+    if (cmd === '/undo') {
+      if (lastSavedEntry) {
+        const e = lastSavedEntry;
+        if (e.type === 'income') state.income = state.income.filter(i => i.id !== e.savedId);
+        else if (e.type === 'expense') state.expenses = state.expenses.filter(i => i.id !== e.savedId);
+        else if (e.type === 'mileage') state.mileage = state.mileage.filter(i => i.id !== e.savedId);
+        saveState(); refreshAll();
+        lastSavedEntry = null;
+        addChatBubble('✓ Last entry removed.', 'bot');
+      } else {
+        addChatBubble('Nothing to undo.', 'bot');
+      }
+      return true;
+    }
+
+    if (cmd === '/miles') {
+      // Auto-log mileage for all income entries this week that don't have matching mileage
+      const today = new Date();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(today.getDate() - 7);
+      const weekStr = dateStr(weekAgo);
+      const todayStr = dateStr(today);
+      const recentIncome = state.income.filter(i => i.date >= weekStr && i.date <= todayStr);
+      const recentMileage = state.mileage.filter(m => m.date >= weekStr && m.date <= todayStr);
+      const missing = [];
+      for (const inc of recentIncome) {
+        const client = (state.clients || []).find(c => c.name.toLowerCase() === (inc.client || '').toLowerCase());
+        if (client && client.miles > 0) {
+          const alreadyLogged = recentMileage.some(m => m.destination === inc.client && m.date === inc.date);
+          if (!alreadyLogged) missing.push({ client: client.name, miles: client.miles, date: inc.date });
+        }
+      }
+      if (!missing.length) {
+        addChatBubble('All mileage is logged for this week — you\'re caught up!', 'bot');
+      } else {
+        let html = '<div style="font-weight:700;margin-bottom:6px;">Missing mileage this week (' + missing.length + ' trips):</div>';
+        const totalMiles = missing.reduce((s, m) => s + m.miles, 0);
+        const totalDed = totalMiles * IRS_RATE;
+        missing.forEach(m => {
+          html += '<div class="upcoming-event">';
+          html += '<div class="event-title">' + m.client + ' — ' + m.miles + ' mi ($' + (m.miles * IRS_RATE).toFixed(2) + ')</div>';
+          html += '<div class="event-time">' + fmtDate(m.date) + '</div>';
+          html += '</div>';
+        });
+        html += '<div style="margin-top:8px;font-weight:700;">Total: ' + totalMiles + ' mi · $' + totalDed.toFixed(2) + ' deduction</div>';
+        html += '<div class="chat-actions"><button class="confirm-btn" onclick="logAllMissingMiles()">✓ Log All</button><button class="edit-btn" onclick="this.parentElement.parentElement.remove()">Skip</button></div>';
+        pendingMiles = missing;
+        addChatBubble(html, 'bot', true);
+      }
+      return true;
+    }
+
+    if (cmd === '/invoice') {
+      const clientName = args.trim();
+      if (!clientName) {
+        // No client name — use today's clocked work or most recent client
+        addChatBubble('Usage: /invoice Dena — generates an end-of-day message for that client.', 'bot');
+        return true;
+      }
+      const matching = state.income.filter(i => (i.client || '').toLowerCase() === clientName.toLowerCase() && !i.invoiced);
+      if (!matching.length) { addChatBubble('No uninvoiced entries found for ' + clientName + '.', 'bot'); return true; }
+      const total = matching.reduce((s, i) => s + (i.total || 0), 0);
+      const client = (state.clients || []).find(c => c.name.toLowerCase() === clientName.toLowerCase());
+      const displayName = matching[0].client;
+
+      // Build the copy-paste text message for the client
+      let msgLines = ['Hi ' + displayName + '! Here\'s a summary of the garden work:'];
+      matching.forEach(i => {
+        let line = '  ' + fmtDate(i.date) + ' — ' + (i.service || 'Garden Care');
+        if (i.hours) line += ' (' + i.hours + ' hrs)';
+        line += ' — $' + (i.total || 0).toFixed(2);
+        msgLines.push(line);
+      });
+      if (matching.length > 1) msgLines.push('Total: $' + total.toFixed(2));
+      msgLines.push('');
+      msgLines.push('Cash is great! You can leave it in your usual spot if I miss you.');
+      msgLines.push('Thank you! —Garden Faery');
+      const plainMsg = msgLines.join('\n');
+
+      // Build the HTML display
+      let html = '<div style="font-weight:700;margin-bottom:8px;font-size:16px;">Message for ' + esc(displayName) + '</div>';
+
+      // Styled message preview
+      html += '<div style="background:#fff;border:1px solid var(--mushroom);border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin-bottom:10px;white-space:pre-wrap;" id="invoiceMsg">' + esc(plainMsg) + '</div>';
+
+      // Action buttons
+      html += '<div class="chat-actions">';
+      html += '<button class="confirm-btn" onclick="copyInvoiceMsg()">Copy Message</button>';
+      if (client && client.phone) {
+        html += '<button class="edit-btn" onclick="window.open(\'sms:' + client.phone + '?body=' + encodeURIComponent(plainMsg) + '\')">Text ' + esc(displayName) + '</button>';
+      }
+      html += '<button class="redo-btn" onclick="addHidySpot(\'' + esc(displayName) + '\')">Add Hidy Spot Note</button>';
+      html += '</div>';
+
+      // Store for copy
+      window._lastInvoiceMsg = plainMsg;
+      window._lastInvoiceClient = displayName;
+      window._lastInvoiceEntries = matching.map(i => i.id);
+
+      addChatBubble(html, 'bot', true);
+      return true;
+    }
+
+    // Unknown command
+    addChatBubble('Unknown command. Type /help to see available commands.', 'bot');
+    return true;
+  }
+
+  return false; // Not a command, continue to parser
+}
+
+// ─── AUTOLOG: Find calendar event(s) for a date and draft entries ───
+function autologFromCalendar(date) {
+  const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === date);
+
+  if (!events.length) {
+    addChatBubble('No calendar events found for ' + fmtDate(date) + '. Try typing the full entry instead.', 'bot');
+    return true;
+  }
+
+  if (events.length === 1) {
+    draftFromCalendarEvent(events[0], date);
+  } else {
+    // Multiple events — let them pick
+    let html = '<div style="font-weight:700;margin-bottom:6px;">Found ' + events.length + ' events on ' + fmtDate(date) + ':</div>';
+    events.forEach((evt, i) => {
+      const hours = getCalendarHours(evt);
+      const time = getCalendarTimeRange(evt);
+      html += '<div class="upcoming-event" style="cursor:pointer;" onclick="draftFromCalendarEvent(getCalendarSyncData().filter(e=>e.start.split(\'T\')[0]===\'' + date + '\')[' + i + '],\'' + date + '\')">';
+      html += '<div class="event-title">' + (evt.client || evt.summary) + '</div>';
+      html += '<div class="event-time">' + time + ' · ' + hours + ' hrs</div>';
+      if (evt.location) html += '<div class="event-location">' + evt.location + '</div>';
+      html += '</div>';
+    });
+    html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Tap one to draft the entry</div>';
+    addChatBubble(html, 'bot', true);
+  }
+  return true;
+}
+
+// ─── CLOCK IN/OUT STATE ───
+let clockedIn = null; // { evt, date, clockInTime }
+
+function clockInToEvent(index) {
+  const today = dateStr(new Date());
+  const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === today);
+  const evt = events[index];
+  if (!evt) return;
+  clockedIn = { evt, date: today, clockInTime: new Date() };
+  // Remove the picker bubble
+  const msgs = document.getElementById('chatMessages');
+  if (msgs.lastChild) msgs.lastChild.remove();
+  let html = '<div style="font-weight:700;margin-bottom:8px;">Clocked In</div>';
+  html += '<div class="parsed-data">';
+  html += parsedRow('Client', evt.client || evt.summary);
+  html += parsedRow('Service', evt.service || 'Garden Care');
+  if (evt.location) html += parsedRow('Location', evt.location);
+  html += parsedRow('Started', clockedIn.clockInTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Type <b>/clockout</b> when you\'re done!</div>';
+  addChatBubble(html, 'bot', true);
+}
+
+// ─── INVOICE HELPERS ───
+function copyInvoiceMsg() {
+  if (window._lastInvoiceMsg) {
+    navigator.clipboard.writeText(window._lastInvoiceMsg).then(() => {
+      addChatBubble('Copied to clipboard! Paste it in a text to your client.', 'bot');
+    }).catch(() => {
+      // Fallback: select text
+      const el = document.getElementById('invoiceMsg');
+      if (el) { const range = document.createRange(); range.selectNodeContents(el); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+      addChatBubble('Text selected — press Ctrl+C (or Cmd+C) to copy.', 'bot');
+    });
+  }
+}
+
+function addHidySpot(clientName) {
+  const client = (state.clients || []).find(c => c.name.toLowerCase() === clientName.toLowerCase());
+  const spot = (client && client.hidySpot) || '';
+  let html = '<div style="font-weight:700;margin-bottom:8px;">Hidy Spot for ' + esc(clientName) + '</div>';
+  if (spot) {
+    html += '<div style="margin-bottom:8px;font-size:13px;">Current spot: <b>' + esc(spot) + '</b></div>';
+    html += '<div style="font-size:12px;color:var(--gray);">This will be included in the message.</div>';
+    // Rebuild message with hidy spot
+    window._lastInvoiceMsg = window._lastInvoiceMsg.replace(
+      'You can leave it in your usual spot if I miss you.',
+      'You can leave cash at ' + spot + ' if I miss you.'
+    );
+    const msgEl = document.getElementById('invoiceMsg');
+    if (msgEl) msgEl.textContent = window._lastInvoiceMsg;
+    addChatBubble('Updated message with hidy spot: ' + esc(spot), 'bot');
+  } else {
+    html += '<div style="margin-bottom:8px;font-size:13px;">No hidy spot saved for ' + esc(clientName) + ' yet.</div>';
+    html += '<input type="text" id="hidySpotInput" placeholder="e.g. under the blue pot on the porch" style="width:100%;padding:8px;border:1px solid var(--mushroom);border-radius:8px;font-family:Nunito,sans-serif;margin-bottom:8px;">';
+    html += '<div class="chat-actions"><button class="confirm-btn" onclick="saveHidySpot(\'' + esc(clientName) + '\')">Save Spot</button></div>';
+    addChatBubble(html, 'bot', true);
+  }
+}
+
+function saveHidySpot(clientName) {
+  const input = document.getElementById('hidySpotInput');
+  if (!input || !input.value.trim()) return;
+  const spot = input.value.trim();
+  const client = (state.clients || []).find(c => c.name.toLowerCase() === clientName.toLowerCase());
+  if (client) {
+    client.hidySpot = spot;
+    saveState();
+  }
+  // Update the invoice message
+  if (window._lastInvoiceMsg) {
+    window._lastInvoiceMsg = window._lastInvoiceMsg.replace(
+      'You can leave it in your usual spot if I miss you.',
+      'You can leave cash at ' + spot + ' if I miss you.'
+    );
+    const msgEl = document.getElementById('invoiceMsg');
+    if (msgEl) msgEl.textContent = window._lastInvoiceMsg;
+  }
+  // Remove the input bubble
+  const msgs = document.getElementById('chatMessages');
+  if (msgs.lastChild) msgs.lastChild.remove();
+  addChatBubble('Saved! ' + esc(clientName) + '\'s hidy spot: <b>' + esc(spot) + '</b>. Message updated.', 'bot', true);
+}
+
+// ─── RANGE LOGGING ───
+let logRangeQueue = [];
+let logRangeIndex = 0;
+let pendingMiles = [];
+
+function draftNextFromRange() {
+  if (logRangeIndex >= logRangeQueue.length) {
+    addChatBubble('All done! ' + logRangeQueue.length + ' events processed.', 'bot');
+    logRangeQueue = [];
+    logRangeIndex = 0;
+    return;
+  }
+  const item = logRangeQueue[logRangeIndex];
+  addChatBubble('(' + (logRangeIndex + 1) + '/' + logRangeQueue.length + ')', 'bot');
+  draftFromCalendarEvent(item.evt, item.date);
+}
+
+// Hook into confirmEntry to advance the range queue
+const _origConfirmForRange = confirmEntry;
+
+function logAllMissingMiles() {
+  if (!pendingMiles.length) return;
+  pendingMiles.forEach(m => {
+    state.mileage.push({ id: uid(), date: m.date, destination: m.client, purpose: 'Client Visit', miles: m.miles, deduction: m.miles * IRS_RATE, notes: '' });
+  });
+  const total = pendingMiles.reduce((s, m) => s + m.miles, 0);
+  saveState(); refreshAll();
+  // Remove the prompt bubble
+  const msgs = document.getElementById('chatMessages');
+  if (msgs.lastChild) msgs.lastChild.remove();
+  addChatBubble('✓ Logged ' + pendingMiles.length + ' trips — ' + total + ' mi total, $' + (total * IRS_RATE).toFixed(2) + ' deduction!', 'bot');
+  pendingMiles = [];
+}
+
+function draftFromCalendarEvent(evt, date) {
+  const hours = getCalendarHours(evt);
+  const rate = state.settings.rate || 25;
+  const entry = {
+    type: 'income',
+    client: evt.client || '',
+    date: date,
+    hours: hours,
+    rate: rate,
+    total: hours * rate,
+    service: evt.service || 'Garden Care',
+    notes: getCalendarTimeRange(evt),
+    payment: 'Cash',
+    calendarMatch: true,
+    calendarLocation: evt.location || ''
+  };
+  pendingEntry = entry;
+  showParsedResult(entry);
+}
+
 function sendChat() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
   input.value = '';
   addChatBubble(text, 'user');
+
+  // ─── COMMANDS ───
+  if (handleCommand(text)) return;
 
   // If we have a pending receipt photo, attach it to the parsed expense
   if (chatReceiptPending && chatReceiptData) {
@@ -1329,6 +1792,12 @@ function saveEntryToState() {
   }
   pendingEntry = null;
   saveState(); refreshAll();
+
+  // If we're in a range log, advance to next after a short delay
+  if (logRangeQueue.length > 0 && logRangeIndex < logRangeQueue.length) {
+    logRangeIndex++;
+    setTimeout(draftNextFromRange, 500);
+  }
 }
 
 function showSavedSummary(e, savedId) {
@@ -1848,6 +2317,8 @@ function addClient() {
   const email = document.getElementById('newClientEmail').value.trim();
   const addr = document.getElementById('newClientAddr').value.trim();
   const miles = parseFloat(document.getElementById('newClientMiles').value) || 0;
+  const hidySpotEl = document.getElementById('newClientHidySpot');
+  const hidySpot = hidySpotEl ? hidySpotEl.value.trim() : '';
   if (!name) { showToast('Enter client name'); return; }
   const existing = state.clients.find(c => c.name.toLowerCase() === name.toLowerCase());
   if (existing) {
@@ -1855,31 +2326,47 @@ function addClient() {
     existing.miles = miles || existing.miles;
     existing.phone = phone || existing.phone || '';
     existing.email = email || existing.email || '';
+    if (hidySpot) existing.hidySpot = hidySpot;
     showToast(name + ' updated');
   } else {
-    state.clients.push({ id: uid(), name, phone, email, address: addr, miles });
+    state.clients.push({ id: uid(), name, phone, email, address: addr, miles, hidySpot });
     showToast(name + ' saved');
   }
   saveState(); renderClientsList();
-  ['newClientName','newClientPhone','newClientEmail','newClientAddr','newClientMiles'].forEach(id => document.getElementById(id).value = '');
+  ['newClientName','newClientPhone','newClientEmail','newClientAddr','newClientMiles','newClientHidySpot'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 function renderClientsList() {
   const list = document.getElementById('clientsList');
-  if (!state.clients.length) { list.innerHTML = '<li style="color:var(--gray);font-size:13px;padding:8px 0">No saved clients yet</li>'; return; }
-  list.innerHTML = state.clients.map(c => {
-    const details = [];
-    if (c.phone) details.push('<a href="tel:' + esc(c.phone) + '" style="color:var(--mushroom)">' + esc(c.phone) + '</a>');
-    if (c.email) details.push('<a href="mailto:' + esc(c.email) + '" style="color:var(--mushroom)">' + esc(c.email) + '</a>');
-    if (c.address) details.push(esc(c.address));
-    details.push(c.miles ? c.miles + ' mi RT' : 'no miles');
-    return `<li class="entry-item" style="flex-direction:column;align-items:stretch;gap:4px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="entry-name">${esc(c.name)}</div>
-        <button class="delete-btn" onclick="delClient('${c.id}')">&times;</button>
-      </div>
-      <div class="entry-detail">${details.join(' · ')}</div>
-    </li>`;
-  }).join('');
+  if (!list) return;
+  if (!state.clients.length) { list.innerHTML = '<div style="color:var(--gray);font-size:13px;padding:12px 0;text-align:center;">No saved clients yet</div>'; return; }
+  let html = '<table class="client-table"><thead><tr>';
+  html += '<th>Name</th><th>Phone</th><th>Address</th><th>Miles</th><th>Hidy Spot</th><th></th>';
+  html += '</tr></thead><tbody>';
+  state.clients.forEach(c => {
+    html += '<tr>';
+    html += '<td style="font-weight:600;white-space:nowrap;">' + esc(c.name) + (c.email ? '<br><a href="mailto:' + esc(c.email) + '" style="font-weight:400;font-size:11px;">' + esc(c.email) + '</a>' : '') + '</td>';
+    html += '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#ccc;">—</span>') + '</td>';
+    html += '<td>' + (c.address ? esc(c.address) : '<span style="color:#ccc;">—</span>') + '</td>';
+    html += '<td style="text-align:center;">' + (c.miles ? c.miles : '<span style="color:#ccc;">—</span>') + '</td>';
+    html += '<td>' + (c.hidySpot ? esc(c.hidySpot) : '<span style="color:#ccc;">—</span>') + '</td>';
+    html += '<td class="actions-cell"><button class="tbl-edit" onclick="editClient(\'' + c.id + '\')">Edit</button><button class="tbl-del" onclick="delClient(\'' + c.id + '\')">&times;</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  list.innerHTML = html;
+}
+function editClient(id) {
+  const c = state.clients.find(cl => cl.id === id);
+  if (!c) return;
+  document.getElementById('newClientName').value = c.name || '';
+  document.getElementById('newClientPhone').value = c.phone || '';
+  document.getElementById('newClientEmail').value = c.email || '';
+  document.getElementById('newClientAddr').value = c.address || '';
+  document.getElementById('newClientMiles').value = c.miles || '';
+  const hs = document.getElementById('newClientHidySpot');
+  if (hs) hs.value = c.hidySpot || '';
+  document.getElementById('newClientName').focus();
+  showToast('Editing ' + c.name + ' — update fields and hit Save');
 }
 function delClient(id) {
   if (!confirm('Remove?')) return;
@@ -2054,7 +2541,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Welcome message in chat
   const msgs = document.getElementById('chatMessages');
   if (!msgs.children.length) {
-    addChatBubble("Hey Taya! Just type what you did and I'll log it. Like:\n\n• \"dena $100 today hedge trimming 10-2\"\n• \"spent $45 at home depot on lumber\"\n• \"drove 12 miles to dena\"\n\nI'll parse it and ask you to confirm before saving.", 'bot');
+    addChatBubble("Hey Taya! Just type what you did and I'll log it. Like:\n\n• \"dena $100 today hedge trimming 10-2\"\n• \"spent $45 at home depot on lumber\"\n• \"drove 12 miles to dena\"\n• \"3/19\" — auto-drafts from your calendar\n\nType /help for all commands.", 'bot');
   }
 
   // Enter key to send
