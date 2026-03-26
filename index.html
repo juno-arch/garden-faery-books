@@ -530,8 +530,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     </div>
   </div>
 
-  <!-- ═══ DASHBOARD TAB ═══ -->
-  <div class="tab-pane" id="tab-dashboard">
+  <!-- ═══ HOME TAB ═══ -->
+  <div class="tab-pane" id="tab-home">
 
     <!-- ─── TODAY'S STATUS ─── -->
     <div class="card" id="dashTodayCard">
@@ -595,86 +595,66 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div class="card-title">Expenses by Category</div>
       <div id="catBreakdownList"></div>
     </div>
-  </div>
 
-  <!-- ═══ CALENDAR TAB ═══ -->
-  <div class="tab-pane" id="tab-calendar">
-    <div class="calendar-toggle" id="calViewToggle">
-      <button class="active" onclick="switchCalView('upcoming',this)">Upcoming</button>
-      <button onclick="switchCalView('month',this)">Month View</button>
-    </div>
-    <div id="calUpcoming">
-      <div class="card">
-        <div class="card-title">This Week</div>
-        <div id="calThisWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading calendar...</p></div>
-      </div>
-      <div class="card" style="margin-top:12px;">
-        <div class="card-title">Next Week</div>
-        <div id="calNextWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading...</p></div>
-      </div>
-    </div>
-    <div id="calMonth" style="display:none;">
-      <div class="calendar-container">
-        <iframe id="gcalIframe" src="https://calendar.google.com/calendar/embed?src=gardenfaeryy%40gmail.com&ctz=America/Los_Angeles&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23fffbf0" loading="lazy"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ HISTORY TAB ═══ -->
-  <div class="tab-pane" id="tab-history">
-    <div class="filter-pills" style="margin-bottom:12px;">
-      <button class="filter-pill active" onclick="filterHistory('all',this)">All</button>
-      <button class="filter-pill" onclick="filterHistory('income',this)">Income</button>
-      <button class="filter-pill" onclick="filterHistory('expense',this)">Expenses</button>
-      <button class="filter-pill" onclick="filterHistory('mileage',this)">Mileage</button>
-    </div>
+    <!-- ─── CALENDAR ─── -->
     <div class="card">
-      <div class="card-title" style="justify-content:space-between;">
-        <span>History</span>
-        <span style="font-size:12px; color:var(--gray); font-weight:400;" id="historyCount">0 entries</span>
+      <div class="card-title">Calendar</div>
+      <div class="calendar-toggle" id="calViewToggle">
+        <button class="active" onclick="switchCalView('upcoming',this)">Upcoming</button>
+        <button onclick="switchCalView('month',this)">Month View</button>
       </div>
-      <ul class="entry-list" id="historyList"></ul>
+      <div id="calUpcoming">
+        <div class="card">
+          <div class="card-title">This Week</div>
+          <div id="calThisWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading calendar...</p></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title">Next Week</div>
+          <div id="calNextWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading...</p></div>
+        </div>
+      </div>
+      <div id="calMonth" style="display:none;">
+        <div class="calendar-container">
+          <iframe id="gcalIframe" src="https://calendar.google.com/calendar/embed?src=gardenfaeryy%40gmail.com&ctz=America/Los_Angeles&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23fffbf0" loading="lazy"></iframe>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ═══ REPORTS TAB ═══ -->
-  <div class="tab-pane" id="tab-reports">
-    <div class="period-toggle">
-      <button class="active" onclick="setReportPeriod('monthly',this)">Monthly</button>
-      <button onclick="setReportPeriod('quarterly',this)">Quarterly</button>
-      <button onclick="setReportPeriod('yearly',this)">Yearly</button>
-    </div>
-    <div class="period-nav">
-      <button onclick="changeReportPeriod(-1)">&larr;</button>
-      <div class="period-label" id="reportPeriodLabel">March 2026</div>
-      <button onclick="changeReportPeriod(1)">&rarr;</button>
-    </div>
-    <div class="card">
-      <div class="card-title" style="justify-content:space-between;">
-        <span>Profit &amp; Loss</span>
-        <button class="btn btn-small btn-outline" onclick="exportPnL()">Export</button>
-      </div>
-      <div id="pnlIncomeRows"></div>
-      <div class="pnl-row total"><span>Total Income</span><span id="pnlTotalIncome">$0</span></div>
-      <div style="height:8px"></div>
-      <div id="pnlExpenseRows"></div>
-      <div class="pnl-row total"><span>Total Expenses</span><span id="pnlTotalExpenses">$0</span></div>
-      <div style="height:8px"></div>
-      <div id="pnlDeductionRows"></div>
-      <div class="pnl-row total"><span>Total Deductions</span><span id="pnlTotalDeductions">$0</span></div>
-      <div class="pnl-row grand-total"><span>Net Profit</span><span id="pnlNetProfit">$0</span></div>
-    </div>
-    <div class="card tax-card">
-      <div class="card-title">Estimated Taxes</div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sole proprietor estimates for <span id="taxYear">2026</span>. Consult a tax professional for exact amounts.</p>
-      <div id="taxEstimateRows"></div>
-      <div class="tax-row highlight" style="margin-top:8px;"><span>Total Estimated Tax</span><span id="taxTotal">$0</span></div>
-      <div style="margin-top:12px;"><div style="font-size:13px;font-weight:700;color:var(--gray);margin-bottom:8px;">Quarterly Due Dates</div><div id="taxDueDates"></div></div>
-    </div>
-  </div>
 
-  <!-- ═══ SETTINGS TAB ═══ -->
+  <!-- ═══ CLIENTS TAB ═══ -->
   <div class="tab-pane" id="tab-clients">
+    <!-- ─── LEADS ─── -->
+    <div class="card">
+      <div class="card-title">Leads</div>
+      <div class="filter-pills" id="leadFilterPills" style="margin-bottom:12px;">
+        <button class="filter-pill active" onclick="filterLeads('all',this)">All</button>
+        <button class="filter-pill" onclick="filterLeads('new',this)">New</button>
+        <button class="filter-pill" onclick="filterLeads('quoted',this)">Quoted</button>
+        <button class="filter-pill" onclick="filterLeads('booked',this)">Booked</button>
+        <button class="filter-pill" onclick="filterLeads('done',this)">Done</button>
+        <button class="filter-pill" onclick="filterLeads('lost',this)">Lost</button>
+      </div>
+      <button class="btn btn-primary" onclick="editLead(null); toggleLeadForm(true)" style="margin-bottom:12px;">+ New Lead</button>
+      <div id="leadsList"></div>
+    </div>
+
+    <!-- ─── LEAD FORM (MODAL) ─── -->
+    <div id="leadFormModal" style="display:none;">
+      <div class="card">
+        <div class="card-title">Lead Details</div>
+        <div class="form-group"><label>Name</label><input type="text" id="leadName" placeholder="Lead name"></div>
+        <div class="form-group"><label>Phone / Email</label><input type="text" id="leadContact" placeholder="(707) 555-1234 or email@example.com"></div>
+        <div class="form-group"><label>Location</label><input type="text" id="leadLocation" placeholder="Street or neighborhood"></div>
+        <div class="form-group"><label>What do they need?</label><textarea id="leadNeeds" placeholder="Garden bed, landscape, etc." style="min-height:80px;"></textarea></div>
+        <div class="form-group"><label>Status</label><select id="leadStatus"><option value="new">New Inquiry</option><option value="quoted">Quoted</option><option value="booked">Booked</option><option value="done">Completed</option><option value="lost">Lost/No Response</option></select></div>
+        <button class="btn btn-primary" onclick="saveLead()">Save</button>
+        <button class="btn btn-outline" onclick="toggleLeadForm(false)">Cancel</button>
+        <button class="btn btn-outline" id="leadDeleteBtn" style="display:none;float:right;" onclick="deleteLead()">Delete</button>
+      </div>
+    </div>
+
+    <!-- ─── EXISTING CLIENTS ─── -->
     <div class="card">
       <div class="card-title">Add / Edit Client</div>
       <div class="form-group"><label>Name</label><input type="text" id="newClientName" placeholder="e.g. Dena"></div>
@@ -695,87 +675,267 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     </div>
   </div>
 
-  <div class="tab-pane" id="tab-settings">
+  <!-- ═══ ESTIMATE TAB ═══ -->
+  <div class="tab-pane" id="tab-estimate">
+    <!-- ─── PRICING CALCULATOR ─── -->
     <div class="card">
-      <div class="card-title">Business Settings</div>
-      <div class="form-group"><label>Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
-      <div class="form-group"><label>Monthly Income Goal ($)</label><input type="number" id="settingsGoal" step="50" value="2000" inputmode="decimal"></div>
-      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-    </div>
-    <div class="card">
-      <div class="card-title">Receipt Scanner</div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Google Cloud Vision auto-reads receipts. Free for 1,000/month.</p>
-      <div class="form-group"><label>Vision API Key</label><input type="password" id="settingsVisionKey" placeholder="Paste API key"></div>
-      <button class="btn btn-primary" onclick="saveVisionKey()">Save Key</button>
-      <div id="visionKeyStatus" style="margin-top:8px;"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Snap a Receipt</div>
-      <div class="camera-area" onclick="document.getElementById('receiptInput').click()">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p>Tap to photograph receipt</p>
-        <input type="file" id="receiptInput" accept="image/*" capture="environment" onchange="handleReceipt(this)">
+      <div class="card-title">Pricing Calculator</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Materials</div>
+      <div class="form-row">
+        <div class="form-group"><label>Cedar per linear ft</label><input type="number" id="estCedarFt" step="0.01" value="3.50" inputmode="decimal"></div>
+        <div class="form-group"><label>Cloth per sq/ft</label><input type="number" id="estClothSqft" step="0.01" value="0.15" inputmode="decimal"></div>
       </div>
-      <div id="receiptPreviewArea" style="display:none; margin-top:12px;">
-        <img id="receiptPreview" class="receipt-preview">
-        <div id="ocrStatus" style="display:none; margin-top:8px;"></div>
-        <div class="form-row" style="margin-top:12px;">
-          <div class="form-group"><label>Vendor</label><input type="text" id="recVendor"></div>
-          <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" inputmode="decimal"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Soil per cu/ft</label><input type="number" id="estSoilCuft" step="0.01" value="0.35" inputmode="decimal"></div>
+        <div class="form-group"><label>Hardware (flat)</label><input type="number" id="estHardware" step="0.01" value="8.00" inputmode="decimal"></div>
+      </div>
+      <div class="form-group"><label>Other/misc (flat)</label><input type="number" id="estMisc" step="0.01" value="0.00" inputmode="decimal"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin:12px 0 8px;">Labor</div>
+      <div class="form-row">
+        <div class="form-group"><label>Hourly rate</label><input type="number" id="estLaborRate" step="0.50" value="45.00" inputmode="decimal"></div>
+        <div class="form-group"><label>Hours estimate</label><input type="number" id="estLaborHrs" step="0.5" value="4" inputmode="decimal"></div>
+      </div>
+      <div class="form-group"><label>Markup %</label><input type="number" id="estMarkup" step="1" value="20" inputmode="decimal"></div>
+      <button class="btn btn-primary" onclick="calcEstimate()">Calculate</button>
+      <div id="estResult" style="margin-top:12px;display:none;">
+        <div class="stats-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="stat-box"><div class="value" id="estMaterialsTotal">$0</div><div class="label">Materials</div></div>
+          <div class="stat-box"><div class="value" id="estLaborTotal">$0</div><div class="label">Labor</div></div>
+          <div class="stat-box"><div class="value" id="estMarkupTotal">$0</div><div class="label">Markup</div></div>
+          <div class="stat-box gold"><div class="value" id="estGrandTotal">$0</div><div class="label">Total Quote</div></div>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label>Date</label><input type="date" id="recDate"></div>
-          <div class="form-group"><label>Category</label><select id="recCategory"><option>Lumber &amp; Hardware</option><option>Soil &amp; Amendments</option><option>Plants &amp; Seeds</option><option>Tools &amp; Equipment</option><option>Transportation</option><option>Supplies</option><option>Marketing</option><option>Insurance</option><option>Meals</option><option>Other</option></select></div>
-        </div>
-        <button class="btn btn-primary" onclick="saveReceipt()" style="margin-top:8px;">Save Receipt</button>
-        <button class="btn btn-outline" onclick="cancelReceipt()" style="margin-top:8px;">Cancel</button>
       </div>
     </div>
+
+    <!-- ─── QUOTE BUILDER ─── -->
     <div class="card">
-      <div class="card-title">Data</div>
-      <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:8px;">Export All (JSON)</button>
-      <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
-      <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
-    </div>
-    <div class="card" id="cloudSyncCard">
-      <div class="card-title">Cloud Sync</div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with Firebase.</p>
-      <div id="syncSignedOut">
-        <div class="form-group"><label>Firebase API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
-        <div class="form-group"><label>Firebase Project ID</label><input type="text" id="fbProjectId" placeholder="garden-faery-books"></div>
-        <div class="form-group"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="garden-faery-books.firebaseapp.com" style="color:var(--gray);"></div>
-        <button class="btn btn-outline" onclick="saveFirebaseConfig()" style="margin-bottom:10px;">Save Config</button>
-        <button class="btn btn-primary" onclick="signInWithGoogle()" id="googleSignInBtn" style="display:none;">
-          <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:middle;margin-right:6px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Sign in with Google
-        </button>
+      <div class="card-title">Quote Builder</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Bed Dimensions</div>
+      <div class="form-row">
+        <div class="form-group"><label>Length (ft)</label><input type="number" id="quoteLength" value="8" inputmode="decimal"></div>
+        <div class="form-group"><label>Width (ft)</label><input type="number" id="quoteWidth" value="4" inputmode="decimal"></div>
       </div>
-      <div id="syncSignedIn" style="display:none;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:var(--fairy-glow);border-radius:8px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:var(--sparkle-gold);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;" id="syncUserAvatar">?</div>
-          <div style="flex:1;">
-            <div style="font-weight:600;font-size:13px;" id="syncUserName"></div>
-            <div style="font-size:11px;color:var(--gray);" id="syncUserEmail"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Depth (in)</label><input type="number" id="quoteDepth" value="12" inputmode="decimal"></div>
+        <div class="form-group"><label>Customer</label><input type="text" id="quoteCustomer" placeholder="Name"></div>
+      </div>
+      <div class="form-group"><label>Quote date</label><input type="date" id="quoteDate"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin:12px 0 8px;">Include in quote</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;"><input type="checkbox" id="quoteInstall" checked> Installation</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;"><input type="checkbox" id="quoteSoil" checked> Soil</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;"><input type="checkbox" id="quoteCloth" checked> Weed cloth</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;"><input type="checkbox" id="quoteCedar" checked> Cedar</label>
+      </div>
+      <button class="btn btn-primary" onclick="buildQuote()">Build Quote</button>
+      <div id="quoteOutput" style="margin-top:12px;display:none;"></div>
+    </div>
+
+    <!-- ─── REPLY TEMPLATES ─── -->
+    <div class="card">
+      <div class="card-title">Reply Templates</div>
+      <div id="replyTemplates" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="reply-template" onclick="copyTemplate(this)" style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;cursor:pointer;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">Quick reply <span style="font-size:11px;color:var(--gray);font-weight:400;">Tap to copy</span></div>
+          <div style="font-size:13px;color:var(--gray);line-height:1.5;">Hi! Thanks for reaching out. I'd love to help with your garden bed. Let me know your yard size and what you'd like to grow, and I'll put together a free estimate!</div>
+        </div>
+        <div class="reply-template" onclick="copyTemplate(this)" style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;cursor:pointer;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">Sending quote <span style="font-size:11px;color:var(--gray);font-weight:400;">Tap to copy</span></div>
+          <div style="font-size:13px;color:var(--gray);line-height:1.5;">Thanks for the info! Here's the estimate for your garden bed. Let me know if you'd like to move forward or have any questions. I can usually schedule within a week!</div>
+        </div>
+        <div class="reply-template" onclick="copyTemplate(this)" style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;cursor:pointer;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">Booking confirmation <span style="font-size:11px;color:var(--gray);font-weight:400;">Tap to copy</span></div>
+          <div style="font-size:13px;color:var(--gray);line-height:1.5;">You're all booked! I'll be there on [DATE] around [TIME]. I'll bring all the materials. Please have the area cleared if possible. See you then!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── LOCAL SUPPLIERS ─── -->
+    <div class="card">
+      <div class="card-title">Local Suppliers</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Arcata area · Prices last checked March 2026</p>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🪵 Cedar Lumber</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
+          2×12 Cedar — <b>$4.75/ft</b><br>
+          <b>Almquist Lumber</b> — 5301 Boyd Rd, Arcata · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a><br>
+          Also: The Mill Yard (4949 West End Rd) · Pierson Building Center (Eureka) · Schmidbauer Lumber
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🧷 Hardware Cloth</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
+          3ft roll — <b>$2.90/ft</b> ($0.97/sq ft)<br>
+          4ft roll — <b>$3.80/ft</b> ($0.95/sq ft)<br>
+          <b>Almquist Lumber</b> · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🌱 Soil &amp; Compost</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
+          Potting soil — <b>$200/yd</b> · Fir compost — <b>$60/yd</b><br>
+          <b>Mad River Gardens</b> — 3384 Janes Rd, Arcata · <a href="tel:7078227049" style="color:var(--accent-1);">(707) 822-7049</a><br>
+          Also: Wes Green Company · Powell Landscape Materials · Full Cycle Compost
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🔩 Screws &amp; Hardware</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
+          Deck screws, corner brackets, landscape fabric<br>
+          <b>Hensel's Ace Hardware</b> (Arcata) · <b>Pierson Building Center</b> (Eureka)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MORE TAB ═══ -->
+  <div class="tab-pane" id="tab-more">
+    <div class="filter-pills" style="margin-bottom:12px;" id="moreSubToggle">
+      <button class="filter-pill active" onclick="switchMoreSub('history',this)">History</button>
+      <button class="filter-pill" onclick="switchMoreSub('reports',this)">Reports</button>
+      <button class="filter-pill" onclick="switchMoreSub('settings',this)">Settings</button>
+    </div>
+
+    <!-- ─── HISTORY SUB ─── -->
+    <div id="more-history">
+      <div class="filter-pills" style="margin-bottom:12px;">
+        <button class="filter-pill active" onclick="filterHistory('all',this)">All</button>
+        <button class="filter-pill" onclick="filterHistory('income',this)">Income</button>
+        <button class="filter-pill" onclick="filterHistory('expense',this)">Expenses</button>
+        <button class="filter-pill" onclick="filterHistory('mileage',this)">Mileage</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span>History</span>
+          <span style="font-size:12px; color:var(--gray); font-weight:400;" id="historyCount">0 entries</span>
+        </div>
+        <ul class="entry-list" id="historyList"></ul>
+      </div>
+    </div>
+
+    <!-- ─── REPORTS SUB ─── -->
+    <div id="more-reports" style="display:none;">
+      <div class="period-toggle">
+        <button class="active" onclick="setReportPeriod('monthly',this)">Monthly</button>
+        <button onclick="setReportPeriod('quarterly',this)">Quarterly</button>
+        <button onclick="setReportPeriod('yearly',this)">Yearly</button>
+      </div>
+      <div class="period-nav">
+        <button onclick="changeReportPeriod(-1)">&larr;</button>
+        <div class="period-label" id="reportPeriodLabel">March 2026</div>
+        <button onclick="changeReportPeriod(1)">&rarr;</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span>Profit &amp; Loss</span>
+          <button class="btn btn-small btn-outline" onclick="exportPnL()">Export</button>
+        </div>
+        <div id="pnlIncomeRows"></div>
+        <div class="pnl-row total"><span>Total Income</span><span id="pnlTotalIncome">$0</span></div>
+        <div style="height:8px"></div>
+        <div id="pnlExpenseRows"></div>
+        <div class="pnl-row total"><span>Total Expenses</span><span id="pnlTotalExpenses">$0</span></div>
+        <div style="height:8px"></div>
+        <div id="pnlDeductionRows"></div>
+        <div class="pnl-row total"><span>Total Deductions</span><span id="pnlTotalDeductions">$0</span></div>
+        <div class="pnl-row grand-total"><span>Net Profit</span><span id="pnlNetProfit">$0</span></div>
+      </div>
+      <div class="card tax-card">
+        <div class="card-title">Estimated Taxes</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sole proprietor estimates for <span id="taxYear">2026</span>. Consult a tax professional for exact amounts.</p>
+        <div id="taxEstimateRows"></div>
+        <div class="tax-row highlight" style="margin-top:8px;"><span>Total Estimated Tax</span><span id="taxTotal">$0</span></div>
+        <div style="margin-top:12px;"><div style="font-size:13px;font-weight:700;color:var(--gray);margin-bottom:8px;">Quarterly Due Dates</div><div id="taxDueDates"></div></div>
+      </div>
+    </div>
+
+    <!-- ─── SETTINGS SUB ─── -->
+    <div id="more-settings" style="display:none;">
+      <div class="card">
+        <div class="card-title">Business Settings</div>
+        <div class="form-group"><label>Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
+        <div class="form-group"><label>Monthly Income Goal ($)</label><input type="number" id="settingsGoal" step="50" value="2000" inputmode="decimal"></div>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Receipt Scanner</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Google Cloud Vision auto-reads receipts. Free for 1,000/month.</p>
+        <div class="form-group"><label>Vision API Key</label><input type="password" id="settingsVisionKey" placeholder="Paste API key"></div>
+        <button class="btn btn-primary" onclick="saveVisionKey()">Save Key</button>
+        <div id="visionKeyStatus" style="margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Snap a Receipt</div>
+        <div class="camera-area" onclick="document.getElementById('receiptInput').click()">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <p>Tap to photograph receipt</p>
+          <input type="file" id="receiptInput" accept="image/*" capture="environment" onchange="handleReceipt(this)">
+        </div>
+        <div id="receiptPreviewArea" style="display:none; margin-top:12px;">
+          <img id="receiptPreview" class="receipt-preview">
+          <div id="ocrStatus" style="display:none; margin-top:8px;"></div>
+          <div class="form-row" style="margin-top:12px;">
+            <div class="form-group"><label>Vendor</label><input type="text" id="recVendor"></div>
+            <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" inputmode="decimal"></div>
           </div>
-          <button class="btn btn-outline" onclick="signOutFirebase()" style="font-size:11px;padding:4px 10px;">Sign Out</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <span style="font-size:13px;font-weight:600;">Auto-sync</span>
-          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-            <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()" style="opacity:0;width:0;height:0;">
-            <span style="position:absolute;inset:0;background:#ccc;border-radius:24px;transition:.3s;" id="syncSlider"></span>
-          </label>
-        </div>
-        <div id="syncStatus" style="font-size:12px;color:var(--gray);margin-bottom:10px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-outline" onclick="syncToCloud()" style="flex:1;font-size:12px;">Push to Cloud</button>
-          <button class="btn btn-outline" onclick="syncFromCloud()" style="flex:1;font-size:12px;">Pull from Cloud</button>
+          <div class="form-row">
+            <div class="form-group"><label>Date</label><input type="date" id="recDate"></div>
+            <div class="form-group"><label>Category</label><select id="recCategory"><option>Lumber &amp; Hardware</option><option>Soil &amp; Amendments</option><option>Plants &amp; Seeds</option><option>Tools &amp; Equipment</option><option>Transportation</option><option>Supplies</option><option>Marketing</option><option>Insurance</option><option>Meals</option><option>Other</option></select></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveReceipt()" style="margin-top:8px;">Save Receipt</button>
+          <button class="btn btn-outline" onclick="cancelReceipt()" style="margin-top:8px;">Cancel</button>
         </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-title">About</div>
-      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.4<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+      <div class="card">
+        <div class="card-title">Data</div>
+        <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:8px;">Export All (JSON)</button>
+        <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
+        <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
+      </div>
+      <div class="card" id="cloudSyncCard">
+        <div class="card-title">Cloud Sync</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with Firebase.</p>
+        <div id="syncSignedOut">
+          <div class="form-group"><label>Firebase API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
+          <div class="form-group"><label>Firebase Project ID</label><input type="text" id="fbProjectId" placeholder="garden-faery-books"></div>
+          <div class="form-group"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="garden-faery-books.firebaseapp.com" style="color:var(--gray);"></div>
+          <button class="btn btn-outline" onclick="saveFirebaseConfig()" style="margin-bottom:10px;">Save Config</button>
+          <button class="btn btn-primary" onclick="signInWithGoogle()" id="googleSignInBtn" style="display:none;">
+            <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:middle;margin-right:6px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign in with Google
+          </button>
+        </div>
+        <div id="syncSignedIn" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:var(--fairy-glow);border-radius:8px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--sparkle-gold);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;" id="syncUserAvatar">?</div>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:13px;" id="syncUserName"></div>
+              <div style="font-size:11px;color:var(--gray);" id="syncUserEmail"></div>
+            </div>
+            <button class="btn btn-outline" onclick="signOutFirebase()" style="font-size:11px;padding:4px 10px;">Sign Out</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:600;">Auto-sync</span>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()" style="opacity:0;width:0;height:0;">
+              <span style="position:absolute;inset:0;background:#ccc;border-radius:24px;transition:.3s;" id="syncSlider"></span>
+            </label>
+          </div>
+          <div id="syncStatus" style="font-size:12px;color:var(--gray);margin-bottom:10px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" onclick="syncToCloud()" style="flex:1;font-size:12px;">Push to Cloud</button>
+            <button class="btn btn-outline" onclick="syncFromCloud()" style="flex:1;font-size:12px;">Pull from Cloud</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">About</div>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+      </div>
     </div>
   </div>
 
@@ -787,29 +947,21 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     Chat
   </button>
-  <button class="tab-btn" onclick="switchTab('dashboard',this)">
+  <button class="tab-btn" onclick="switchTab('home',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     Home
-  </button>
-  <button class="tab-btn" onclick="switchTab('calendar',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    Calendar
   </button>
   <button class="tab-btn" onclick="switchTab('clients',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     Clients
   </button>
-  <button class="tab-btn" onclick="switchTab('history',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    History
+  <button class="tab-btn" onclick="switchTab('estimate',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    Estimate
   </button>
-  <button class="tab-btn" onclick="switchTab('reports',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    Reports
-  </button>
-  <button class="tab-btn" onclick="switchTab('settings',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Settings
+  <button class="tab-btn" onclick="switchTab('more',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    More
   </button>
 </nav>
 
@@ -826,7 +978,7 @@ let realStateBackup = null;
 
 let state = {
   income: [], expenses: [], mileage: [], receipts: [],
-  invoices: [], clients: [], cards: [],
+  invoices: [], clients: [], cards: [], leads: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
   settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70 },
   version: 4
@@ -838,10 +990,14 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
-      ['income','expenses','mileage','receipts','invoices','clients','cards'].forEach(k => {
+      ['income','expenses','mileage','receipts','invoices','clients','cards','leads'].forEach(k => {
         if (!state[k]) state[k] = [];
       });
       if (!state.learned) state.learned = { vendors: {}, aliases: {}, categories: {} };
+      // Migration: strip any old base64 receipt images to reclaim storage
+      let stripped = false;
+      (state.receipts || []).forEach(r => { if (r.image) { delete r.image; stripped = true; } });
+      if (stripped) saveState();
     }
   } catch (e) { console.warn('Load error:', e); }
 }
@@ -849,12 +1005,21 @@ function saveState() {
   if (testMode) return; // Don't save anything in test mode
   try {
     state.lastModified = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // Strip base64 images from receipts before saving — they blow past
+    // localStorage's ~5 MB cap and cause silent data loss.
+    const toSave = JSON.parse(JSON.stringify(state));
+    if (toSave.receipts) {
+      toSave.receipts.forEach(r => { delete r.image; });
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     // Auto-sync to cloud if enabled
     if (typeof firebaseReady !== 'undefined' && firebaseReady && autoSyncEnabled) {
       debouncedSyncToCloud();
     }
-  } catch (e) { console.warn('Save error:', e); }
+  } catch (e) {
+    console.warn('Save error:', e);
+    showToast('Storage full — try exporting data');
+  }
 }
 
 function toggleTestMode() {
@@ -936,7 +1101,16 @@ function switchTab(name, btn) {
   btn.classList.add('active');
   document.querySelector('.main-content').scrollTop = 0;
   if (name === 'chat') document.getElementById('chatInput').focus();
-  if (name === 'calendar') loadCalendarEvents();
+  if (name === 'home') loadCalendarEvents();
+  if (name === 'estimate') { document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0]; }
+}
+
+function switchMoreSub(sub, btn) {
+  document.querySelectorAll('#moreSubToggle .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['history','reports','settings'].forEach(s => {
+    document.getElementById('more-' + s).style.display = s === sub ? 'block' : 'none';
+  });
 }
 
 // ═══════════════════════════════════════
@@ -2567,6 +2741,163 @@ function scrollChat() {
 }
 
 // ═══════════════════════════════════════
+// ESTIMATOR
+// ═══════════════════════════════════════
+function calcEstimate() {
+  const cedarFt = parseFloat(document.getElementById('estCedarFt').value) || 0;
+  const clothSqft = parseFloat(document.getElementById('estClothSqft').value) || 0;
+  const soilCuft = parseFloat(document.getElementById('estSoilCuft').value) || 0;
+  const hardware = parseFloat(document.getElementById('estHardware').value) || 0;
+  const misc = parseFloat(document.getElementById('estMisc').value) || 0;
+  const laborRate = parseFloat(document.getElementById('estLaborRate').value) || 0;
+  const laborHrs = parseFloat(document.getElementById('estLaborHrs').value) || 0;
+  const markup = parseFloat(document.getElementById('estMarkup').value) || 0;
+  const materials = cedarFt + clothSqft + soilCuft + hardware + misc;
+  const labor = laborRate * laborHrs;
+  const markupAmt = (materials + labor) * (markup / 100);
+  const total = materials + labor + markupAmt;
+  document.getElementById('estMaterialsTotal').textContent = '$' + materials.toFixed(2);
+  document.getElementById('estLaborTotal').textContent = '$' + labor.toFixed(2);
+  document.getElementById('estMarkupTotal').textContent = '$' + markupAmt.toFixed(2);
+  document.getElementById('estGrandTotal').textContent = '$' + total.toFixed(2);
+  document.getElementById('estResult').style.display = 'block';
+}
+
+function buildQuote() {
+  const l = parseFloat(document.getElementById('quoteLength').value) || 0;
+  const w = parseFloat(document.getElementById('quoteWidth').value) || 0;
+  const d = parseFloat(document.getElementById('quoteDepth').value) || 0;
+  const customer = document.getElementById('quoteCustomer').value.trim() || 'Customer';
+  const date = document.getElementById('quoteDate').value || new Date().toISOString().split('T')[0];
+  const perimeter = 2 * (l + w);
+  const boardsHigh = Math.ceil(d / 6); // 6-inch boards
+  const cedarFt = perimeter * boardsHigh;
+  const sqft = l * w;
+  const cuft = (l * w * (d / 12));
+  const cedarCost = cedarFt * 4.75;
+  const clothCost = document.getElementById('quoteCloth').checked ? sqft * 0.97 : 0;
+  const soilCost = document.getElementById('quoteSoil').checked ? (cuft / 27) * 60 : 0;
+  const hardware = 8;
+  const materialTotal = (document.getElementById('quoteCedar').checked ? cedarCost : 0) + clothCost + soilCost + hardware;
+  const labor = document.getElementById('quoteInstall').checked ? 45 * 4 : 0;
+  const markupAmt = (materialTotal + labor) * 0.20;
+  const total = materialTotal + labor + markupAmt;
+  let html = '<div style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;">';
+  html += '<div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Quote for ' + esc(customer) + '</div>';
+  html += '<div style="font-size:12px;color:var(--gray);margin-bottom:10px;">' + date + ' · ' + l + '×' + w + '×' + d + '" raised bed</div>';
+  html += '<div style="font-size:13px;line-height:1.8;">';
+  if (document.getElementById('quoteCedar').checked) html += 'Cedar (' + cedarFt.toFixed(0) + ' lin ft) — <b>$' + cedarCost.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteCloth').checked) html += 'Weed cloth (' + sqft.toFixed(0) + ' sq ft) — <b>$' + clothCost.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteSoil').checked) html += 'Soil (' + cuft.toFixed(1) + ' cu ft) — <b>$' + soilCost.toFixed(2) + '</b><br>';
+  html += 'Hardware — <b>$' + hardware.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteInstall').checked) html += 'Installation — <b>$' + labor.toFixed(2) + '</b><br>';
+  html += 'Markup (20%) — <b>$' + markupAmt.toFixed(2) + '</b><br>';
+  html += '</div>';
+  html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--accent-border-xlt);font-size:16px;font-weight:800;color:var(--text-primary);">Total: $' + total.toFixed(2) + '</div>';
+  html += '</div>';
+  document.getElementById('quoteOutput').innerHTML = html;
+  document.getElementById('quoteOutput').style.display = 'block';
+}
+
+function copyTemplate(el) {
+  const text = el.querySelector('div:last-child').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => {
+    // Fallback for iOS
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Copied!');
+  });
+}
+
+// ═══════════════════════════════════════
+// LEADS
+// ═══════════════════════════════════════
+let editingLeadId = null;
+
+function toggleLeadForm(show) {
+  document.getElementById('leadFormModal').style.display = show ? 'block' : 'none';
+  if (!show) { editingLeadId = null; document.getElementById('leadFormModal').querySelectorAll('input,textarea,select').forEach(el => el.value = ''); }
+}
+
+function saveLead() {
+  const name = document.getElementById('leadName').value.trim();
+  if (!name) { showToast('Name required'); return; }
+  const lead = {
+    id: editingLeadId || uid(),
+    name: name,
+    contact: document.getElementById('leadContact').value.trim(),
+    location: document.getElementById('leadLocation').value.trim(),
+    needs: document.getElementById('leadNeeds').value.trim(),
+    status: document.getElementById('leadStatus').value,
+    created: editingLeadId ? ((state.leads || []).find(l => l.id === editingLeadId) || {}).created || new Date().toISOString() : new Date().toISOString()
+  };
+  if (!state.leads) state.leads = [];
+  if (editingLeadId) {
+    const idx = state.leads.findIndex(l => l.id === editingLeadId);
+    if (idx >= 0) state.leads[idx] = lead; else state.leads.push(lead);
+  } else {
+    state.leads.push(lead);
+  }
+  saveState();
+  toggleLeadForm(false);
+  renderLeads();
+  showToast(editingLeadId ? 'Lead updated' : 'Lead added');
+}
+
+function editLead(id) {
+  const lead = (state.leads || []).find(l => l.id === id);
+  if (!lead) return;
+  editingLeadId = id;
+  document.getElementById('leadName').value = lead.name || '';
+  document.getElementById('leadContact').value = lead.contact || '';
+  document.getElementById('leadLocation').value = lead.location || '';
+  document.getElementById('leadNeeds').value = lead.needs || '';
+  document.getElementById('leadStatus').value = lead.status || 'new';
+  document.getElementById('leadDeleteBtn').style.display = 'inline-block';
+  toggleLeadForm(true);
+}
+
+function deleteLead() {
+  if (!editingLeadId) return;
+  state.leads = (state.leads || []).filter(l => l.id !== editingLeadId);
+  saveState();
+  toggleLeadForm(false);
+  renderLeads();
+  showToast('Lead deleted');
+}
+
+let leadFilter = 'all';
+function filterLeads(filter, btn) {
+  leadFilter = filter;
+  document.querySelectorAll('#leadFilterPills .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+function renderLeads() {
+  const leads = (state.leads || []).filter(l => leadFilter === 'all' || l.status === leadFilter);
+  const el = document.getElementById('leadsList');
+  if (!leads.length) {
+    el.innerHTML = '<p style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">No leads yet. Tap + to add one.</p>';
+    return;
+  }
+  const statusColors = { new: '#5dade2', quoted: '#f39c12', booked: '#27ae60', done: '#8e44ad', lost: '#95a5a6' };
+  const statusLabels = { new: 'New', quoted: 'Quoted', booked: 'Booked', done: 'Done', lost: 'Lost' };
+  el.innerHTML = leads.map(l => {
+    const col = statusColors[l.status] || '#888';
+    return '<div onclick="editLead(\'' + l.id + '\')" style="background:var(--card-bg);border:1px solid var(--accent-border-xlt);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">' +
+      '<div><div style="font-weight:700;font-size:14px;color:var(--text-primary);">' + esc(l.name) + '</div>' +
+      (l.location ? '<div style="font-size:12px;color:var(--gray);">' + esc(l.location) + '</div>' : '') +
+      (l.needs ? '<div style="font-size:12px;color:var(--gray);margin-top:2px;">' + esc(l.needs) + '</div>' : '') + '</div>' +
+      '<div style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:12px;background:' + col + '22;color:' + col + ';">' + (statusLabels[l.status] || l.status) + '</div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════
 let viewMonth = new Date().getMonth();
@@ -3325,7 +3656,7 @@ function importData(input) {
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
-function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); }
+function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); }
 function dateStr(d) { return d.toISOString().split('T')[0]; }
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function fmtDate(s) { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
@@ -3406,6 +3737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsRate').value = state.settings.rate || 25;
   document.getElementById('settingsGoal').value = state.settings.goal || 2000;
   if (state.settings.visionKey) document.getElementById('settingsVisionKey').value = state.settings.visionKey;
+  document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
 
   // Welcome message in chat
   const msgs = document.getElementById('chatMessages');
