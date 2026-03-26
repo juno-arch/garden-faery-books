@@ -1,0 +1,80 @@
+{
+  "lastUpdated": "2026-03-25",
+  "clients": [
+    {
+      "name": "Dena",
+      "phone": "(707) 599-5014",
+      "email": "",
+      "address": "1112 Spear Ave, Arcata CA 95521",
+      "roundTripMiles": 0,
+      "hidySpot": "",
+      "services": ["Weeding", "Garden Care"],
+      "rate": 25,
+      "payment": "Cash",
+      "status": "active",
+      "firstJob": "2026-03-16",
+      "schedule": "As needed",
+      "notes": "First Feed Your Soul job."
+    },
+    {
+      "name": "Elizabeth",
+      "phone": "",
+      "email": "",
+      "address": "3168 Deer Fern Ct",
+      "roundTripMiles": 0,
+      "hidySpot": "",
+      "services": ["Garden Care"],
+      "rate": 25,
+      "payment": "Cash",
+      "status": "active",
+      "firstJob": "2026-03-19",
+      "schedule": "Weekly (Wednesdays, 9am-2pm)",
+      "notes": "Recurring weekly through April."
+    },
+    {
+      "name": "Edith",
+      "phone": "",
+      "email": "",
+      "address": "1641 Old Arcata Road, Bayside CA 95524",
+      "roundTripMiles": 0,
+      "hidySpot": "",
+      "services": ["Consultation"],
+      "rate": 25,
+      "payment": "Cash",
+      "status": "active",
+      "firstJob": "2026-03-26",
+      "schedule": "Consultation scheduled Mar 26",
+      "notes": ""
+    },
+    {
+      "name": "Sarah",
+      "phone": "",
+      "email": "",
+      "address": "",
+      "roundTripMiles": 0,
+      "hidySpot": "",
+      "services": ["Weeding"],
+      "rate": 25,
+      "payment": "Cash",
+      "status": "active",
+      "firstJob": "2026-03-30",
+      "schedule": "TBD weeding Mar 30",
+      "notes": ""
+    },
+    {
+      "name": "Anna Peck",
+      "phone": "",
+      "email": "",
+      "address": "565 Hilton LN, Arcata CA 95521",
+      "roundTripMiles": 0,
+      "hidySpot": "",
+      "services": ["Consultation"],
+      "rate": 25,
+      "payment": "Cash",
+      "status": "active",
+      "firstJob": "2026-04-01",
+      "schedule": "Consultation Apr 1, 9-9:30am",
+      "notes": ""
+    }
+  ]
+}

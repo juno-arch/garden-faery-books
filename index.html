@@ -473,28 +473,66 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 
   <!-- ═══ DASHBOARD TAB ═══ -->
   <div class="tab-pane" id="tab-dashboard">
-    <div class="month-selector">
-      <button onclick="changeMonth(-1)">&larr;</button>
-      <div class="month-label" id="monthLabel">March 2026</div>
-      <button onclick="changeMonth(1)">&rarr;</button>
+
+    <!-- ─── TODAY'S STATUS ─── -->
+    <div class="card" id="dashTodayCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="card-title" style="margin:0;">Today</div>
+        <div id="dashClockBadge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:#eee8dd;color:var(--gray);"></div>
+      </div>
+      <div id="dashTodaySchedule" style="margin-bottom:8px;"></div>
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="stat-box"><div class="value" id="dashTodayEarned">$0</div><div class="label">Earned</div></div>
+        <div class="stat-box red"><div class="value" id="dashTodaySpent">$0</div><div class="label">Spent</div></div>
+        <div class="stat-box"><div class="value" id="dashTodayHours">0</div><div class="label">Hours</div></div>
+      </div>
     </div>
+
+    <!-- ─── WEEKLY EARNINGS ─── -->
     <div class="card">
-      <div class="card-title">Monthly Goal</div>
-      <div class="goal-bar">
+      <div class="card-title">This Week</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="value" id="dashWeekIncome">$0</div><div class="label">Income</div></div>
+        <div class="stat-box"><div class="value" id="dashWeekHours">0</div><div class="label">Hours</div></div>
+        <div class="stat-box red"><div class="value" id="dashWeekExpenses">$0</div><div class="label">Expenses</div></div>
+        <div class="stat-box"><div class="value" id="dashWeekJobs">0</div><div class="label">Jobs</div></div>
+      </div>
+    </div>
+
+    <!-- ─── MONTHLY GOAL ─── -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="card-title" style="margin:0;">
+          <span id="monthLabel">March 2026</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="changeMonth(-1)" style="background:none;border:1px solid rgba(196,149,106,0.3);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
+          <button onclick="changeMonth(1)" style="background:none;border:1px solid rgba(196,149,106,0.3);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
+        </div>
+      </div>
+      <div class="goal-bar" style="margin-top:10px;">
         <div class="goal-bar-fill" id="goalFill" style="width:0%"></div>
         <div class="goal-bar-text" id="goalText">0%</div>
       </div>
       <div class="goal-numbers"><span id="goalEarned">$0</span><span id="goalTarget">$1,000</span></div>
+      <div class="stats-grid" style="margin-top:10px;">
+        <div class="stat-box"><div class="value" id="statIncome">$0</div><div class="label">Income</div></div>
+        <div class="stat-box red"><div class="value" id="statExpenses">$0</div><div class="label">Expenses</div></div>
+        <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net Profit</div></div>
+        <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
+        <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
+        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Mile Deductions</div></div>
+      </div>
     </div>
-    <div class="stats-grid">
-      <div class="stat-box"><div class="value" id="statIncome">$0</div><div class="label">Income</div></div>
-      <div class="stat-box red"><div class="value" id="statExpenses">$0</div><div class="label">Expenses</div></div>
-      <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net Profit</div></div>
-      <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
-      <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
-      <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Mile Deductions</div></div>
+
+    <!-- ─── WHO OWES ME ─── -->
+    <div class="card" id="dashOwedCard">
+      <div class="card-title">Who Owes Me</div>
+      <div id="dashOwedList" style="font-size:14px;"></div>
     </div>
-    <div class="card" id="catBreakdownCard" style="margin-top:12px; display:none;">
+
+    <!-- ─── EXPENSE BREAKDOWN ─── -->
+    <div class="card" id="catBreakdownCard" style="display:none;">
       <div class="card-title">Expenses by Category</div>
       <div id="catBreakdownList"></div>
     </div>
@@ -2484,6 +2522,58 @@ function changeMonth(delta) {
 }
 
 function refreshDashboard() {
+  const todayStr = dateStr(new Date());
+  const today = new Date();
+  const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 7);
+  const weekStr = dateStr(weekAgo);
+
+  // ─── TODAY'S STATUS ───
+  const todayIncome = state.income.filter(i => i.date === todayStr);
+  const todayExpenses = state.expenses.filter(e => e.date === todayStr);
+  const todayEarned = todayIncome.reduce((s,i) => s+(i.total||0), 0);
+  const todaySpent = todayExpenses.reduce((s,e) => s+(e.amount||0), 0);
+  const todayHours = todayIncome.reduce((s,i) => s+(i.hours||0), 0);
+
+  document.getElementById('dashTodayEarned').textContent = '$' + todayEarned.toFixed(0);
+  document.getElementById('dashTodaySpent').textContent = '$' + todaySpent.toFixed(0);
+  document.getElementById('dashTodayHours').textContent = todayHours.toFixed(1);
+
+  // Clock status badge
+  const badge = document.getElementById('dashClockBadge');
+  if (clockedIn) {
+    const mins = Math.round((new Date() - clockedIn.clockInTime) / 60000);
+    badge.textContent = 'Clocked In · ' + mins + 'm';
+    badge.style.background = 'rgba(76,175,80,0.15)'; badge.style.color = '#2e7d32';
+  } else {
+    badge.textContent = 'Not Clocked In';
+    badge.style.background = '#eee8dd'; badge.style.color = 'var(--gray)';
+  }
+
+  // Today's schedule
+  const todayEvents = getCalendarSyncData().filter(e => e.start.split('T')[0] === todayStr);
+  const schedEl = document.getElementById('dashTodaySchedule');
+  if (todayEvents.length) {
+    schedEl.innerHTML = todayEvents.map(evt => {
+      const time = getCalendarTimeRange(evt);
+      const logged = todayIncome.some(i => (i.client||'').toLowerCase() === (evt.client||'').toLowerCase());
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">' +
+        '<div><span style="font-weight:600;">' + esc(evt.client || evt.summary) + '</span> <span style="color:var(--gray);">' + time + '</span></div>' +
+        (logged ? '<span style="color:#2e7d32;font-size:11px;font-weight:600;">Logged</span>' : '<span style="color:var(--mushroom);font-size:11px;">Pending</span>') +
+        '</div>';
+    }).join('');
+  } else {
+    schedEl.innerHTML = '<div style="font-size:13px;color:var(--gray);padding:4px 0;">No jobs scheduled today</div>';
+  }
+
+  // ─── THIS WEEK ───
+  const weekIncome = state.income.filter(i => i.date >= weekStr && i.date <= todayStr);
+  const weekExpenses = state.expenses.filter(e => e.date >= weekStr && e.date <= todayStr);
+  document.getElementById('dashWeekIncome').textContent = '$' + weekIncome.reduce((s,i) => s+(i.total||0), 0).toFixed(0);
+  document.getElementById('dashWeekHours').textContent = weekIncome.reduce((s,i) => s+(i.hours||0), 0).toFixed(1);
+  document.getElementById('dashWeekExpenses').textContent = '$' + weekExpenses.reduce((s,e) => s+(e.amount||0), 0).toFixed(0);
+  document.getElementById('dashWeekJobs').textContent = weekIncome.length;
+
+  // ─── MONTHLY GOAL ───
   const mi = state.income.filter(i => { const d = new Date(i.date+'T00:00:00'); return d.getMonth()===viewMonth && d.getFullYear()===viewYear; });
   const me = state.expenses.filter(e => { const d = new Date(e.date+'T00:00:00'); return d.getMonth()===viewMonth && d.getFullYear()===viewYear; });
   const mm = state.mileage.filter(m => { const d = new Date(m.date+'T00:00:00'); return d.getMonth()===viewMonth && d.getFullYear()===viewYear; });
@@ -2506,6 +2596,32 @@ function refreshDashboard() {
   document.getElementById('statJobs').textContent = mi.length;
   document.getElementById('statMileDed').textContent = '$'+totMilDed.toFixed(0);
 
+  // ─── WHO OWES ME ───
+  const uninvoiced = {};
+  state.income.filter(i => !i.invoiced).forEach(i => {
+    const name = i.client || 'Unknown';
+    uninvoiced[name] = (uninvoiced[name] || 0) + (i.total || 0);
+  });
+  const owedEntries = Object.entries(uninvoiced).filter(([_, amt]) => amt > 0).sort((a, b) => b[1] - a[1]);
+  const owedCard = document.getElementById('dashOwedCard');
+  const owedList = document.getElementById('dashOwedList');
+  if (owedEntries.length) {
+    owedCard.style.display = 'block';
+    const totalOwed = owedEntries.reduce((s, [_, a]) => s + a, 0);
+    owedList.innerHTML = owedEntries.map(([name, amt]) =>
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;">' +
+      '<span style="font-weight:600;">' + esc(name) + '</span>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<span style="font-weight:700;color:var(--warm-dark);">$' + amt.toFixed(0) + '</span>' +
+      '<button onclick="sendChat_(\'/invoice ' + esc(name) + '\')" style="font-size:11px;padding:3px 8px;border:1px solid var(--mushroom);border-radius:6px;background:var(--fairy-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);">Invoice</button>' +
+      '</div></div>'
+    ).join('') +
+    '<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--sparkle-gold);"><span>Total Outstanding</span><span>$' + totalOwed.toFixed(0) + '</span></div>';
+  } else {
+    owedCard.style.display = 'block';
+    owedList.innerHTML = '<div style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">All caught up! No outstanding invoices.</div>';
+  }
+
   // Category breakdown
   const catCard = document.getElementById('catBreakdownCard');
   if (me.length > 0) {
@@ -2519,7 +2635,7 @@ function refreshDashboard() {
     ).join('');
   } else { catCard.style.display = 'none'; }
 
-  // Recent activity
+  // Recent activity (under chat)
   const recent = [
     ...state.income.map(i => ({...i, _type:'income', _sort:i.date})),
     ...state.expenses.map(e => ({...e, _type:'expense', _sort:e.date})),
@@ -2533,6 +2649,15 @@ function refreshDashboard() {
     if (r._type==='expense') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.vendor)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.category}</div></div><span class="entry-amount expense">-$${r.amount.toFixed(2)}</span></li>`;
     return `<li class="entry-item"><div class="entry-info"><div class="entry-name">🚗 ${esc(r.destination)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.miles} mi</div></div><span class="entry-amount income">$${r.deduction.toFixed(2)}</span></li>`;
   }).join('');
+}
+
+// Helper to trigger invoice from dashboard
+function sendChat_(text) {
+  document.querySelector('[onclick*="tab-chat"]').click();
+  setTimeout(() => {
+    document.getElementById('chatInput').value = text;
+    sendChat();
+  }, 100);
 }
 
 // ═══════════════════════════════════════
