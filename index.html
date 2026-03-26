@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4a3520">
+<meta name="description" content="Garden Faery Books — chat-first bookkeeping for Taya's garden care business in Arcata, CA.">
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -17,23 +18,63 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
-  --warm-dark: #4a3520;
-  --mushroom: #c4956a;
-  --cream: #fffbf0;
-  --fairy-pink: #d4a0b0;
-  --sparkle-gold: #d4a843;
-  --lavender: #b8a9c9;
-  --fairy-glow: #f0e6d0;
+  /* ─── Brand Colors ─── */
+  --color-warm-dark:      #4a3520;
+  --color-mushroom-brown: #c4956a;
+  --color-cream:          #fffbf0;
+  --color-fairy-pink:     #d4a0b0;
+  --color-sparkle-gold:   #d4a843;
+  --color-lavender:       #b8a9c9;
+  --color-fairy-glow:     #f0e6d0;
+
+  /* ─── Semantic Aliases ─── */
+  --color-text-primary:   var(--color-warm-dark);
+  --color-text-heading:   var(--color-warm-dark);
+  --color-bg-page:        var(--color-cream);
+  --color-bg-card:        var(--color-fairy-glow);
+  --color-accent-primary: var(--color-mushroom-brown);
+  --color-accent-soft:    var(--color-fairy-pink);
+  --color-highlight:      var(--color-sparkle-gold);
+  --color-border:         var(--color-mushroom-brown);
+
+  /* ─── Backwards-compat aliases (used throughout app) ─── */
+  --warm-dark: var(--color-warm-dark);
+  --mushroom: var(--color-mushroom-brown);
+  --cream: var(--color-cream);
+  --fairy-pink: var(--color-fairy-pink);
+  --sparkle-gold: var(--color-sparkle-gold);
+  --lavender: var(--color-lavender);
+  --fairy-glow: var(--color-fairy-glow);
+
+  /* ─── Utility ─── */
   --red: #c0392b;
   --red-light: #fdecea;
   --gray: #6b6b6b;
   --shadow: 0 2px 12px rgba(74,53,32,0.10);
-  --radius: 14px;
-  --font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Fredoka', 'Nunito', -apple-system, sans-serif;
+
+  /* ─── Spacing ─── */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* ─── Border Radius ─── */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --radius: var(--radius-md);
+
+  /* ─── Fonts ─── */
+  --font-heading: 'Fredoka', sans-serif;
+  --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font: var(--font-body);
+  --font-display: var(--font-heading);
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { font-family: var(--font); background: var(--cream); color: #3a3a3a; height: 100%; overflow: hidden; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { font-family: var(--font-body); background: var(--color-bg-page); color: var(--color-text-primary); height: 100%; overflow: hidden; line-height: 1.6; }
+h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-text-heading); line-height: 1.2; }
 
 /* ─── HEADER ─── */
 .app-header {
@@ -72,9 +113,11 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 
 /* ─── TAB BAR ─── */
 .tab-bar {
-  position: fixed; bottom: 0; left: 0; right: 0; background: white;
-  display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,251,240,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; box-shadow: 0 -1px 8px rgba(74,53,32,0.08); z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
+  border-top: 1px solid rgba(196,149,106,0.15);
 }
 .tab-btn {
   flex: 1; padding: 6px 2px 5px; display: flex; flex-direction: column;
@@ -119,25 +162,29 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .chat-bubble.bot .parsed-value { font-weight: 700; }
 .chat-actions { display: flex; gap: 8px; margin-top: 10px; }
 .chat-actions button {
-  flex: 1; padding: 10px; border: none; border-radius: 10px;
-  font-family: var(--font); font-weight: 700; font-size: 14px; cursor: pointer;
+  flex: 1; padding: 10px; border: none; border-radius: var(--radius-pill);
+  font-family: var(--font-body); font-weight: 700; font-size: 14px; cursor: pointer;
+  transition: background-color 0.2s;
 }
-.chat-actions .confirm-btn { background: var(--mushroom); color: white; }
-.chat-actions .edit-btn { background: white; color: var(--warm-dark); border: 1.5px solid var(--mushroom); }
+.chat-actions .confirm-btn { background: var(--color-accent-primary); color: white; }
+.chat-actions .confirm-btn:hover { background: var(--color-warm-dark); }
+.chat-actions .edit-btn { background: white; color: var(--color-warm-dark); border: 1.5px solid var(--color-mushroom-brown); }
+.chat-actions .edit-btn:hover { background: var(--color-fairy-glow); }
 .chat-input-row {
   display: flex; gap: 8px; position: sticky; bottom: 0;
   background: var(--cream); padding-top: 8px;
 }
 .chat-input-row input {
-  flex: 1; padding: 12px 16px; border: 2px solid rgba(196,149,106,0.3); border-radius: 12px;
-  font-size: 16px; font-family: var(--font); background: white;
+  flex: 1; padding: 12px 16px; border: 2px solid rgba(196,149,106,0.3); border-radius: var(--radius-pill);
+  font-size: 16px; font-family: var(--font-body); background: white;
 }
-.chat-input-row input:focus { outline: none; border-color: var(--mushroom); box-shadow: 0 0 0 3px rgba(196,149,106,0.15); }
+.chat-input-row input:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px rgba(196,149,106,0.15); }
 .chat-input-row button {
-  padding: 12px 18px; border: none; border-radius: 12px;
-  background: linear-gradient(135deg, var(--warm-dark), var(--mushroom));
-  color: white; font-size: 18px; cursor: pointer;
+  padding: 12px 18px; border: none; border-radius: var(--radius-pill);
+  background: var(--color-accent-primary); color: white; font-size: 18px; cursor: pointer;
+  transition: background-color 0.2s;
 }
+.chat-input-row button:hover { background: var(--color-warm-dark); }
 .chat-hint { font-size: 12px; color: var(--gray); margin-bottom: 8px; text-align: center; }
 .chat-photo-btn {
   padding: 10px 12px; border: 2px solid rgba(196,149,106,0.3); border-radius: 12px;
@@ -304,26 +351,31 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
 .form-group input, .form-group select, .form-group textarea {
-  width: 100%; padding: 10px 12px; border: 2px solid #E0E0E0; border-radius: 8px;
-  font-size: 16px; font-family: var(--font); background: white; -webkit-appearance: none;
+  width: 100%; padding: 10px 12px; border: 1.5px solid rgba(196,149,106,0.3); border-radius: var(--radius-md);
+  font-size: 16px; font-family: var(--font-body); background: white; -webkit-appearance: none;
+  transition: border-color 0.2s;
 }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--mushroom); box-shadow: 0 0 0 3px rgba(196,149,106,0.2); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px rgba(196,149,106,0.15); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .btn {
-  width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px;
-  font-weight: 700; font-family: var(--font); cursor: pointer;
+  width: 100%; padding: 14px; border: none; border-radius: var(--radius-pill); font-size: 16px;
+  font-weight: 700; font-family: var(--font-body); cursor: pointer; transition: background-color 0.2s;
 }
-.btn-primary { background: linear-gradient(135deg, var(--warm-dark), var(--mushroom)); color: white; }
-.btn-outline { background: white; color: var(--warm-dark); border: 2px solid var(--mushroom); }
-.btn-small { padding: 8px 16px; font-size: 13px; width: auto; }
+.btn-primary { background: var(--color-accent-primary); color: white; }
+.btn-primary:hover { background: var(--color-warm-dark); }
+.btn-outline { background: white; color: var(--color-warm-dark); border: 2px solid var(--color-mushroom-brown); }
+.btn-outline:hover { background: var(--color-fairy-glow); }
+.btn-small { padding: 8px 16px; font-size: 13px; width: auto; border-radius: var(--radius-pill); }
 
 /* ─── FILTER PILLS ─── */
 .filter-pills { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; }
 .filter-pill {
-  padding: 6px 14px; border-radius: 20px; border: 1.5px solid #E0E0E0; background: white;
-  font-size: 12px; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; color: var(--gray);
+  padding: 6px 14px; border-radius: var(--radius-pill); border: 1.5px solid rgba(196,149,106,0.3); background: white;
+  font-size: 12px; font-weight: 600; font-family: var(--font-body); cursor: pointer; white-space: nowrap; color: var(--gray);
+  transition: all 0.2s;
 }
-.filter-pill.active { background: var(--warm-dark); color: white; border-color: var(--warm-dark); }
+.filter-pill:hover { border-color: var(--color-accent-primary); color: var(--color-warm-dark); }
+.filter-pill.active { background: var(--color-warm-dark); color: white; border-color: var(--color-warm-dark); }
 
 /* ─── MONTH NAV ─── */
 .month-selector { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
@@ -335,8 +387,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .pnl-row.indent { padding-left: 16px; color: #555; }
 .pnl-row.total { font-weight: 700; border-top: 2px solid #E0E0E0; padding-top: 8px; margin-top: 4px; }
 .pnl-row.grand-total { font-weight: 800; font-size: 16px; border-top: 3px double var(--warm-dark); padding-top: 10px; margin-top: 8px; }
-.period-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--warm-dark); margin-bottom: 12px; }
-.period-toggle button { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--warm-dark); cursor: pointer; }
+.period-toggle { display: flex; border-radius: var(--radius-pill); overflow: hidden; border: 2px solid var(--color-warm-dark); margin-bottom: 12px; }
+.period-toggle button { flex: 1; padding: 10px; border: none; background: white; font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--color-warm-dark); cursor: pointer; transition: all 0.2s; }
 .period-toggle button.active { background: var(--warm-dark); color: white; }
 .period-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
 .period-nav button { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--mushroom); padding: 4px 8px; }
@@ -380,9 +432,9 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .upcoming-event .event-title { font-weight: 700; font-size: 14px; color: var(--warm-dark); }
 .upcoming-event .event-time { font-size: 12px; color: var(--gray); margin-top: 2px; }
 .upcoming-event .event-location { font-size: 12px; color: var(--mushroom); margin-top: 2px; }
-.calendar-toggle { display: flex; border-radius: 10px; overflow: hidden; border: 2px solid var(--warm-dark); margin-bottom: 12px; }
-.calendar-toggle button { flex: 1; padding: 8px; border: none; background: white; font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--warm-dark); cursor: pointer; }
-.calendar-toggle button.active { background: var(--warm-dark); color: white; }
+.calendar-toggle { display: flex; border-radius: var(--radius-pill); overflow: hidden; border: 2px solid var(--color-warm-dark); margin-bottom: 12px; }
+.calendar-toggle button { flex: 1; padding: 8px; border: none; background: white; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--color-warm-dark); cursor: pointer; transition: all 0.2s; }
+.calendar-toggle button.active { background: var(--color-warm-dark); color: white; }
 
 /* ─── TOAST ─── */
 .toast {
@@ -716,7 +768,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     </div>
     <div class="card">
       <div class="card-title">About</div>
-      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.2<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.3<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
     </div>
   </div>
 
