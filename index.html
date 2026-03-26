@@ -85,7 +85,7 @@ h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-text-headi
 
 /* ─── HEADER ─── */
 .app-header {
-  background: linear-gradient(135deg, var(--text-primary), #6b2f60);
+  background: var(--text-primary);
   color: white; padding: 14px 20px; display: flex; align-items: center;
   justify-content: space-between; position: fixed; top: 0; left: 0; right: 0;
   z-index: 100; box-shadow: 0 3px 16px rgba(74,25,66,0.25);
@@ -96,7 +96,7 @@ h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-text-headi
 /* ─── TEST MODE ─── */
 .test-banner {
   display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: linear-gradient(90deg, #e74c3c, #c0392b); color: white;
+  background: #e74c3c; color: white;
   text-align: center; font-size: 12px; font-weight: 700; font-family: var(--font);
   padding: 4px; letter-spacing: 0.5px;
 }
@@ -318,7 +318,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .stat-box.gold .value { color: var(--sparkle-gold); }
 .stat-box.red .value { color: var(--red); }
 .goal-bar { height: 28px; background: #eee8dd; border-radius: 14px; overflow: hidden; position: relative; }
-.goal-bar-fill { height: 100%; background: linear-gradient(90deg, var(--warm-dark), var(--mushroom), var(--sparkle-gold)); border-radius: 14px; transition: width 0.5s ease; min-width: 4px; }
+.goal-bar-fill { height: 100%; background: var(--mushroom); border-radius: 14px; transition: width 0.5s ease; min-width: 4px; }
 .goal-bar-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 700; color: #333; }
 .goal-numbers { display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px; color: var(--gray); }
 
@@ -402,7 +402,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .period-nav .period-label { font-size: 16px; font-weight: 700; color: var(--warm-dark); min-width: 160px; text-align: center; }
 
 /* ─── TAX ─── */
-.tax-card { background: linear-gradient(135deg, var(--cream), var(--fairy-glow)); border-color: rgba(212,168,67,0.2); }
+.tax-card { background: var(--fairy-glow); border-color: rgba(212,168,67,0.2); }
 .tax-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .tax-row:last-child { border-bottom: none; }
 .tax-row.highlight { font-weight: 700; font-size: 15px; background: rgba(255,255,255,0.5); margin: 4px -12px; padding: 10px 12px; border-radius: 8px; }
@@ -427,7 +427,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .cat-label { font-size: 12px; font-weight: 600; color: #555; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cat-bar-bg { flex: 1; height: 18px; background: var(--cream); border-radius: 10px; overflow: hidden; }
-.cat-bar-fill { height: 100%; background: linear-gradient(90deg, var(--mushroom), var(--fairy-pink)); border-radius: 10px; transition: width 0.4s ease; min-width: 2px; }
+.cat-bar-fill { height: 100%; background: var(--mushroom); border-radius: 10px; transition: width 0.4s ease; min-width: 2px; }
 .cat-amount { font-size: 12px; font-weight: 700; color: var(--red); min-width: 50px; text-align: right; }
 
 /* ─── CALENDAR ─── */
@@ -1698,7 +1698,7 @@ function handleCommand(text) {
       html += '</div>';
       const pct = Math.min(100, Math.round(totalIncome / goal * 100));
       html += '<div style="margin-top:8px;height:20px;background:#eee8dd;border-radius:10px;overflow:hidden;position:relative;">';
-      html += '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--warm-dark),var(--mushroom),var(--sparkle-gold));border-radius:10px;"></div>';
+      html += '<div style="height:100%;width:' + pct + '%;background:var(--mushroom);border-radius:10px;"></div>';
       html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' + pct + '%</div></div>';
       addChatBubble(html, 'bot', true);
       return true;
