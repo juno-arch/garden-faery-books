@@ -5,52 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#4a3520">
+<meta name="theme-color" content="#4a1942">
 <meta name="description" content="Garden Faery Books — chat-first bookkeeping for Taya's garden care business in Arcata, CA.">
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Elsie+Swash+Caps:wght@400;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root {
-  /* ─── Brand Colors ─── */
-  --color-warm-dark:      #4a3520;
-  --color-mushroom-brown: #c4956a;
-  --color-cream:          #fffbf0;
-  --color-fairy-pink:     #d4a0b0;
-  --color-sparkle-gold:   #d4a843;
-  --color-lavender:       #b8a9c9;
-  --color-fairy-glow:     #f0e6d0;
+  /* ─── Constants (never change) ─── */
+  --text-primary: #4a1942;
+
+  /* ─── Seasonal Defaults (Spring — overridden by JS) ─── */
+  --bg:        #f8f4ed;
+  --accent-1:  #c48bb0;
+  --accent-2:  #a3b88c;
+  --highlight:  #d4c27a;
+  --card-bg:   rgba(248,244,237,0.6);
+  --card-glow: #ece6da;
 
   /* ─── Semantic Aliases ─── */
-  --color-text-primary:   var(--color-warm-dark);
-  --color-text-heading:   var(--color-warm-dark);
-  --color-bg-page:        var(--color-cream);
-  --color-bg-card:        var(--color-fairy-glow);
-  --color-accent-primary: var(--color-mushroom-brown);
-  --color-accent-soft:    var(--color-fairy-pink);
-  --color-highlight:      var(--color-sparkle-gold);
-  --color-border:         var(--color-mushroom-brown);
+  --color-text-primary:   var(--text-primary);
+  --color-text-heading:   var(--text-primary);
+  --color-bg-page:        var(--bg);
+  --color-bg-card:        var(--card-glow);
+  --color-accent-primary: var(--accent-1);
+  --color-accent-soft:    var(--accent-2);
+  --color-highlight:      var(--highlight);
+  --color-border:         var(--accent-1);
 
   /* ─── Backwards-compat aliases (used throughout app) ─── */
-  --warm-dark: var(--color-warm-dark);
-  --mushroom: var(--color-mushroom-brown);
-  --cream: var(--color-cream);
-  --fairy-pink: var(--color-fairy-pink);
-  --sparkle-gold: var(--color-sparkle-gold);
-  --lavender: var(--color-lavender);
-  --fairy-glow: var(--color-fairy-glow);
+  --warm-dark:     var(--text-primary);
+  --mushroom:      var(--accent-1);
+  --cream:         var(--bg);
+  --fairy-pink:    var(--accent-2);
+  --sparkle-gold:  var(--highlight);
+  --lavender:      var(--accent-2);
+  --fairy-glow:    var(--card-glow);
+
+  /* ─── Accent Alpha Borders (set by seasonal JS) ─── */
+  --accent-border:     rgba(196,139,176,0.30);
+  --accent-border-lt:  rgba(196,139,176,0.20);
+  --accent-border-xlt: rgba(196,139,176,0.15);
 
   /* ─── Utility ─── */
   --red: #c0392b;
   --red-light: #fdecea;
   --gray: #6b6b6b;
-  --shadow: 0 2px 12px rgba(74,53,32,0.10);
+  --shadow: 0 2px 12px rgba(74,25,66,0.10);
 
   /* ─── Spacing ─── */
   --space-xs: 0.25rem;
@@ -67,7 +74,7 @@
   --radius: var(--radius-md);
 
   /* ─── Fonts ─── */
-  --font-heading: 'Fredoka', sans-serif;
+  --font-heading: 'Elsie Swash Caps', serif;
   --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font: var(--font-body);
   --font-display: var(--font-heading);
@@ -78,10 +85,10 @@ h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-text-headi
 
 /* ─── HEADER ─── */
 .app-header {
-  background: linear-gradient(135deg, var(--warm-dark), #6b4f38);
+  background: linear-gradient(135deg, var(--text-primary), #6b2f60);
   color: white; padding: 14px 20px; display: flex; align-items: center;
   justify-content: space-between; position: fixed; top: 0; left: 0; right: 0;
-  z-index: 100; box-shadow: 0 3px 16px rgba(74,53,32,0.25);
+  z-index: 100; box-shadow: 0 3px 16px rgba(74,25,66,0.25);
 }
 .app-header h1 { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
 .app-header .subtitle { font-size: 11px; opacity: 0.7; }
@@ -114,10 +121,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 /* ─── TAB BAR ─── */
 .tab-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(255,251,240,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  display: flex; box-shadow: 0 -1px 8px rgba(74,53,32,0.08); z-index: 100;
+  background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; box-shadow: 0 -1px 8px rgba(74,25,66,0.08); z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
-  border-top: 1px solid rgba(196,149,106,0.15);
+  border-top: 1px solid rgba(196,139,176,0.15);
 }
 .tab-btn {
   flex: 1; padding: 6px 2px 5px; display: flex; flex-direction: column;
@@ -131,9 +138,9 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 
 /* ─── CARDS ─── */
 .card {
-  background: rgba(255,251,240,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: var(--card-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
-  box-shadow: var(--shadow); border: 1px solid rgba(196,149,106,0.2);
+  box-shadow: var(--shadow); border: 1px solid rgba(196,139,176,0.2);
 }
 .card-title {
   font-family: var(--font-display); font-size: 15px; font-weight: 700;
@@ -156,7 +163,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   border-bottom-left-radius: 4px;
 }
 .chat-bubble.bot .parsed-data { margin-top: 8px; font-size: 13px; }
-.chat-bubble.bot .parsed-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(196,149,106,0.15); }
+.chat-bubble.bot .parsed-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--accent-border-xlt); }
 .chat-bubble.bot .parsed-row:last-child { border-bottom: none; }
 .chat-bubble.bot .parsed-label { color: var(--gray); }
 .chat-bubble.bot .parsed-value { font-weight: 700; }
@@ -175,10 +182,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   background: var(--cream); padding-top: 8px;
 }
 .chat-input-row input {
-  flex: 1; padding: 12px 16px; border: 2px solid rgba(196,149,106,0.3); border-radius: var(--radius-pill);
+  flex: 1; padding: 12px 16px; border: 2px solid var(--accent-border); border-radius: var(--radius-pill);
   font-size: 16px; font-family: var(--font-body); background: white;
 }
-.chat-input-row input:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px rgba(196,149,106,0.15); }
+.chat-input-row input:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px var(--accent-border-xlt); }
 .chat-input-row button {
   padding: 12px 18px; border: none; border-radius: var(--radius-pill);
   background: var(--color-accent-primary); color: white; font-size: 18px; cursor: pointer;
@@ -187,12 +194,12 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .chat-input-row button:hover { background: var(--color-warm-dark); }
 .chat-hint { font-size: 12px; color: var(--gray); margin-bottom: 8px; text-align: center; }
 .chat-photo-btn {
-  padding: 10px 12px; border: 2px solid rgba(196,149,106,0.3); border-radius: 12px;
+  padding: 10px 12px; border: 2px solid var(--accent-border); border-radius: 12px;
   background: white; color: var(--mushroom); cursor: pointer; display: flex; align-items: center;
   transition: border-color 0.2s, background 0.2s;
 }
 .chat-photo-btn:hover { border-color: var(--mushroom); background: var(--fairy-glow); }
-.chat-receipt-img { max-width: 200px; max-height: 160px; border-radius: 10px; margin-top: 8px; object-fit: cover; border: 2px solid rgba(196,149,106,0.2); }
+.chat-receipt-img { max-width: 200px; max-height: 160px; border-radius: 10px; margin-top: 8px; object-fit: cover; border: 2px solid var(--accent-border-lt); }
 
 /* ─── RECEIPT SCANNER OVERLAY ─── */
 .scanner-overlay {
@@ -284,7 +291,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .chat-edit-form .edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .chat-edit-form .edit-label { font-size: 12px; color: var(--gray); min-width: 60px; font-weight: 600; }
 .chat-edit-form input, .chat-edit-form select {
-  flex: 1; padding: 7px 10px; border: 1.5px solid rgba(196,149,106,0.3); border-radius: 8px;
+  flex: 1; padding: 7px 10px; border: 1.5px solid var(--accent-border); border-radius: 8px;
   font-size: 14px; font-family: var(--font); background: white;
 }
 .chat-edit-form input:focus, .chat-edit-form select:focus { outline: none; border-color: var(--mushroom); }
@@ -304,7 +311,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 
 /* ─── STATS ─── */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stat-box { background: var(--fairy-glow); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid rgba(196,149,106,0.2); }
+.stat-box { background: var(--fairy-glow); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid var(--accent-border-lt); }
 .stat-box .value { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--warm-dark); }
 .stat-box .label { font-size: 11px; color: var(--gray); margin-top: 2px; }
 .stat-box.gold { background: var(--cream); border-color: rgba(212,168,67,0.25); }
@@ -351,11 +358,11 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 4px; }
 .form-group input, .form-group select, .form-group textarea {
-  width: 100%; padding: 10px 12px; border: 1.5px solid rgba(196,149,106,0.3); border-radius: var(--radius-md);
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--accent-border); border-radius: var(--radius-md);
   font-size: 16px; font-family: var(--font-body); background: white; -webkit-appearance: none;
   transition: border-color 0.2s;
 }
-.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px rgba(196,149,106,0.15); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--color-accent-primary); box-shadow: 0 0 0 3px var(--accent-border-xlt); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .btn {
   width: 100%; padding: 14px; border: none; border-radius: var(--radius-pill); font-size: 16px;
@@ -370,7 +377,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 /* ─── FILTER PILLS ─── */
 .filter-pills { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; }
 .filter-pill {
-  padding: 6px 14px; border-radius: var(--radius-pill); border: 1.5px solid rgba(196,149,106,0.3); background: white;
+  padding: 6px 14px; border-radius: var(--radius-pill); border: 1.5px solid var(--accent-border); background: white;
   font-size: 12px; font-weight: 600; font-family: var(--font-body); cursor: pointer; white-space: nowrap; color: var(--gray);
   transition: all 0.2s;
 }
@@ -441,7 +448,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(100px);
   background: var(--warm-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px;
   z-index: 200; transition: transform 0.3s ease; white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(74,53,32,0.3);
+  box-shadow: 0 4px 16px rgba(74,25,66,0.3);
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -558,8 +565,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
           <span id="monthLabel">March 2026</span>
         </div>
         <div style="display:flex;gap:8px;">
-          <button onclick="changeMonth(-1)" style="background:none;border:1px solid rgba(196,149,106,0.3);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
-          <button onclick="changeMonth(1)" style="background:none;border:1px solid rgba(196,149,106,0.3);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
+          <button onclick="changeMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
+          <button onclick="changeMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
         </div>
       </div>
       <div class="goal-bar" style="margin-top:10px;">
@@ -768,7 +775,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     </div>
     <div class="card">
       <div class="card-title">About</div>
-      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.3<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+      <p style="font-size:12px; color:var(--gray);">Garden Faery Books v4.4<br>Chat-first bookkeeping for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
     </div>
   </div>
 
@@ -3326,6 +3333,56 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s||''
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
 
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// SEASONAL COLOR SYSTEM
+// ═══════════════════════════════════════
+(function applySeasonalPalette() {
+  const month = new Date().getMonth();
+  const root = document.documentElement;
+  let a1; // accent-1 RGB for border alphas
+  if (month >= 2 && month <= 4) {
+    // Spring (Mar–May)
+    a1 = '196,139,176';
+    root.style.setProperty('--bg', '#f8f4ed');
+    root.style.setProperty('--accent-1', '#c48bb0');
+    root.style.setProperty('--accent-2', '#a3b88c');
+    root.style.setProperty('--highlight', '#d4c27a');
+    root.style.setProperty('--card-bg', 'rgba(248,244,237,0.6)');
+    root.style.setProperty('--card-glow', '#ece6da');
+  } else if (month >= 5 && month <= 7) {
+    // Summer (Jun–Aug)
+    a1 = '232,184,40';
+    root.style.setProperty('--bg', '#faf6f1');
+    root.style.setProperty('--accent-1', '#e8b828');
+    root.style.setProperty('--accent-2', '#b5c99a');
+    root.style.setProperty('--highlight', '#7b2d6e');
+    root.style.setProperty('--card-bg', 'rgba(250,246,241,0.6)');
+    root.style.setProperty('--card-glow', '#f0eae0');
+  } else if (month >= 8 && month <= 10) {
+    // Autumn (Sep–Nov)
+    a1 = '212,148,58';
+    root.style.setProperty('--bg', '#faf3ea');
+    root.style.setProperty('--accent-1', '#d4943a');
+    root.style.setProperty('--accent-2', '#a67c52');
+    root.style.setProperty('--highlight', '#7a3b4e');
+    root.style.setProperty('--card-bg', 'rgba(250,243,234,0.6)');
+    root.style.setProperty('--card-glow', '#f0e6d8');
+  } else {
+    // Winter (Dec–Feb)
+    a1 = '143,176,165';
+    root.style.setProperty('--bg', '#f5f3f0');
+    root.style.setProperty('--accent-1', '#8fb0a5');
+    root.style.setProperty('--accent-2', '#506a6e');
+    root.style.setProperty('--highlight', '#c4b5a0');
+    root.style.setProperty('--card-bg', 'rgba(245,243,240,0.6)');
+    root.style.setProperty('--card-glow', '#e8e4df');
+  }
+  // Set accent border alphas for the active season
+  root.style.setProperty('--accent-border',     'rgba(' + a1 + ',0.30)');
+  root.style.setProperty('--accent-border-lt',  'rgba(' + a1 + ',0.20)');
+  root.style.setProperty('--accent-border-xlt', 'rgba(' + a1 + ',0.15)');
+})();
+
 // INIT
 // ═══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
