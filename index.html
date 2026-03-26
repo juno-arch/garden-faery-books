@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4a1942">
-<meta name="description" content="Garden Faery Books — chat-first bookkeeping for Taya's garden care business in Arcata, CA.">
+<meta name="description" content="Garden Faery Books: chat-first bookkeeping for Taya's garden care business in Arcata, CA.">
 <title>Garden Faery Books</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -510,7 +510,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   </div>
 </div>
 
-<div class="test-banner" id="testBanner">TEST MODE — nothing is being saved</div>
+<div class="test-banner" id="testBanner">TEST MODE: nothing is being saved</div>
 
 <header class="app-header">
   <div>
@@ -631,7 +631,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 
     <!-- ─── WHO OWES ME ─── -->
     <div class="card" id="dashOwedCard">
-      <div class="card-title">Who Owes Me</div>
+      <div class="card-title">Who Owes Me (Thyme to Pay Up!)</div>
       <div id="dashOwedList" style="font-size:14px;"></div>
     </div>
 
@@ -680,7 +680,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <button class="filter-pill" onclick="filterLeads('done',this)">Done</button>
         <button class="filter-pill" onclick="filterLeads('lost',this)">Lost</button>
       </div>
-      <button class="btn btn-primary" onclick="editLead(null); toggleLeadForm(true)" style="margin-bottom:12px;">+ New Lead</button>
+      <button class="btn btn-primary" onclick="editLead(null); toggleLeadForm(true)" style="margin-bottom:12px;">+ Plant a Lead</button>
       <div id="leadsList"></div>
     </div>
 
@@ -712,7 +712,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <div class="form-group"><label>Round-Trip Miles</label><input type="number" id="newClientMiles" step="0.1" placeholder="8.4" inputmode="decimal"></div>
       </div>
       <div class="form-group"><label>Hidy Spot (cash drop location)</label><input type="text" id="newClientHidySpot" placeholder="e.g. under the blue pot on the porch"></div>
-      <button class="btn btn-outline" onclick="addClient()">Save Client</button>
+      <button class="btn btn-outline" onclick="addClient()">Plant this Client 🌱</button>
     </div>
     <div class="card" style="overflow-x:auto;padding:8px;">
       <div class="card-title">Your Clients</div>
@@ -781,7 +781,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div class="card-title">Reply Templates</div>
       <div id="replyTemplates" style="display:flex;flex-direction:column;gap:10px;">
         <div class="reply-template" onclick="copyTemplate(this)" style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;cursor:pointer;">
-          <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">Quick reply <span style="font-size:11px;color:var(--gray);font-weight:400;">Tap to copy</span></div>
+          <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">Quick reply <span style="font-size:11px;color:var(--gray);font-weight:400;">Tap to pluck</span></div>
           <div style="font-size:13px;color:var(--gray);line-height:1.5;">Hi! Thanks for reaching out. I'd love to help with your garden bed. Let me know your yard size and what you'd like to grow, and I'll put together a free estimate!</div>
         </div>
         <div class="reply-template" onclick="copyTemplate(this)" style="background:var(--card-bg);border:1px solid var(--accent-border-lt);border-radius:var(--radius-md);padding:12px;cursor:pointer;">
@@ -803,8 +803,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div style="margin-bottom:16px;">
         <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🪵 Cedar Lumber</div>
         <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          2×12 Cedar — <b>$4.75/ft</b><br>
-          <b>Almquist Lumber</b> — 5301 Boyd Rd, Arcata · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a><br>
+          2×12 Cedar: <b>$4.75/ft</b><br>
+          <b>Almquist Lumber</b>, 5301 Boyd Rd, Arcata · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a><br>
           Also: The Mill Yard (4949 West End Rd) · Pierson Building Center (Eureka) · Schmidbauer Lumber
         </div>
       </div>
@@ -812,8 +812,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div style="margin-bottom:16px;">
         <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🧷 Hardware Cloth</div>
         <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          3ft roll — <b>$2.90/ft</b> ($0.97/sq ft)<br>
-          4ft roll — <b>$3.80/ft</b> ($0.95/sq ft)<br>
+          3ft roll: <b>$2.90/ft</b> ($0.97/sq ft)<br>
+          4ft roll: <b>$3.80/ft</b> ($0.95/sq ft)<br>
           <b>Almquist Lumber</b> · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a>
         </div>
       </div>
@@ -821,8 +821,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div style="margin-bottom:16px;">
         <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🌱 Soil &amp; Compost</div>
         <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          Potting soil — <b>$200/yd</b> · Fir compost — <b>$60/yd</b><br>
-          <b>Mad River Gardens</b> — 3384 Janes Rd, Arcata · <a href="tel:7078227049" style="color:var(--accent-1);">(707) 822-7049</a><br>
+          Potting soil: <b>$200/yd</b> · Fir compost: <b>$60/yd</b><br>
+          <b>Mad River Gardens</b>, 3384 Janes Rd, Arcata · <a href="tel:7078227049" style="color:var(--accent-1);">(707) 822-7049</a><br>
           Also: Wes Green Company · Powell Landscape Materials · Full Cycle Compost
         </div>
       </div>
@@ -1050,7 +1050,7 @@ function saveState() {
     }
   } catch (e) {
     console.warn('Save error:', e);
-    showToast('Storage full — try exporting data');
+    showToast('Storage full! Time to prune. Try exporting data');
   }
 }
 
@@ -1066,7 +1066,7 @@ function toggleTestMode() {
     // Clear chat and show test welcome
     const msgs = document.getElementById('chatMessages');
     msgs.innerHTML = '';
-    addChatBubble("You're in TEST MODE! Try anything — type entries, snap receipts, whatever you want. Nothing gets saved.\n\nI loaded some fake data so you can see how everything looks. Hit the Test button again to go back to your real books.", 'bot');
+    addChatBubble("You're in TEST MODE! Go wild in the sandbox: type entries, snap receipts, whatever you want. Nothing gets saved.\n\nI loaded some fake data so you can see how everything looks. Hit the Test button again to go back to your real books.", 'bot');
     showToast('Test mode ON');
   } else {
     // Exit test mode — restore real state
@@ -1081,7 +1081,7 @@ function toggleTestMode() {
     const msgs = document.getElementById('chatMessages');
     msgs.innerHTML = '';
     addChatBubble("Welcome back! You're on your real books now. Everything is saved as you left it.", 'bot');
-    showToast('Test mode OFF — real data restored');
+    showToast('Back to the real garden! Data restored 🌻');
   }
 }
 
@@ -1367,7 +1367,7 @@ function processReceiptFile(file) {
     } else {
       // No API key — try to help them set one up, but still allow manual
       chatReceiptPending = true;
-      addChatBubble("No Vision API key found — add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
+      addChatBubble("No Vision API key found. Add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
     }
   };
   reader.readAsDataURL(file);
@@ -1410,7 +1410,7 @@ async function runChatOCR(imgData) {
       }
     } else {
       chatReceiptPending = true;
-      addChatBubble("Couldn't read the text on that receipt. No worries — just type what it's for.\n\nLike: \"home depot $45 lumber\"", 'bot');
+      addChatBubble("Couldn't read the text on that receipt. No worries, just type what it's for.\n\nLike: \"home depot $45 lumber\"", 'bot');
     }
   } catch (err) {
     chatReceiptPending = true;
@@ -1441,8 +1441,8 @@ function handleCommand(text) {
       addChatBubble('<div style="font-weight:700;margin-bottom:8px;">Chat Commands</div>' +
         '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin-bottom:4px;">ON THE JOB</div>' +
         '<div class="parsed-data">' +
-        parsedRow('/clockin', 'Arrive at a job — pulls today\'s calendar') +
-        parsedRow('/clockout', 'Finish — logs hours + auto-adds mileage') +
+        parsedRow('/clockin', 'Arrive at a job. Pulls today\'s calendar') +
+        parsedRow('/clockout', 'Finish up. Logs hours + auto-adds mileage') +
         parsedRow('/yesterday', 'Missed clock-in? Log from yesterday\'s calendar') +
         parsedRow('/status', 'Am I clocked in? Today\'s earnings?') +
         '</div>' +
@@ -1571,7 +1571,7 @@ function handleCommand(text) {
         return true;
       }
       if (events.length === 1) {
-        addChatBubble('Found yesterday\'s job — drafting entry:', 'bot');
+        addChatBubble('Found yesterday\'s job! Drafting entry:', 'bot');
         draftFromCalendarEvent(events[0], yestStr);
       } else {
         let html = '<div style="font-weight:700;margin-bottom:6px;">Yesterday\'s Jobs (' + fmtDate(yestStr) + ')</div>';
@@ -1623,14 +1623,14 @@ function handleCommand(text) {
         }
       }
       if (!missing.length) {
-        addChatBubble('All mileage is logged for this week — you\'re caught up!', 'bot');
+        addChatBubble('All mileage is logged for this week. You\'re caught up!', 'bot');
       } else {
         let html = '<div style="font-weight:700;margin-bottom:6px;">Missing mileage this week (' + missing.length + ' trips):</div>';
         const totalMiles = missing.reduce((s, m) => s + m.miles, 0);
         const totalDed = totalMiles * IRS_RATE;
         missing.forEach(m => {
           html += '<div class="upcoming-event">';
-          html += '<div class="event-title">' + m.client + ' — ' + m.miles + ' mi ($' + (m.miles * IRS_RATE).toFixed(2) + ')</div>';
+          html += '<div class="event-title">' + m.client + ': ' + m.miles + ' mi ($' + (m.miles * IRS_RATE).toFixed(2) + ')</div>';
           html += '<div class="event-time">' + fmtDate(m.date) + '</div>';
           html += '</div>';
         });
@@ -1646,7 +1646,7 @@ function handleCommand(text) {
       const clientName = args.trim();
       if (!clientName) {
         // No client name — use today's clocked work or most recent client
-        addChatBubble('Usage: /invoice Dena — generates an end-of-day message for that client.', 'bot');
+        addChatBubble('Usage: /invoice Dena (generates an end-of-day message for that client)', 'bot');
         return true;
       }
       const matching = state.income.filter(i => (i.client || '').toLowerCase() === clientName.toLowerCase() && !i.invoiced);
@@ -1658,9 +1658,9 @@ function handleCommand(text) {
       // Build the copy-paste text message for the client
       let msgLines = ['Hi ' + displayName + '! Here\'s a summary of the garden work:'];
       matching.forEach(i => {
-        let line = '  ' + fmtDate(i.date) + ' — ' + (i.service || 'Garden Care');
+        let line = '  ' + fmtDate(i.date) + ', ' + (i.service || 'Garden Care');
         if (i.hours) line += ' (' + i.hours + ' hrs)';
-        line += ' — $' + (i.total || 0).toFixed(2);
+        line += ': $' + (i.total || 0).toFixed(2);
         msgLines.push(line);
       });
       if (matching.length > 1) msgLines.push('Total: $' + total.toFixed(2));
@@ -1930,7 +1930,7 @@ function handleQuery(lower) {
       else if (e.type === 'mileage') state.mileage = state.mileage.filter(i => i.id !== e.savedId);
       saveState(); refreshAll();
       lastSavedEntry = null;
-      addChatBubble('Done — last entry removed.', 'bot');
+      addChatBubble('Pulled that one out! Last entry removed 🍂', 'bot');
     } else {
       addChatBubble('Nothing to delete.', 'bot');
     }
@@ -1996,12 +1996,12 @@ function clockInToEvent(index) {
 function copyInvoiceMsg() {
   if (window._lastInvoiceMsg) {
     navigator.clipboard.writeText(window._lastInvoiceMsg).then(() => {
-      addChatBubble('Copied to clipboard! Paste it in a text to your client.', 'bot');
+      addChatBubble('Copied! Paste it in a text to your client. Go get that business 🌻', 'bot');
     }).catch(() => {
       // Fallback: select text
       const el = document.getElementById('invoiceMsg');
       if (el) { const range = document.createRange(); range.selectNodeContents(el); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
-      addChatBubble('Text selected — press Ctrl+C (or Cmd+C) to copy.', 'bot');
+      addChatBubble('Text selected. Press Ctrl+C (or Cmd+C) to copy.', 'bot');
     });
   }
 }
@@ -2083,7 +2083,7 @@ function logAllMissingMiles() {
   // Remove the prompt bubble
   const msgs = document.getElementById('chatMessages');
   if (msgs.lastChild) msgs.lastChild.remove();
-  addChatBubble('✓ Logged ' + pendingMiles.length + ' trips — ' + total + ' mi total, $' + (total * IRS_RATE).toFixed(2) + ' deduction!', 'bot');
+  addChatBubble('✓ Logged ' + pendingMiles.length + ' trips, ' + total + ' mi total, $' + (total * IRS_RATE).toFixed(2) + ' deduction!', 'bot');
   pendingMiles = [];
 }
 
@@ -2488,7 +2488,7 @@ function confirmEntry() {
     if (e.type === 'income') what = '$' + e.total.toFixed(0) + (e.client ? ' for ' + e.client : '') + ' on ' + fmtDate(e.date);
     else if (e.type === 'expense') what = '$' + e.amount.toFixed(2) + (e.vendor ? ' at ' + e.vendor : '') + ' on ' + fmtDate(e.date);
     else if (e.type === 'mileage') what = e.miles + ' mi' + (e.destination ? ' to ' + e.destination : '') + ' on ' + fmtDate(e.date);
-    addChatBubble('⚠️ This looks like a duplicate — ' + what + ' is already logged.<div class="chat-actions"><button class="confirm-btn" onclick="forceConfirmEntry()">Save Anyway</button><button class="edit-btn" onclick="cancelEntry()">Skip</button></div>', 'bot', true);
+    addChatBubble('⚠️ This looks like a duplicate. ' + what + ' is already logged.<div class="chat-actions"><button class="confirm-btn" onclick="forceConfirmEntry()">Save Anyway</button><button class="edit-btn" onclick="cancelEntry()">Skip</button></div>', 'bot', true);
     return;
   }
 
@@ -2659,7 +2659,7 @@ function cancelEntry() {
   pendingEntry = null;
   chatReceiptData = null;
   chatReceiptPending = false;
-  addChatBubble("No worries — try again!", 'bot');
+  addChatBubble("No worries, let's try that again! Every garden has a do-over 🌿", 'bot');
 }
 
 function editEntry() {
@@ -2766,7 +2766,7 @@ function logQuickMileage(client, miles, date) {
   // Remove the prompt bubble and show confirmation
   const msgs = document.getElementById('chatMessages');
   if (msgs.lastChild) msgs.lastChild.remove();
-  addChatBubble(`✓ ${miles} mi to ${client} logged — $${(miles * IRS_RATE).toFixed(2)} deduction`, 'bot');
+  addChatBubble(`✓ ${miles} mi to ${client} logged: $${(miles * IRS_RATE).toFixed(2)} deduction`, 'bot');
 }
 
 function addChatBubble(content, type, isHtml) {
@@ -2830,12 +2830,12 @@ function buildQuote() {
   html += '<div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Quote for ' + esc(customer) + '</div>';
   html += '<div style="font-size:12px;color:var(--gray);margin-bottom:10px;">' + date + ' · ' + l + '×' + w + '×' + d + '" raised bed</div>';
   html += '<div style="font-size:13px;line-height:1.8;">';
-  if (document.getElementById('quoteCedar').checked) html += 'Cedar (' + cedarFt.toFixed(0) + ' lin ft) — <b>$' + cedarCost.toFixed(2) + '</b><br>';
-  if (document.getElementById('quoteCloth').checked) html += 'Weed cloth (' + sqft.toFixed(0) + ' sq ft) — <b>$' + clothCost.toFixed(2) + '</b><br>';
-  if (document.getElementById('quoteSoil').checked) html += 'Soil (' + cuft.toFixed(1) + ' cu ft) — <b>$' + soilCost.toFixed(2) + '</b><br>';
-  html += 'Hardware — <b>$' + hardware.toFixed(2) + '</b><br>';
-  if (document.getElementById('quoteInstall').checked) html += 'Installation — <b>$' + labor.toFixed(2) + '</b><br>';
-  html += 'Markup (20%) — <b>$' + markupAmt.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteCedar').checked) html += 'Cedar (' + cedarFt.toFixed(0) + ' lin ft): <b>$' + cedarCost.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteCloth').checked) html += 'Weed cloth (' + sqft.toFixed(0) + ' sq ft): <b>$' + clothCost.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteSoil').checked) html += 'Soil (' + cuft.toFixed(1) + ' cu ft): <b>$' + soilCost.toFixed(2) + '</b><br>';
+  html += 'Hardware: <b>$' + hardware.toFixed(2) + '</b><br>';
+  if (document.getElementById('quoteInstall').checked) html += 'Installation: <b>$' + labor.toFixed(2) + '</b><br>';
+  html += 'Markup (20%): <b>$' + markupAmt.toFixed(2) + '</b><br>';
   html += '</div>';
   html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--accent-border-xlt);font-size:16px;font-weight:800;color:var(--text-primary);">Total: $' + total.toFixed(2) + '</div>';
   html += '</div>';
@@ -2845,7 +2845,7 @@ function buildQuote() {
 
 function copyTemplate(el) {
   const text = el.querySelector('div:last-child').textContent;
-  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!')).catch(() => {
+  navigator.clipboard.writeText(text).then(() => showToast('Copied! Ready to plant that message 🌿')).catch(() => {
     // Fallback for iOS
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -2853,7 +2853,7 @@ function copyTemplate(el) {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    showToast('Copied!');
+    showToast('Copied! Go spread the word 🌻');
   });
 }
 
@@ -2889,7 +2889,7 @@ function saveLead() {
   saveState();
   toggleLeadForm(false);
   renderLeads();
-  showToast(editingLeadId ? 'Lead updated' : 'Lead added');
+  showToast(editingLeadId ? 'Lead freshened up! 🌿' : 'New lead planted! 🌱');
 }
 
 function editLead(id) {
@@ -2911,7 +2911,7 @@ function deleteLead() {
   saveState();
   toggleLeadForm(false);
   renderLeads();
-  showToast('Lead deleted');
+  showToast('Lead pulled out 🍂');
 }
 
 let leadFilter = 'all';
@@ -2926,7 +2926,7 @@ function renderLeads() {
   const leads = (state.leads || []).filter(l => leadFilter === 'all' || l.status === leadFilter);
   const el = document.getElementById('leadsList');
   if (!leads.length) {
-    el.innerHTML = '<p style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">No leads yet. Tap + to add one.</p>';
+    el.innerHTML = '<p style="text-align:center;padding:20px;color:var(--gray);font-size:13px;">No leads yet. Time to plant some seeds! 🌱</p>';
     return;
   }
   const statusColors = { new: '#5dade2', quoted: '#f39c12', booked: '#27ae60', done: '#8e44ad', lost: '#95a5a6' };
@@ -3077,7 +3077,7 @@ function refreshDashboard() {
   ].sort((a,b) => b._sort.localeCompare(a._sort)).slice(0,8);
 
   const ra = document.getElementById('recentActivity');
-  if (!recent.length) { ra.innerHTML = '<li style="text-align:center;color:var(--gray);padding:20px;font-size:13px">No entries yet — use Chat to log your first job</li>'; return; }
+  if (!recent.length) { ra.innerHTML = '<li style="text-align:center;color:var(--gray);padding:20px;font-size:13px">Nothing sprouting yet. Use Chat to log your first job! 🌱</li>'; return; }
   ra.innerHTML = recent.map(r => {
     if (r._type==='income') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.client)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.service}</div></div><span class="entry-amount income">+$${r.total.toFixed(0)}</span></li>`;
     if (r._type==='expense') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.vendor)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.category}</div></div><span class="entry-amount expense">-$${r.amount.toFixed(2)}</span></li>`;
@@ -3109,13 +3109,13 @@ function filterHistory(mode, btn) {
 function renderHistory() {
   let items = [];
   if (historyFilter === 'all' || historyFilter === 'income') {
-    items.push(...state.income.map(i => ({...i, _type:'income', _sort:i.date, _display:`${esc(i.client)} — $${i.total.toFixed(0)}`, _detail:`${fmtDate(i.date)} · ${i.hours?i.hours+'hrs · ':''}${i.service}${i.notes?' · '+i.notes:''}`, _id:i.id})));
+    items.push(...state.income.map(i => ({...i, _type:'income', _sort:i.date, _display:`${esc(i.client)}: $${i.total.toFixed(0)}`, _detail:`${fmtDate(i.date)} · ${i.hours?i.hours+'hrs · ':''}${i.service}${i.notes?' · '+i.notes:''}`, _id:i.id})));
   }
   if (historyFilter === 'all' || historyFilter === 'expense') {
-    items.push(...state.expenses.map(e => ({...e, _type:'expense', _sort:e.date, _display:`${esc(e.vendor)} — $${e.amount.toFixed(2)}`, _detail:`${fmtDate(e.date)} · ${e.category}${e.description?' · '+e.description:''}`, _id:e.id})));
+    items.push(...state.expenses.map(e => ({...e, _type:'expense', _sort:e.date, _display:`${esc(e.vendor)}: $${e.amount.toFixed(2)}`, _detail:`${fmtDate(e.date)} · ${e.category}${e.description?' · '+e.description:''}`, _id:e.id})));
   }
   if (historyFilter === 'all' || historyFilter === 'mileage') {
-    items.push(...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date, _display:`${esc(m.destination)} — ${m.miles} mi`, _detail:`${fmtDate(m.date)} · ${m.purpose} · $${m.deduction.toFixed(2)} deduction`, _id:m.id})));
+    items.push(...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date, _display:`${esc(m.destination)}: ${m.miles} mi`, _detail:`${fmtDate(m.date)} · ${m.purpose} · $${m.deduction.toFixed(2)} deduction`, _id:m.id})));
   }
   items.sort((a,b) => b._sort.localeCompare(a._sort));
   document.getElementById('historyCount').textContent = items.length + ' entries';
@@ -3282,7 +3282,7 @@ function exportPnL() {
   const tI = pI.reduce((s,i)=>s+(i.total||0),0);
   const tE = pE.reduce((s,e)=>s+(e.amount||0),0);
   const tMD = pM.reduce((s,m)=>s+m.deduction,0);
-  let t = `GARDEN FAERY — PROFIT & LOSS\n${label}\n${'═'.repeat(40)}\n\nINCOME\n`;
+  let t = `GARDEN FAERY: PROFIT & LOSS\n${label}\n${'═'.repeat(40)}\n\nINCOME\n`;
   const ibS = {}; pI.forEach(i=>{ibS[i.service||'Other']=(ibS[i.service||'Other']||0)+(i.total||0);});
   Object.entries(ibS).sort((a,b)=>b[1]-a[1]).forEach(([s,a])=>{t+=`  ${s.padEnd(25)} $${a.toFixed(2)}\n`;});
   t += `  ${'─'.repeat(36)}\n  TOTAL${' '.repeat(22)}$${tI.toFixed(2)}\n\nEXPENSES\n`;
@@ -3315,10 +3315,10 @@ function addClient() {
     existing.phone = phone || existing.phone || '';
     existing.email = email || existing.email || '';
     if (hidySpot) existing.hidySpot = hidySpot;
-    showToast(name + ' updated');
+    showToast(name + ' freshened up! 🌿');
   } else {
     state.clients.push({ id: uid(), name, phone, email, address: addr, miles, hidySpot });
-    showToast(name + ' saved');
+    showToast(name + ' planted! 🌱');
   }
   saveState(); renderClientsList();
   ['newClientName','newClientPhone','newClientEmail','newClientAddr','newClientMiles','newClientHidySpot'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -3354,7 +3354,7 @@ function editClient(id) {
   const hs = document.getElementById('newClientHidySpot');
   if (hs) hs.value = c.hidySpot || '';
   document.getElementById('newClientName').focus();
-  showToast('Editing ' + c.name + ' — update fields and hit Save');
+  showToast('Editing ' + c.name + '. Update fields and hit Save');
 }
 function delClient(id) {
   if (!confirm('Remove?')) return;
@@ -3398,12 +3398,12 @@ async function runOCR(imgData) {
       if (parsed.vendor) document.getElementById('recVendor').value = parsed.vendor;
       if (parsed.amount) document.getElementById('recAmount').value = parsed.amount.toFixed(2);
       if (parsed.date) document.getElementById('recDate').value = parsed.date;
-      statusEl.innerHTML = '<div style="padding:8px;background:var(--fairy-glow);border-radius:8px;font-size:13px">Auto-filled — double check and save</div>';
+      statusEl.innerHTML = '<div style="padding:8px;background:var(--fairy-glow);border-radius:8px;font-size:13px">Auto-filled! Double check and save</div>';
     } else {
-      statusEl.innerHTML = '<div style="padding:8px;background:var(--red-light);border-radius:8px;font-size:13px">Couldn\'t read receipt — fill in manually</div>';
+      statusEl.innerHTML = '<div style="padding:8px;background:var(--red-light);border-radius:8px;font-size:13px">Couldn\'t read receipt. Fill in manually</div>';
     }
   } catch (err) {
-    statusEl.innerHTML = '<div style="padding:8px;background:var(--red-light);border-radius:8px;font-size:13px">OCR error — fill in manually</div>';
+    statusEl.innerHTML = '<div style="padding:8px;background:var(--red-light);border-radius:8px;font-size:13px">OCR error. Fill in manually</div>';
   }
 }
 // Add the spin keyframes
@@ -3486,7 +3486,7 @@ function saveReceipt() {
   state.receipts.push({id, vendor, amount, date, category, image: currentReceiptData});
   state.expenses.push({id:uid(), vendor, date, amount, category, card:'', description:'From receipt', receiptId:id});
   saveState(); refreshAll(); cancelReceipt();
-  showToast('Receipt saved + expense logged');
+  showToast('Receipt saved + expense logged! Rooting for you 🌱');
 }
 function cancelReceipt() {
   currentReceiptData = null;
@@ -3660,7 +3660,7 @@ function useReceiptPhoto() {
     runChatOCR(imageData);
   } else {
     chatReceiptPending = true;
-    addChatBubble("No Vision API key found — add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
+    addChatBubble("No Vision API key found. Add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
   }
 }
 
@@ -3670,7 +3670,7 @@ function useReceiptPhoto() {
 function saveSettings() {
   state.settings.rate = parseFloat(document.getElementById('settingsRate').value) || 25;
   state.settings.goal = parseFloat(document.getElementById('settingsGoal').value) || 2000;
-  saveState(); refreshDashboard(); showToast('Settings saved');
+  saveState(); refreshDashboard(); showToast('Settings saved! Let your garden grow 🌻');
 }
 function saveVisionKey() {
   const key = document.getElementById('settingsVisionKey').value.trim();
@@ -3786,7 +3786,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Welcome message in chat
   const msgs = document.getElementById('chatMessages');
   if (!msgs.children.length) {
-    addChatBubble("Hey Taya! Just type what you did and I'll log it. Like:\n\n• \"dena $100 today hedge trimming 10-2\"\n• \"spent $45 at home depot on lumber\"\n• \"drove 12 miles to dena\"\n• \"3/19\" — auto-drafts from your calendar\n\nType /help for all commands.", 'bot');
+    addChatBubble("Hey Taya! Let's get to the root of it. Just type what you did and I'll log it. Like:\n\n• \"dena $100 today hedge trimming 10-2\"\n• \"spent $45 at home depot on lumber\"\n• \"drove 12 miles to dena\"\n• \"3/19\" (auto-drafts from your calendar)\n\nType /help for all commands.", 'bot');
   }
 
   // Enter key to send
@@ -4041,7 +4041,7 @@ function syncFromCloud() {
   return db.collection('users').doc(currentUser.uid).get().then(doc => {
     if (!doc.exists || !doc.data().state) {
       // No cloud data — push local to cloud
-      updateSyncStatus('green', 'First sync — pushing local data');
+      updateSyncStatus('green', 'First sync! Pushing local data');
       return syncToCloud();
     }
     const cloudState = doc.data().state;
