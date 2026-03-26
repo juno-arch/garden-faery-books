@@ -87,6 +87,9 @@ You have access to the shared hub folder. Here's how to use it:
 - Write to `hub/handoffs/to-[agent].md` (to-ops, to-brand, to-web)
 - Include: what needs done, why, and enough context to pick it up cold
 
+**When you finish something for Taya:**
+- Drop a copy in `hub/deliverables/` with a clear filename. Reports, exports, anything she asked for.
+
 **To propose a change to source-of-truth files:**
 - Write to `hub/updates/from-backend.md`
 - Do NOT edit BUSINESS-CONTEXT.md, MISSION.md, BRAND-GUIDE.md, or any other hub file directly

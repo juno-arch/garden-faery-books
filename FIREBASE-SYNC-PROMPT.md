@@ -63,7 +63,7 @@ I need you to add Firebase cloud sync to my Garden Faery Books PWA (`index.html`
 - This is a single-file PWA — all code goes in `index.html` inline
 - Cash only business, no payment processing needed
 - Don't break test mode — `saveState()` should still be a no-op when `testMode = true`
-- Keep the Garden Faery brand styling: Warm Dark #4a3520, Mushroom Brown #c4956a, Cream #fffbf0, Fairy Pink #d4a0b0, Sparkle Gold #d4a843, Lavender #b8a9c9, fonts: Fredoka (headings) + Nunito (body)
+- Keep the Garden Faery brand styling: Deep Plum #4a1942 (text), seasonal accent colors (see hub/BRAND-GUIDE.md), fonts: Elsie Swash Caps (headings) + Nunito (body). NO gradients — flat colors only.
 - Don't remove or modify any existing features
 
 ### Before you code:
