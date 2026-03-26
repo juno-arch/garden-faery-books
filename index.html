@@ -2649,7 +2649,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Force update check on load
+    reg.update();
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'activated') {
+          console.log('Service worker updated to v7');
+        }
+      });
+    });
+  }).catch(()=>{});
+}
 
 // ═══════════════════════════════════════
 // FIREBASE CLOUD SYNC
