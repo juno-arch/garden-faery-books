@@ -2680,7 +2680,18 @@ function debouncedSyncToCloud() {
 
 function getFirebaseConfig() {
   try {
-    return JSON.parse(localStorage.getItem('firebaseConfig')) || null;
+    // Check state first (persists with app data), fall back to legacy localStorage
+    if (state.firebaseConfig && state.firebaseConfig.apiKey) {
+      return state.firebaseConfig;
+    }
+    const legacy = JSON.parse(localStorage.getItem('firebaseConfig'));
+    if (legacy && legacy.apiKey) {
+      // Migrate legacy config into state
+      state.firebaseConfig = legacy;
+      saveState();
+      return legacy;
+    }
+    return null;
   } catch (e) { return null; }
 }
 
@@ -2691,7 +2702,9 @@ function saveFirebaseConfig() {
   if (!apiKey || !projectId) { showToast('Enter API Key and Project ID'); return; }
   if (!authDomain) authDomain = projectId + '.firebaseapp.com';
   const config = { apiKey, authDomain, projectId };
-  localStorage.setItem('firebaseConfig', JSON.stringify(config));
+  state.firebaseConfig = config;
+  saveState();
+  localStorage.setItem('firebaseConfig', JSON.stringify(config)); // legacy backup
   showToast('Firebase config saved');
   initFirebase();
 }
