@@ -146,6 +146,92 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 }
 .chat-photo-btn:hover { border-color: var(--mushroom); background: var(--fairy-glow); }
 .chat-receipt-img { max-width: 200px; max-height: 160px; border-radius: 10px; margin-top: 8px; object-fit: cover; border: 2px solid rgba(196,149,106,0.2); }
+
+/* ─── RECEIPT SCANNER OVERLAY ─── */
+.scanner-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: #000; flex-direction: column;
+}
+.scanner-overlay.active { display: flex; }
+.scanner-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: rgba(0,0,0,0.7); z-index: 2;
+}
+.scanner-header button {
+  background: none; border: none; color: #fff; font-size: 16px;
+  font-weight: 600; padding: 8px 12px; cursor: pointer; font-family: var(--font);
+}
+.scanner-header .scanner-title { color: #fff; font-size: 15px; font-weight: 600; }
+.scanner-viewfinder {
+  flex: 1; position: relative; overflow: hidden; display: flex;
+  align-items: center; justify-content: center;
+}
+.scanner-viewfinder video {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.scanner-guide {
+  position: absolute; inset: 10%; border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 12px; pointer-events: none; z-index: 1;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.35);
+}
+.scanner-guide::before {
+  content: 'Align receipt inside frame'; position: absolute;
+  bottom: -32px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.8); font-size: 13px; white-space: nowrap;
+  font-family: var(--font);
+}
+.scanner-guide .corner { position: absolute; width: 24px; height: 24px; border-color: #fff; border-style: solid; }
+.scanner-guide .corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 8px 0 0 0; }
+.scanner-guide .corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 8px 0 0; }
+.scanner-guide .corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 8px; }
+.scanner-guide .corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 8px 0; }
+.scanner-controls {
+  display: flex; justify-content: center; align-items: center; gap: 40px;
+  padding: 24px 16px 36px; background: rgba(0,0,0,0.7); z-index: 2;
+}
+.scanner-shutter {
+  width: 72px; height: 72px; border-radius: 50%; border: 4px solid #fff;
+  background: rgba(255,255,255,0.2); cursor: pointer; position: relative;
+  transition: transform 0.1s;
+}
+.scanner-shutter:active { transform: scale(0.9); }
+.scanner-shutter::after {
+  content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #fff;
+}
+.scanner-flash-btn, .scanner-enhance-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.15); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.scanner-flash-btn.on { background: rgba(212,168,67,0.5); color: var(--sparkle-gold); }
+
+/* Scanner preview mode */
+.scanner-preview-container {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; background: #111;
+}
+.scanner-preview-container img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+}
+.scanner-preview-controls {
+  display: flex; justify-content: center; gap: 12px;
+  padding: 20px 16px 36px; background: rgba(0,0,0,0.7); z-index: 2;
+}
+.scanner-preview-controls button {
+  padding: 12px 24px; border-radius: 12px; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font);
+}
+.scanner-retake-btn { background: rgba(255,255,255,0.15); color: #fff; }
+.scanner-use-btn { background: var(--mushroom); color: #fff; }
+.scanner-enhance-toggle {
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  background: rgba(255,255,255,0.1); border-radius: 20px;
+  color: #fff; font-size: 13px; font-family: var(--font);
+  border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+}
+.scanner-enhance-toggle.active { background: rgba(212,168,67,0.3); border-color: var(--sparkle-gold); }
+
 /* ─── CHAT EDIT FORM ─── */
 .chat-edit-form { margin-top: 10px; }
 .chat-edit-form .edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -319,6 +405,37 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 </head>
 <body>
 
+<!-- ═══ RECEIPT SCANNER OVERLAY ═══ -->
+<div class="scanner-overlay" id="scannerOverlay">
+  <div class="scanner-header">
+    <button onclick="closeScanner()">Cancel</button>
+    <span class="scanner-title">Scan Receipt</span>
+    <button class="scanner-flash-btn" id="flashBtn" onclick="toggleFlash()" style="display:none;">&#9889;</button>
+  </div>
+  <div class="scanner-viewfinder" id="scannerViewfinder">
+    <video id="scannerVideo" autoplay playsinline muted></video>
+    <div class="scanner-guide">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+    </div>
+    <canvas id="scannerCanvas" style="display:none;"></canvas>
+  </div>
+  <div class="scanner-controls" id="scannerCaptureControls">
+    <div style="width:44px;"></div>
+    <button class="scanner-shutter" onclick="captureReceipt()"></button>
+    <button class="scanner-enhance-btn" id="enhancePreviewBtn" onclick="toggleEnhanceMode()" title="Enhance">&#9788;</button>
+  </div>
+  <!-- Preview mode (after capture) -->
+  <div class="scanner-preview-container" id="scannerPreviewContainer" style="display:none;">
+    <img id="scannerPreviewImg">
+  </div>
+  <div class="scanner-preview-controls" id="scannerPreviewControls" style="display:none;">
+    <button class="scanner-retake-btn" onclick="retakeReceipt()">Retake</button>
+    <button class="scanner-enhance-toggle" id="enhanceToggle" onclick="toggleEnhance()">&#9788; Enhance</button>
+    <button class="scanner-use-btn" onclick="useReceiptPhoto()">Use Photo</button>
+  </div>
+</div>
+
 <div class="test-banner" id="testBanner">TEST MODE — nothing is being saved</div>
 
 <header class="app-header">
@@ -341,8 +458,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-hint" id="chatHint">type an entry, a date, snap a receipt, or /help for commands</div>
     <div class="chat-input-row">
-      <button class="chat-photo-btn" onclick="document.getElementById('chatReceiptInput').click()" title="Add receipt photo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <button class="chat-photo-btn" onclick="openScanner()" title="Scan receipt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <input type="file" id="chatReceiptInput" accept="image/*" capture="environment" onchange="handleChatReceipt(this)" style="display:none">
       </button>
       <input type="text" id="chatInput" placeholder="Type or snap a receipt..." autocomplete="off">
@@ -928,14 +1045,14 @@ function processReceiptFile(file) {
     document.getElementById('chatMessages').appendChild(bubble);
     scrollChat();
 
-    // If we have a Vision API key, auto-OCR it
+    // Always auto-OCR if we have a Vision key
     if (state.settings.visionKey) {
       addChatBubble('Reading your receipt...', 'bot');
       runChatOCR(chatReceiptData);
     } else {
-      // No API key — ask them to type details
+      // No API key — try to help them set one up, but still allow manual
       chatReceiptPending = true;
-      addChatBubble("Got the photo! Just type what it's for and I'll log it with the receipt attached.\n\nLike: \"home depot $45 lumber\" or \"gas station $38\"", 'bot');
+      addChatBubble("No Vision API key found — add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
     }
   };
   reader.readAsDataURL(file);
@@ -1009,17 +1126,24 @@ function handleCommand(text) {
       addChatBubble('<div style="font-weight:700;margin-bottom:8px;">Chat Commands</div>' +
         '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin-bottom:4px;">ON THE JOB</div>' +
         '<div class="parsed-data">' +
-        parsedRow('/clockin', 'Arrive at a job — pulls today\'s calendar event') +
-        parsedRow('/clockout', 'Finish a job — drafts income entry with actual hours') +
-        parsedRow('/yesterday', 'Forgot to clock in? Log yesterday\'s job from calendar') +
+        parsedRow('/clockin', 'Arrive at a job — pulls today\'s calendar') +
+        parsedRow('/clockout', 'Finish — logs hours + auto-adds mileage') +
+        parsedRow('/yesterday', 'Missed clock-in? Log from yesterday\'s calendar') +
+        parsedRow('/status', 'Am I clocked in? Today\'s earnings?') +
         '</div>' +
         '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin:8px 0 4px;">TRACKING</div>' +
         '<div class="parsed-data">' +
         parsedRow('/miles', 'Find & log missing mileage this week') +
-        parsedRow('/invoice Dena', 'End-of-day message to text your client') +
-        parsedRow('/today', 'Show today\'s calendar events') +
-        parsedRow('/undo', 'Remove the last entry you saved') +
-        '</div>', 'bot', true);
+        parsedRow('/invoice Dena', 'Generate text message for client') +
+        parsedRow('/today', 'Show today\'s calendar') +
+        parsedRow('/undo', 'Remove the last entry') +
+        '</div>' +
+        '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin:8px 0 4px;">REPORTS</div>' +
+        '<div class="parsed-data">' +
+        parsedRow('/summary', 'This week\'s income, expenses, miles') +
+        parsedRow('/month', 'Monthly totals + goal progress') +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--gray);margin-top:8px;">You can also ask questions like: "how much did I make this week?", "who owes me?", "what\'s tomorrow?"</div>', 'bot', true);
       return true;
     }
 
@@ -1254,12 +1378,251 @@ function handleCommand(text) {
       return true;
     }
 
+    if (cmd === '/summary' || cmd === '/week') {
+      const today = new Date();
+      const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 7);
+      const weekStr = dateStr(weekAgo);
+      const todayStr = dateStr(today);
+      const weekIncome = state.income.filter(i => i.date >= weekStr && i.date <= todayStr);
+      const weekExpenses = state.expenses.filter(e => e.date >= weekStr && e.date <= todayStr);
+      const weekMileage = state.mileage.filter(m => m.date >= weekStr && m.date <= todayStr);
+      const totalIncome = weekIncome.reduce((s, i) => s + (i.total || 0), 0);
+      const totalExpenses = weekExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+      const totalMiles = weekMileage.reduce((s, m) => s + (m.miles || 0), 0);
+      const totalHours = weekIncome.reduce((s, i) => s + (i.hours || 0), 0);
+      let html = '<div style="font-weight:700;margin-bottom:8px;">This Week\'s Summary</div>';
+      html += '<div class="parsed-data">';
+      html += parsedRow('Income', '$' + totalIncome.toFixed(2) + ' (' + weekIncome.length + ' jobs)');
+      html += parsedRow('Hours', totalHours.toFixed(1) + ' hrs');
+      html += parsedRow('Expenses', '$' + totalExpenses.toFixed(2) + ' (' + weekExpenses.length + ' items)');
+      html += parsedRow('Miles', totalMiles + ' mi ($' + (totalMiles * IRS_RATE).toFixed(2) + ' deduction)');
+      html += parsedRow('Net', '$' + (totalIncome - totalExpenses).toFixed(2));
+      html += '</div>';
+      if (weekIncome.length) {
+        html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Clients: ' +
+          [...new Set(weekIncome.map(i => i.client).filter(Boolean))].join(', ') + '</div>';
+      }
+      addChatBubble(html, 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/month') {
+      const today = new Date();
+      const monthStart = dateStr(new Date(today.getFullYear(), today.getMonth(), 1));
+      const todayStr = dateStr(today);
+      const monthIncome = state.income.filter(i => i.date >= monthStart && i.date <= todayStr);
+      const monthExpenses = state.expenses.filter(e => e.date >= monthStart && e.date <= todayStr);
+      const monthMileage = state.mileage.filter(m => m.date >= monthStart && m.date <= todayStr);
+      const totalIncome = monthIncome.reduce((s, i) => s + (i.total || 0), 0);
+      const totalExpenses = monthExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+      const totalMiles = monthMileage.reduce((s, m) => s + (m.miles || 0), 0);
+      const goal = state.settings.goal || 2000;
+      let html = '<div style="font-weight:700;margin-bottom:8px;">This Month</div>';
+      html += '<div class="parsed-data">';
+      html += parsedRow('Income', '$' + totalIncome.toFixed(2) + ' of $' + goal.toFixed(0) + ' goal');
+      html += parsedRow('Expenses', '$' + totalExpenses.toFixed(2));
+      html += parsedRow('Miles', totalMiles + ' mi ($' + (totalMiles * IRS_RATE).toFixed(2) + ')');
+      html += parsedRow('Net Profit', '$' + (totalIncome - totalExpenses).toFixed(2));
+      html += parsedRow('Jobs', monthIncome.length + '');
+      html += '</div>';
+      const pct = Math.min(100, Math.round(totalIncome / goal * 100));
+      html += '<div style="margin-top:8px;height:20px;background:#eee8dd;border-radius:10px;overflow:hidden;position:relative;">';
+      html += '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--warm-dark),var(--mushroom),var(--sparkle-gold));border-radius:10px;"></div>';
+      html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">' + pct + '%</div></div>';
+      addChatBubble(html, 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/status') {
+      let html = '<div style="font-weight:700;margin-bottom:8px;">Current Status</div>';
+      html += '<div class="parsed-data">';
+      if (clockedIn) {
+        const mins = Math.round((new Date() - clockedIn.clockInTime) / 60000);
+        const hrs = Math.floor(mins / 60);
+        const m = mins % 60;
+        html += parsedRow('Clocked In', (clockedIn.evt.client || clockedIn.evt.summary));
+        html += parsedRow('Duration', (hrs > 0 ? hrs + 'h ' : '') + m + 'm so far');
+        html += parsedRow('Running Total', '$' + ((mins / 60) * (state.settings.rate || 25)).toFixed(2));
+      } else {
+        html += parsedRow('Clock', 'Not clocked in');
+      }
+      const todayStr = dateStr(new Date());
+      const todayIncome = state.income.filter(i => i.date === todayStr).reduce((s, i) => s + (i.total || 0), 0);
+      const todayExpenses = state.expenses.filter(e => e.date === todayStr).reduce((s, e) => s + (e.amount || 0), 0);
+      html += parsedRow('Today\'s Income', '$' + todayIncome.toFixed(2));
+      if (todayExpenses > 0) html += parsedRow('Today\'s Expenses', '$' + todayExpenses.toFixed(2));
+      html += '</div>';
+      // Upcoming events
+      const todayEvents = getCalendarSyncData().filter(e => e.start.split('T')[0] === todayStr);
+      if (todayEvents.length) {
+        html += '<div style="font-size:12px;color:var(--gray);margin-top:6px;">Today: ' +
+          todayEvents.map(e => e.client || e.summary).join(', ') + '</div>';
+      }
+      addChatBubble(html, 'bot', true);
+      return true;
+    }
+
     // Unknown command
     addChatBubble('Unknown command. Type /help to see available commands.', 'bot');
     return true;
   }
 
+  // ─── NATURAL LANGUAGE QUERIES ───
+  if (handleQuery(lower)) return true;
+
   return false; // Not a command, continue to parser
+}
+
+function handleQuery(lower) {
+  // Greetings
+  if (/^(hey|hi|hello|sup|yo|good morning|good afternoon|good evening|gm)\b/i.test(lower)) {
+    const greetings = [
+      "Hey! Ready to log some work?",
+      "Hi Taya! What are we tracking today?",
+      "Hey there! Type an entry or /help for commands.",
+    ];
+    addChatBubble(greetings[Math.floor(Math.random() * greetings.length)], 'bot');
+    return true;
+  }
+
+  // Thanks
+  if (/^(thanks?|thank you|ty|thx|appreciate)/i.test(lower)) {
+    const thanks = ["You got it!", "Anytime!", "Happy to help!"];
+    addChatBubble(thanks[Math.floor(Math.random() * thanks.length)], 'bot');
+    return true;
+  }
+
+  // "How much" / "what's my total" queries
+  const howMuchIncome = /how much.*(make|made|earn|earned|income|brought)/i.test(lower) ||
+                        /what.*(my total|my income|i make|i made)/i.test(lower) ||
+                        /total.*income/i.test(lower);
+  const howMuchExpense = /how much.*(spend|spent|expense)/i.test(lower) ||
+                         /what.*(my expenses|i spend|i spent)/i.test(lower) ||
+                         /total.*expense/i.test(lower);
+  const howManyMiles = /how many miles|total miles|mileage total/i.test(lower);
+  const howManyJobs = /how many.*(jobs?|clients?|appointments?)/i.test(lower);
+
+  if (howMuchIncome || howMuchExpense || howManyMiles || howManyJobs) {
+    // Figure out time range
+    let startDate, endDate = dateStr(new Date()), label = '';
+    const today = new Date();
+
+    if (/today/i.test(lower)) {
+      startDate = dateStr(today); label = 'today';
+    } else if (/yesterday/i.test(lower)) {
+      const y = new Date(today); y.setDate(y.getDate() - 1);
+      startDate = endDate = dateStr(y); label = 'yesterday';
+    } else if (/this week|past week|last 7/i.test(lower)) {
+      const w = new Date(today); w.setDate(w.getDate() - 7);
+      startDate = dateStr(w); label = 'this week';
+    } else if (/this month|in march|in feb|in jan/i.test(lower)) {
+      startDate = dateStr(new Date(today.getFullYear(), today.getMonth(), 1));
+      label = 'this month';
+    } else if (/this year|in 2026/i.test(lower)) {
+      startDate = today.getFullYear() + '-01-01';
+      label = 'this year';
+    } else {
+      // Default to this month
+      startDate = dateStr(new Date(today.getFullYear(), today.getMonth(), 1));
+      label = 'this month';
+    }
+
+    if (howMuchIncome) {
+      const entries = state.income.filter(i => i.date >= startDate && i.date <= endDate);
+      const total = entries.reduce((s, i) => s + (i.total || 0), 0);
+      const hours = entries.reduce((s, i) => s + (i.hours || 0), 0);
+      addChatBubble('You made <b>$' + total.toFixed(2) + '</b> ' + label + ' (' + entries.length + ' jobs, ' + hours.toFixed(1) + ' hrs).', 'bot', true);
+      return true;
+    }
+    if (howMuchExpense) {
+      const entries = state.expenses.filter(e => e.date >= startDate && e.date <= endDate);
+      const total = entries.reduce((s, e) => s + (e.amount || 0), 0);
+      addChatBubble('You spent <b>$' + total.toFixed(2) + '</b> ' + label + ' (' + entries.length + ' expenses).', 'bot', true);
+      return true;
+    }
+    if (howManyMiles) {
+      const entries = state.mileage.filter(m => m.date >= startDate && m.date <= endDate);
+      const total = entries.reduce((s, m) => s + (m.miles || 0), 0);
+      addChatBubble('You drove <b>' + total + ' miles</b> ' + label + ' ($' + (total * IRS_RATE).toFixed(2) + ' deduction).', 'bot', true);
+      return true;
+    }
+    if (howManyJobs) {
+      const entries = state.income.filter(i => i.date >= startDate && i.date <= endDate);
+      const clients = [...new Set(entries.map(i => i.client).filter(Boolean))];
+      addChatBubble('You had <b>' + entries.length + ' jobs</b> ' + label + ' with ' + clients.length + ' client' + (clients.length === 1 ? '' : 's') + (clients.length ? ': ' + clients.join(', ') : '') + '.', 'bot', true);
+      return true;
+    }
+  }
+
+  // "Am I clocked in?"
+  if (/am i clocked|clocked in\??|where am i/i.test(lower)) {
+    if (clockedIn) {
+      const mins = Math.round((new Date() - clockedIn.clockInTime) / 60000);
+      addChatBubble('You\'re clocked in at <b>' + (clockedIn.evt.client || clockedIn.evt.summary) + '</b> (' + mins + ' min so far). Type /clockout when done.', 'bot', true);
+    } else {
+      addChatBubble('You\'re not clocked in right now. Type /clockin to start a job.', 'bot');
+    }
+    return true;
+  }
+
+  // "What do I have today/tomorrow?"
+  if (/what.*(today|tomorrow|have coming|on my calendar|schedule)/i.test(lower)) {
+    const targetDate = /tomorrow/i.test(lower) ?
+      (() => { const d = new Date(); d.setDate(d.getDate() + 1); return dateStr(d); })() :
+      dateStr(new Date());
+    const label = /tomorrow/i.test(lower) ? 'tomorrow' : 'today';
+    const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === targetDate);
+    if (!events.length) {
+      addChatBubble('Nothing on the calendar for ' + label + '.', 'bot');
+    } else {
+      let html = '<div style="font-weight:700;margin-bottom:6px;">' + label.charAt(0).toUpperCase() + label.slice(1) + '\'s Schedule</div>';
+      events.forEach(evt => { html += renderEventCard(evt); });
+      addChatBubble(html, 'bot', true);
+    }
+    return true;
+  }
+
+  // "Who owes me?"
+  if (/who owes|unpaid|outstanding|uninvoiced/i.test(lower)) {
+    const uninvoiced = {};
+    state.income.filter(i => !i.invoiced).forEach(i => {
+      const name = i.client || 'Unknown';
+      uninvoiced[name] = (uninvoiced[name] || 0) + (i.total || 0);
+    });
+    const entries = Object.entries(uninvoiced).filter(([_, amt]) => amt > 0).sort((a, b) => b[1] - a[1]);
+    if (!entries.length) {
+      addChatBubble('No outstanding uninvoiced work right now!', 'bot');
+    } else {
+      let html = '<div style="font-weight:700;margin-bottom:8px;">Uninvoiced Work</div><div class="parsed-data">';
+      let total = 0;
+      entries.forEach(([name, amt]) => {
+        html += parsedRow(name, '$' + amt.toFixed(2));
+        total += amt;
+      });
+      html += parsedRow('<b>Total</b>', '<b>$' + total.toFixed(2) + '</b>');
+      html += '</div>';
+      addChatBubble(html, 'bot', true);
+    }
+    return true;
+  }
+
+  // "delete last" / "remove that"
+  if (/^(delete|remove)\s*(last|that|the last|previous)/i.test(lower)) {
+    if (lastSavedEntry) {
+      const e = lastSavedEntry;
+      if (e.type === 'income') state.income = state.income.filter(i => i.id !== e.savedId);
+      else if (e.type === 'expense') state.expenses = state.expenses.filter(i => i.id !== e.savedId);
+      else if (e.type === 'mileage') state.mileage = state.mileage.filter(i => i.id !== e.savedId);
+      saveState(); refreshAll();
+      lastSavedEntry = null;
+      addChatBubble('Done — last entry removed.', 'bot');
+    } else {
+      addChatBubble('Nothing to delete.', 'bot');
+    }
+    return true;
+  }
+
+  return false;
 }
 
 // ─── AUTOLOG: Find calendar event(s) for a date and draft entries ───
@@ -1486,6 +1849,20 @@ function parseEntry(text) {
   const hasClientMatch = (state.clients || []).some(c => lower.includes(c.name.toLowerCase()));
   if (hasExpenseKeyword && !hasClientMatch && /\$\d|\d+\.\d{2}/.test(text)) {
     return parseExpense(text, lower);
+  }
+  // ─── Quick expense shortcut: "gas $40", "lunch $15", "home depot $45" ───
+  const quickExpenseMatch = text.match(/^([A-Za-z][A-Za-z\s'&.-]+?)\s+\$(\d+(?:\.\d{1,2})?)\s*(.*)?$/);
+  if (quickExpenseMatch && !hasClientMatch) {
+    const vendor = quickExpenseMatch[1].trim();
+    const amount = parseFloat(quickExpenseMatch[2]);
+    const desc = (quickExpenseMatch[3] || '').trim();
+    const cat = guessCategory(vendor);
+    if (cat !== 'Supplies' || hasExpenseKeyword || /gas|food|lunch|coffee|hardware|store|depot|shop/i.test(vendor)) {
+      return {
+        type: 'expense', vendor: vendor.split(' ').map(w => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+        date: parseDate(lower), amount, category: applyLearnedCategory(vendor, cat), description: desc
+      };
+    }
   }
   // ─── INCOME (default) ───
   return parseIncome(text, lower);
@@ -2476,29 +2853,67 @@ styleSheet.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(styleSheet);
 
 function parseReceiptText(text) {
-  const result = {vendor:'',amount:0,date:''};
+  const result = {vendor:'',amount:0,date:'',items:[]};
   const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
-  const skip = /^(receipt|transaction|sale|order|date|time|tel|phone|www|http|thank|cashier|register|terminal)/i;
+
+  // ─── VENDOR (store name, usually first 1-3 lines) ───
+  const skipVendor = /^(receipt|transaction|sale|order|date|time|tel|phone|fax|www|http|thank|cashier|register|terminal|store\s*#|pos|credit|debit|visa|master|amex|change|cash|subtotal|total|tax|item|qty|sku|\d{3}[-.]\d{3})/i;
+  const addressLike = /\d+\s+(st|ave|blvd|rd|dr|ln|ct|way|hwy|pkwy)\b/i;
   for (const line of lines) {
-    const clean = line.replace(/[^a-zA-Z\s&'.-]/g,'').trim();
-    if (clean.length >= 3 && !skip.test(clean)) {
+    const clean = line.replace(/[^a-zA-Z\s&'.\-]/g,'').trim();
+    if (clean.length >= 3 && !skipVendor.test(clean) && !addressLike.test(line)) {
       result.vendor = clean.split(/\s+/).slice(0,4).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
       break;
     }
   }
-  const totalMatch = text.match(/(?:total|amount\s*due|balance)[:\s]*\$?\s*(\d+[.,]\d{2})/i);
-  if (totalMatch) result.amount = parseFloat(totalMatch[1].replace(',','.'));
-  else {
+
+  // ─── AMOUNT (look for total, then largest dollar amount) ───
+  // Try multiple total patterns in priority order
+  const totalPatterns = [
+    /(?:grand\s*total|total\s*due|amount\s*due|balance\s*due)[:\s]*\$?\s*(\d+[.,]\d{2})/i,
+    /(?:total)[:\s]*\$?\s*(\d+[.,]\d{2})/i,
+    /(?:total)\s+(\d+[.,]\d{2})/i,
+  ];
+  for (const pat of totalPatterns) {
+    const m = text.match(pat);
+    if (m) { result.amount = parseFloat(m[1].replace(',','.')); break; }
+  }
+  // Fallback: largest dollar amount (skip tax-like small amounts if possible)
+  if (!result.amount) {
     const amts = []; let m;
     const rx = /\$\s*(\d+[.,]\d{2})/g;
     while ((m=rx.exec(text))!==null) amts.push(parseFloat(m[1].replace(',','.')));
     if (amts.length) result.amount = Math.max(...amts);
   }
-  const dateP = [/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/,/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})(?!\d)/];
-  for (const p of dateP) {
+
+  // ─── DATE ───
+  const datePatterns = [
+    /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/,
+    /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2})(?!\d)/,
+    /(\w{3,9})\s+(\d{1,2}),?\s+(\d{4})/i,  // "March 25, 2026"
+    /(\d{1,2})\s+(\w{3,9})\s+(\d{4})/i,     // "25 March 2026"
+  ];
+  for (const p of datePatterns) {
     const dm = text.match(p);
-    if (dm) { try { const d = new Date(dm[0]); if (!isNaN(d.getTime())) { result.date = dateStr(d); break; } } catch(e){} }
+    if (dm) {
+      try {
+        const d = new Date(dm[0].replace(',',''));
+        if (!isNaN(d.getTime()) && d.getFullYear() > 2000) {
+          result.date = dateStr(d); break;
+        }
+      } catch(e){}
+    }
   }
+
+  // ─── LINE ITEMS (bonus: extract individual items) ───
+  const itemRx = /^(.+?)\s+\$?\s*(\d+\.\d{2})\s*$/;
+  for (const line of lines) {
+    const im = line.match(itemRx);
+    if (im && !/total|tax|subtotal|change|cash|credit|debit/i.test(im[1])) {
+      result.items.push({ name: im[1].trim(), amount: parseFloat(im[2]) });
+    }
+  }
+
   return result;
 }
 
@@ -2520,6 +2935,174 @@ function cancelReceipt() {
   document.getElementById('receiptInput').value = '';
   document.getElementById('ocrStatus').style.display = 'none';
   ['recVendor','recAmount'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ═══════════════════════════════════════
+// RECEIPT SCANNER (Camera)
+// ═══════════════════════════════════════
+let scannerStream = null;
+let scannerTrack = null;
+let flashOn = false;
+let enhanceOn = false;
+let capturedImageData = null;
+let capturedOriginal = null;
+
+function openScanner() {
+  // Check camera support
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // Fallback to file picker on unsupported browsers
+    document.getElementById('chatReceiptInput').click();
+    return;
+  }
+  const overlay = document.getElementById('scannerOverlay');
+  overlay.classList.add('active');
+  document.getElementById('scannerPreviewContainer').style.display = 'none';
+  document.getElementById('scannerPreviewControls').style.display = 'none';
+  document.getElementById('scannerCaptureControls').style.display = 'flex';
+  document.getElementById('scannerViewfinder').style.display = 'flex';
+
+  const video = document.getElementById('scannerVideo');
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+    audio: false
+  }).then(stream => {
+    scannerStream = stream;
+    scannerTrack = stream.getVideoTracks()[0];
+    video.srcObject = stream;
+    video.play();
+    // Check if flash/torch is available
+    const caps = scannerTrack.getCapabilities ? scannerTrack.getCapabilities() : {};
+    if (caps.torch) {
+      document.getElementById('flashBtn').style.display = 'flex';
+    }
+  }).catch(err => {
+    console.warn('Camera error:', err);
+    closeScanner();
+    // Fallback to file picker
+    document.getElementById('chatReceiptInput').click();
+  });
+}
+
+function closeScanner() {
+  const overlay = document.getElementById('scannerOverlay');
+  overlay.classList.remove('active');
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+    scannerTrack = null;
+  }
+  flashOn = false;
+  enhanceOn = false;
+  capturedImageData = null;
+  capturedOriginal = null;
+}
+
+function toggleFlash() {
+  if (!scannerTrack) return;
+  flashOn = !flashOn;
+  scannerTrack.applyConstraints({ advanced: [{ torch: flashOn }] }).catch(() => {});
+  document.getElementById('flashBtn').classList.toggle('on', flashOn);
+}
+
+function toggleEnhanceMode() {
+  enhanceOn = !enhanceOn;
+  document.getElementById('enhancePreviewBtn').classList.toggle('on', enhanceOn);
+}
+
+function captureReceipt() {
+  const video = document.getElementById('scannerVideo');
+  const canvas = document.getElementById('scannerCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  // Save original
+  capturedOriginal = canvas.toDataURL('image/jpeg', 0.92);
+
+  // Apply enhancement if toggled
+  if (enhanceOn) {
+    applyEnhancement(ctx, canvas.width, canvas.height);
+  }
+  capturedImageData = canvas.toDataURL('image/jpeg', 0.92);
+
+  // Switch to preview mode
+  document.getElementById('scannerViewfinder').style.display = 'none';
+  document.getElementById('scannerCaptureControls').style.display = 'none';
+  document.getElementById('scannerPreviewContainer').style.display = 'flex';
+  document.getElementById('scannerPreviewControls').style.display = 'flex';
+  document.getElementById('scannerPreviewImg').src = capturedImageData;
+  document.getElementById('enhanceToggle').classList.toggle('active', enhanceOn);
+}
+
+function applyEnhancement(ctx, w, h) {
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const d = imageData.data;
+  // High contrast + brightness boost for receipt text readability
+  const contrast = 1.5;
+  const brightness = 20;
+  for (let i = 0; i < d.length; i += 4) {
+    // Convert to grayscale
+    const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+    // Apply contrast and brightness
+    let val = ((gray - 128) * contrast + 128) + brightness;
+    val = Math.max(0, Math.min(255, val));
+    d[i] = d[i+1] = d[i+2] = val;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function toggleEnhance() {
+  const canvas = document.getElementById('scannerCanvas');
+  const ctx = canvas.getContext('2d');
+  const toggle = document.getElementById('enhanceToggle');
+  enhanceOn = !enhanceOn;
+  toggle.classList.toggle('active', enhanceOn);
+
+  if (enhanceOn) {
+    // Re-draw original then enhance
+    const img = new Image();
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0);
+      applyEnhancement(ctx, canvas.width, canvas.height);
+      capturedImageData = canvas.toDataURL('image/jpeg', 0.92);
+      document.getElementById('scannerPreviewImg').src = capturedImageData;
+    };
+    img.src = capturedOriginal;
+  } else {
+    capturedImageData = capturedOriginal;
+    document.getElementById('scannerPreviewImg').src = capturedOriginal;
+  }
+}
+
+function retakeReceipt() {
+  capturedImageData = null;
+  capturedOriginal = null;
+  document.getElementById('scannerPreviewContainer').style.display = 'none';
+  document.getElementById('scannerPreviewControls').style.display = 'none';
+  document.getElementById('scannerCaptureControls').style.display = 'flex';
+  document.getElementById('scannerViewfinder').style.display = 'flex';
+}
+
+function useReceiptPhoto() {
+  const imageData = capturedImageData;
+  closeScanner();
+  // Process through the existing receipt flow
+  chatReceiptData = imageData;
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble user';
+  bubble.innerHTML = '<img src="' + imageData + '" class="chat-receipt-img"><div style="font-size:12px;margin-top:4px;opacity:0.8">Receipt photo</div>';
+  document.getElementById('chatMessages').appendChild(bubble);
+  scrollChat();
+
+  // Auto-OCR if Vision key exists
+  if (state.settings.visionKey) {
+    addChatBubble('Reading your receipt...', 'bot');
+    runChatOCR(imageData);
+  } else {
+    chatReceiptPending = true;
+    addChatBubble("No Vision API key found — add one in Settings to auto-read receipts.\n\nFor now, type what it's for:\n\"home depot $45 lumber\"", 'bot');
+  }
 }
 
 // ═══════════════════════════════════════
