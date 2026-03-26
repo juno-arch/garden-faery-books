@@ -2753,23 +2753,17 @@ function initFirebase() {
 function signInWithGoogle() {
   if (!firebaseReady) { showToast('Save Firebase config first'); return; }
   const provider = new firebase.auth.GoogleAuthProvider();
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (isMobile) {
-    // Redirect mode works on iOS Safari (popups get blocked)
-    firebase.auth().signInWithRedirect(provider);
-  } else {
-    firebase.auth().signInWithPopup(provider).then(result => {
-      showToast('Signed in as ' + result.user.displayName);
-    }).catch(err => {
-      console.warn('Sign-in error:', err);
-      if (err.code === 'auth/popup-blocked') {
-        // Fallback to redirect if popup blocked on desktop too
-        firebase.auth().signInWithRedirect(provider);
-      } else if (err.code !== 'auth/popup-closed-by-user') {
-        showToast('Sign-in failed: ' + err.message);
-      }
-    });
-  }
+  // Use popup on all platforms (enable popups in Safari Settings if on iPhone)
+  firebase.auth().signInWithPopup(provider).then(result => {
+    showToast('Signed in as ' + result.user.displayName);
+  }).catch(err => {
+    console.warn('Sign-in error:', err);
+    if (err.code === 'auth/popup-blocked') {
+      showToast('Please allow popups for this site in Safari Settings, then try again');
+    } else if (err.code !== 'auth/popup-closed-by-user') {
+      showToast('Sign-in failed: ' + err.message);
+    }
+  });
 }
 
 function signOutFirebase() {
