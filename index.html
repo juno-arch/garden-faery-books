@@ -680,7 +680,11 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <button class="filter-pill" onclick="filterLeads('done',this)">Done</button>
         <button class="filter-pill" onclick="filterLeads('lost',this)">Lost</button>
       </div>
-      <button class="btn btn-primary" onclick="editLead(null); toggleLeadForm(true)" style="margin-bottom:12px;">+ Plant a Lead</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="editLead(null); toggleLeadForm(true)">+ Plant a Lead</button>
+        <button class="btn btn-outline" onclick="syncWebsiteLeads()" id="syncLeadsBtn">🌐 Sync from Website</button>
+      </div>
+      <div id="syncLeadsStatus" style="display:none;font-size:12px;color:var(--gray);margin-bottom:8px;"></div>
       <div id="leadsList"></div>
     </div>
 
@@ -933,6 +937,12 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
         <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
       </div>
+      <div class="card">
+        <div class="card-title">Website Lead Sync</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Pull new leads from gardenfaery.love contact forms into your Leads list.</p>
+        <div class="form-group"><label>Forms Script URL</label><input type="text" id="settingsFormsUrl" placeholder="https://script.google.com/macros/s/..." style="font-size:12px;"></div>
+        <button class="btn btn-primary" onclick="saveFormsUrl()">Save URL</button>
+      </div>
       <div class="card" id="cloudSyncCard">
         <div class="card-title">Cloud Sync</div>
         <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with Firebase.</p>
@@ -1012,7 +1022,7 @@ let state = {
   income: [], expenses: [], mileage: [], receipts: [],
   invoices: [], clients: [], cards: [], leads: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
-  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70 },
+  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '' },
   version: 4
 };
 
@@ -2942,6 +2952,73 @@ function renderLeads() {
 }
 
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// WEBSITE LEAD SYNC
+// ═══════════════════════════════════════
+function saveFormsUrl() {
+  const url = document.getElementById('settingsFormsUrl').value.trim();
+  if (!url) { showToast('Paste the Forms Script URL first'); return; }
+  state.settings.formsUrl = url;
+  saveState();
+  showToast('Forms URL saved! 🌐');
+}
+
+function syncWebsiteLeads() {
+  const url = state.settings.formsUrl;
+  if (!url) { showToast('Set your Forms Script URL in Settings first'); return; }
+  const btn = document.getElementById('syncLeadsBtn');
+  const status = document.getElementById('syncLeadsStatus');
+  btn.disabled = true;
+  btn.textContent = '🔄 Syncing...';
+  status.style.display = 'block';
+  status.textContent = 'Fetching from website...';
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (!state.leads) state.leads = [];
+      const contacts = data.contacts || [];
+      let added = 0;
+      contacts.forEach(c => {
+        // Skip if we already have this contact (match by name+email)
+        const name = (c.name || '').trim();
+        const email = (c.email || '').trim();
+        if (!name && !email) return;
+        const exists = state.leads.some(l =>
+          (l.name || '').toLowerCase() === name.toLowerCase() &&
+          (l.contact || '').toLowerCase() === email.toLowerCase()
+        );
+        if (exists) return;
+        state.leads.push({
+          id: uid(),
+          name: name || email,
+          contact: [email, c.phone || ''].filter(Boolean).join(', '),
+          location: '',
+          needs: c.message || '',
+          status: 'new',
+          created: c.date_submitted || new Date().toISOString(),
+          source: 'website'
+        });
+        added++;
+      });
+      if (added > 0) {
+        saveState();
+        renderLeads();
+      }
+      status.textContent = added > 0
+        ? '🌱 ' + added + ' new lead' + (added > 1 ? 's' : '') + ' sprouted from the website!'
+        : '✓ All caught up. No new leads from the website.';
+      btn.disabled = false;
+      btn.textContent = '🌐 Sync from Website';
+    })
+    .catch(err => {
+      console.warn('Sync error:', err);
+      status.textContent = 'Sync failed. Check the URL in Settings.';
+      btn.disabled = false;
+      btn.textContent = '🌐 Sync from Website';
+    });
+}
+
 // DASHBOARD
 // ═══════════════════════════════════════
 let viewMonth = new Date().getMonth();
@@ -3781,6 +3858,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsRate').value = state.settings.rate || 25;
   document.getElementById('settingsGoal').value = state.settings.goal || 2000;
   if (state.settings.visionKey) document.getElementById('settingsVisionKey').value = state.settings.visionKey;
+  if (state.settings.formsUrl) document.getElementById('settingsFormsUrl').value = state.settings.formsUrl;
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
 
   // Welcome message in chat
