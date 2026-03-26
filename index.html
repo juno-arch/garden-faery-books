@@ -92,6 +92,21 @@ h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--color-text-headi
 }
 .app-header h1 { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
 .app-header .subtitle { font-size: 11px; opacity: 0.7; }
+.hamburger-btn { background: none; border: none; color: white; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+
+/* ─── SIDEBAR ─── */
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; opacity: 0; transition: opacity 0.25s ease; }
+.sidebar-overlay.open { display: block; opacity: 1; }
+.sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--bg); z-index: 301; transition: right 0.25s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+.sidebar-overlay.open .sidebar { right: 0; }
+.sidebar-header { background: var(--text-primary); color: white; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+.sidebar-header h2 { font-family: var(--font-heading); font-size: 18px; margin: 0; }
+.sidebar-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px; }
+.sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+.sidebar-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; font-size: 15px; font-weight: 600; color: var(--text-primary); cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: var(--font-body); transition: background 0.15s; }
+.sidebar-item:hover, .sidebar-item:active { background: var(--card-glow); }
+.sidebar-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.sidebar-divider { height: 1px; background: var(--accent-border-xlt); margin: 8px 20px; }
 
 /* ─── TEST MODE ─── */
 .test-banner {
@@ -502,8 +517,38 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     <h1>Garden Faery Books</h1>
     <div class="subtitle" id="appSubtitle">Taya's Bookkeeping</div>
   </div>
-  <button class="test-toggle" id="testToggle" onclick="toggleTestMode()">Test</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="test-toggle" id="testToggle" onclick="toggleTestMode()">Test</button>
+    <button class="hamburger-btn" onclick="openSidebar()" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
 </header>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()">
+  <div class="sidebar" onclick="event.stopPropagation()">
+    <div class="sidebar-header">
+      <h2>Menu</h2>
+      <button class="sidebar-close" onclick="closeSidebar()">&times;</button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-item" onclick="openSidebarTab('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        History
+      </button>
+      <button class="sidebar-item" onclick="openSidebarTab('reports')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Reports
+      </button>
+      <div class="sidebar-divider"></div>
+      <button class="sidebar-item" onclick="openSidebarTab('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+  </div>
+</div>
 
 <div class="main-content">
 
@@ -792,16 +837,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     </div>
   </div>
 
-  <!-- ═══ MORE TAB ═══ -->
-  <div class="tab-pane" id="tab-more">
-    <div class="filter-pills" style="margin-bottom:12px;" id="moreSubToggle">
-      <button class="filter-pill active" onclick="switchMoreSub('history',this)">History</button>
-      <button class="filter-pill" onclick="switchMoreSub('reports',this)">Reports</button>
-      <button class="filter-pill" onclick="switchMoreSub('settings',this)">Settings</button>
-    </div>
-
-    <!-- ─── HISTORY SUB ─── -->
-    <div id="more-history">
+  <!-- ═══ HISTORY TAB (sidebar) ═══ -->
+  <div class="tab-pane" id="tab-history">
       <div class="filter-pills" style="margin-bottom:12px;">
         <button class="filter-pill active" onclick="filterHistory('all',this)">All</button>
         <button class="filter-pill" onclick="filterHistory('income',this)">Income</button>
@@ -815,10 +852,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         </div>
         <ul class="entry-list" id="historyList"></ul>
       </div>
-    </div>
+  </div>
 
-    <!-- ─── REPORTS SUB ─── -->
-    <div id="more-reports" style="display:none;">
+  <!-- ═══ REPORTS TAB (sidebar) ═══ -->
+  <div class="tab-pane" id="tab-reports">
       <div class="period-toggle">
         <button class="active" onclick="setReportPeriod('monthly',this)">Monthly</button>
         <button onclick="setReportPeriod('quarterly',this)">Quarterly</button>
@@ -851,10 +888,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <div class="tax-row highlight" style="margin-top:8px;"><span>Total Estimated Tax</span><span id="taxTotal">$0</span></div>
         <div style="margin-top:12px;"><div style="font-size:13px;font-weight:700;color:var(--gray);margin-bottom:8px;">Quarterly Due Dates</div><div id="taxDueDates"></div></div>
       </div>
-    </div>
+  </div>
 
-    <!-- ─── SETTINGS SUB ─── -->
-    <div id="more-settings" style="display:none;">
+  <!-- ═══ SETTINGS TAB (sidebar) ═══ -->
+  <div class="tab-pane" id="tab-settings">
       <div class="card">
         <div class="card-title">Business Settings</div>
         <div class="form-group"><label>Hourly Rate ($)</label><input type="number" id="settingsRate" step="0.5" value="25" inputmode="decimal"></div>
@@ -934,9 +971,8 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
       <div class="card">
         <div class="card-title">About</div>
-        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.1<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
       </div>
-    </div>
   </div>
 
 </div>
@@ -958,10 +994,6 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   <button class="tab-btn" onclick="switchTab('estimate',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
     Estimate
-  </button>
-  <button class="tab-btn" onclick="switchTab('more',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    More
   </button>
 </nav>
 
@@ -1105,12 +1137,24 @@ function switchTab(name, btn) {
   if (name === 'estimate') { document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0]; }
 }
 
-function switchMoreSub(sub, btn) {
-  document.querySelectorAll('#moreSubToggle .filter-pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  ['history','reports','settings'].forEach(s => {
-    document.getElementById('more-' + s).style.display = s === sub ? 'block' : 'none';
-  });
+// ═══════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════
+function openSidebar() {
+  document.getElementById('sidebarOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function openSidebarTab(name) {
+  closeSidebar();
+  // Deselect bottom tab buttons (sidebar tabs aren't in the bottom bar)
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector('.main-content').scrollTop = 0;
 }
 
 // ═══════════════════════════════════════
