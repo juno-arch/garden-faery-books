@@ -13,9 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Elsie+Swash+Caps:wght@400;900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
 <style>
 :root {
   /* ─── Constants (never change) ─── */
@@ -641,6 +639,54 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <div id="catBreakdownList"></div>
     </div>
 
+    <!-- ─── ADMIN TIME TRACKER ─── -->
+    <div class="card" id="adminTimeCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">Admin Time</div>
+        <button onclick="toggleAdminForm()" id="adminFormToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">+ Log Time</button>
+      </div>
+
+      <!-- Admin time summary -->
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
+        <div class="stat-box"><div class="value" id="adminWeekHrs">0</div><div class="label">This Week</div></div>
+        <div class="stat-box"><div class="value" id="adminMonthHrs">0</div><div class="label">This Month</div></div>
+        <div class="stat-box"><div class="value" id="adminMonthCost">$0</div><div class="label">Cost</div></div>
+      </div>
+
+      <!-- Quick log form (hidden by default) -->
+      <div id="adminFormPanel" style="display:none;padding:12px;background:var(--card-glow);border-radius:var(--radius);margin-bottom:10px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Date</label>
+            <input type="date" id="adminDate" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Hours</label>
+            <input type="number" id="adminHours" placeholder="1.5" step="0.25" min="0.25" max="24" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Category</label>
+          <div class="filter-pills" id="adminCatPills" style="flex-wrap:wrap;">
+            <button class="filter-pill active" onclick="pickAdminCat(this)" data-cat="Admin">Admin</button>
+            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Scheduling">Scheduling</button>
+            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Planning">Planning</button>
+            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Claude Session">Claude Session</button>
+            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Marketing">Marketing</button>
+            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Bookkeeping">Bookkeeping</button>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Notes (optional)</label>
+          <input type="text" id="adminNotes" placeholder="What were you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
+        </div>
+        <button onclick="saveAdminTime()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--text-primary);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Plant This Time 🌱</button>
+      </div>
+
+      <!-- Recent admin entries -->
+      <div id="adminRecentList" style="font-size:13px;"></div>
+    </div>
+
     <!-- ─── CALENDAR ─── -->
     <div class="card">
       <div class="card-title">Calendar</div>
@@ -848,6 +894,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <button class="filter-pill" onclick="filterHistory('income',this)">Income</button>
         <button class="filter-pill" onclick="filterHistory('expense',this)">Expenses</button>
         <button class="filter-pill" onclick="filterHistory('mileage',this)">Mileage</button>
+        <button class="filter-pill" onclick="filterHistory('admin',this)">Admin</button>
       </div>
       <div class="card">
         <div class="card-title" style="justify-content:space-between;">
@@ -945,16 +992,13 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
       <div class="card" id="cloudSyncCard">
         <div class="card-title">Cloud Sync</div>
-        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with Firebase.</p>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Sync your data between phone and desktop with PocketBase. Private, self-hosted, no Google.</p>
         <div id="syncSignedOut">
-          <div class="form-group"><label>Firebase API Key</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
-          <div class="form-group"><label>Firebase Project ID</label><input type="text" id="fbProjectId" placeholder="garden-faery-books"></div>
-          <div class="form-group"><label>Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="garden-faery-books.firebaseapp.com" style="color:var(--gray);"></div>
-          <button class="btn btn-outline" onclick="saveFirebaseConfig()" style="margin-bottom:10px;">Save Config</button>
-          <button class="btn btn-primary" onclick="signInWithGoogle()" id="googleSignInBtn" style="display:none;">
-            <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:middle;margin-right:6px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Sign in with Google
-          </button>
+          <div class="form-group"><label>Server URL</label><input type="text" id="pbServerUrl" placeholder="https://your-server.com"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="pbEmail" placeholder="taya@gardenfaery.love"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="pbPassword" placeholder="Your password"></div>
+          <button class="btn btn-outline" onclick="savePocketBaseConfig()" style="margin-bottom:10px;">Save Config</button>
+          <button class="btn btn-primary" onclick="signInPocketBase()" id="pbSignInBtn" style="display:none;">Sign In</button>
         </div>
         <div id="syncSignedIn" style="display:none;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px;background:var(--fairy-glow);border-radius:8px;">
@@ -963,7 +1007,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
               <div style="font-weight:600;font-size:13px;" id="syncUserName"></div>
               <div style="font-size:11px;color:var(--gray);" id="syncUserEmail"></div>
             </div>
-            <button class="btn btn-outline" onclick="signOutFirebase()" style="font-size:11px;padding:4px 10px;">Sign Out</button>
+            <button class="btn btn-outline" onclick="signOutPocketBase()" style="font-size:11px;padding:4px 10px;">Sign Out</button>
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <span style="font-size:13px;font-weight:600;">Auto-sync</span>
@@ -981,7 +1025,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
       <div class="card">
         <div class="card-title">About</div>
-        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.1<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with Firebase. Works offline.</p>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.3<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with PocketBase. Private and offline-ready.</p>
       </div>
   </div>
 
@@ -1021,8 +1065,9 @@ let realStateBackup = null;
 let state = {
   income: [], expenses: [], mileage: [], receipts: [],
   invoices: [], clients: [], cards: [], leads: [],
+  adminTime: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
-  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '' },
+  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25 },
   version: 4
 };
 
@@ -1032,7 +1077,7 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
-      ['income','expenses','mileage','receipts','invoices','clients','cards','leads'].forEach(k => {
+      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime'].forEach(k => {
         if (!state[k]) state[k] = [];
       });
       if (!state.learned) state.learned = { vendors: {}, aliases: {}, categories: {} };
@@ -1055,7 +1100,7 @@ function saveState() {
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     // Auto-sync to cloud if enabled
-    if (typeof firebaseReady !== 'undefined' && firebaseReady && autoSyncEnabled) {
+    if (typeof pbReady !== 'undefined' && pbReady && autoSyncEnabled) {
       debouncedSyncToCloud();
     }
   } catch (e) {
@@ -2779,6 +2824,113 @@ function logQuickMileage(client, miles, date) {
   addChatBubble(`✓ ${miles} mi to ${client} logged: $${(miles * IRS_RATE).toFixed(2)} deduction`, 'bot');
 }
 
+// ═══════════════════════════════════════
+// ADMIN TIME TRACKER
+// ═══════════════════════════════════════
+function toggleAdminForm() {
+  const panel = document.getElementById('adminFormPanel');
+  const btn = document.getElementById('adminFormToggle');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    btn.textContent = 'Cancel';
+    // Default date to today
+    document.getElementById('adminDate').value = dateStr(new Date());
+    document.getElementById('adminHours').value = '';
+    document.getElementById('adminNotes').value = '';
+    // Reset category to Admin
+    document.querySelectorAll('#adminCatPills .filter-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('#adminCatPills .filter-pill[data-cat="Admin"]').classList.add('active');
+  } else {
+    panel.style.display = 'none';
+    btn.textContent = '+ Log Time';
+  }
+}
+
+function pickAdminCat(el) {
+  document.querySelectorAll('#adminCatPills .filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function saveAdminTime() {
+  const date = document.getElementById('adminDate').value;
+  const hours = parseFloat(document.getElementById('adminHours').value);
+  const catEl = document.querySelector('#adminCatPills .filter-pill.active');
+  const category = catEl ? catEl.dataset.cat : 'Admin';
+  const notes = document.getElementById('adminNotes').value.trim();
+
+  if (!date) { showToast('Pick a date first!'); return; }
+  if (!hours || hours <= 0) { showToast('How many hours? Even weeds take time'); return; }
+
+  const rate = state.settings.adminRate || 25;
+  state.adminTime.push({
+    id: uid(),
+    date: date,
+    hours: hours,
+    category: category,
+    notes: notes,
+    cost: +(hours * rate).toFixed(2)
+  });
+
+  saveState();
+  refreshDashboard();
+  renderAdminTime();
+  toggleAdminForm();
+  showToast('Admin time planted! ' + hours + 'h of ' + category + ' logged 🌱');
+}
+
+function deleteAdminTime(id) {
+  state.adminTime = state.adminTime.filter(a => a.id !== id);
+  saveState();
+  refreshDashboard();
+  renderAdminTime();
+  showToast('Entry pulled up by the roots');
+}
+
+function renderAdminTime() {
+  const list = document.getElementById('adminRecentList');
+  if (!list) return;
+
+  const now = new Date();
+  const todayStr = dateStr(now);
+  const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+  const weekStr = dateStr(weekAgo);
+  const rate = state.settings.adminRate || 25;
+
+  // Weekly hours
+  const weekEntries = (state.adminTime || []).filter(a => a.date >= weekStr && a.date <= todayStr);
+  const weekHrs = weekEntries.reduce((s, a) => s + (a.hours || 0), 0);
+  document.getElementById('adminWeekHrs').textContent = weekHrs.toFixed(1) + 'h';
+
+  // Monthly hours
+  const monthEntries = (state.adminTime || []).filter(a => {
+    const d = new Date(a.date + 'T00:00:00');
+    return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
+  });
+  const monthHrs = monthEntries.reduce((s, a) => s + (a.hours || 0), 0);
+  document.getElementById('adminMonthHrs').textContent = monthHrs.toFixed(1) + 'h';
+  document.getElementById('adminMonthCost').textContent = '$' + (monthHrs * rate).toFixed(0);
+
+  // Recent entries (last 5)
+  const recent = [...(state.adminTime || [])].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  if (!recent.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--gray);padding:12px;">No admin time logged yet. Your behind-the-scenes work matters too!</div>';
+    return;
+  }
+
+  list.innerHTML = recent.map(a =>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--accent-border-xlt);">' +
+    '<div>' +
+    '<div style="font-weight:600;font-size:13px;">' + esc(a.category) + '</div>' +
+    '<div style="color:var(--gray);font-size:11px;">' + fmtDate(a.date) + (a.notes ? ' · ' + esc(a.notes) : '') + '</div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+    '<span style="font-weight:700;font-size:13px;">' + a.hours + 'h</span>' +
+    '<button onclick="deleteAdminTime(\'' + a.id + '\')" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--gray);padding:2px;" title="Delete">×</button>' +
+    '</div>' +
+    '</div>'
+  ).join('');
+}
+
 function addChatBubble(content, type, isHtml) {
   const div = document.createElement('div');
   div.className = 'chat-bubble ' + type;
@@ -3150,7 +3302,8 @@ function refreshDashboard() {
   const recent = [
     ...state.income.map(i => ({...i, _type:'income', _sort:i.date})),
     ...state.expenses.map(e => ({...e, _type:'expense', _sort:e.date})),
-    ...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date}))
+    ...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date})),
+    ...(state.adminTime||[]).map(a => ({...a, _type:'admin', _sort:a.date}))
   ].sort((a,b) => b._sort.localeCompare(a._sort)).slice(0,8);
 
   const ra = document.getElementById('recentActivity');
@@ -3158,8 +3311,12 @@ function refreshDashboard() {
   ra.innerHTML = recent.map(r => {
     if (r._type==='income') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.client)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.service}</div></div><span class="entry-amount income">+$${r.total.toFixed(0)}</span></li>`;
     if (r._type==='expense') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">${esc(r.vendor)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.category}</div></div><span class="entry-amount expense">-$${r.amount.toFixed(2)}</span></li>`;
+    if (r._type==='admin') return `<li class="entry-item"><div class="entry-info"><div class="entry-name">🕐 ${esc(r.category)}</div><div class="entry-detail">${fmtDate(r.date)}${r.notes ? ' · '+esc(r.notes) : ''}</div></div><span class="entry-amount" style="color:var(--gray);font-weight:700;">${r.hours}h</span></li>`;
     return `<li class="entry-item"><div class="entry-info"><div class="entry-name">🚗 ${esc(r.destination)}</div><div class="entry-detail">${fmtDate(r.date)} · ${r.miles} mi</div></div><span class="entry-amount income">$${r.deduction.toFixed(2)}</span></li>`;
   }).join('');
+
+  // Render admin time card
+  renderAdminTime();
 }
 
 // Helper to trigger invoice from dashboard
@@ -3194,6 +3351,9 @@ function renderHistory() {
   if (historyFilter === 'all' || historyFilter === 'mileage') {
     items.push(...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date, _display:`${esc(m.destination)}: ${m.miles} mi`, _detail:`${fmtDate(m.date)} · ${m.purpose} · $${m.deduction.toFixed(2)} deduction`, _id:m.id})));
   }
+  if (historyFilter === 'all' || historyFilter === 'admin') {
+    items.push(...(state.adminTime||[]).map(a => ({...a, _type:'admin', _sort:a.date, _display:`🕐 ${esc(a.category)}: ${a.hours}h`, _detail:`${fmtDate(a.date)}${a.notes?' · '+esc(a.notes):''} · $${(a.cost||0).toFixed(0)} cost`, _id:a.id})));
+  }
   items.sort((a,b) => b._sort.localeCompare(a._sort));
   document.getElementById('historyCount').textContent = items.length + ' entries';
   const list = document.getElementById('historyList');
@@ -3205,7 +3365,7 @@ function renderHistory() {
         <div class="entry-detail">${r._detail}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${r._type==='income'?'var(--fairy-glow)':r._type==='expense'?'var(--red-light)':'rgba(184,169,201,0.2)'};color:${r._type==='income'?'var(--warm-dark)':r._type==='expense'?'var(--red)':'var(--lavender)'};font-weight:600;">${r._type}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${r._type==='income'?'var(--fairy-glow)':r._type==='expense'?'var(--red-light)':r._type==='admin'?'rgba(212,194,122,0.2)':'rgba(184,169,201,0.2)'};color:${r._type==='income'?'var(--warm-dark)':r._type==='expense'?'var(--red)':r._type==='admin'?'var(--sparkle-gold)':'var(--lavender)'};font-weight:600;">${r._type}</span>
         <button class="delete-btn" onclick="delEntry('${r._type}','${r._id}')">&times;</button>
       </div>
     </li>`).join('');
@@ -3216,6 +3376,7 @@ function delEntry(type, id) {
   if (type==='income') state.income = state.income.filter(i => i.id !== id);
   if (type==='expense') state.expenses = state.expenses.filter(e => e.id !== id);
   if (type==='mileage') state.mileage = state.mileage.filter(m => m.id !== id);
+  if (type==='admin') state.adminTime = (state.adminTime||[]).filter(a => a.id !== id);
   saveState(); refreshAll(); showToast('Deleted');
 }
 
@@ -3777,7 +3938,7 @@ function importData(input) {
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
-function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); }
+function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); renderAdminTime(); }
 function dateStr(d) { return d.toISOString().split('T')[0]; }
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function fmtDate(s) { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
@@ -3936,11 +4097,11 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════
-// FIREBASE CLOUD SYNC
+// POCKETBASE CLOUD SYNC
 // ═══════════════════════════════════════
-let firebaseReady = false;
+let pbReady = false;
 let autoSyncEnabled = false;
-let db = null;
+let pb = null;
 let currentUser = null;
 let syncDebounceTimer = null;
 
@@ -3949,16 +4110,14 @@ function debouncedSyncToCloud() {
   syncDebounceTimer = setTimeout(() => syncToCloud(), 2000);
 }
 
-function getFirebaseConfig() {
+function getPocketBaseConfig() {
   try {
-    // Check state first (persists with app data), fall back to legacy localStorage
-    if (state.firebaseConfig && state.firebaseConfig.apiKey) {
-      return state.firebaseConfig;
+    if (state.pbConfig && state.pbConfig.serverUrl) {
+      return state.pbConfig;
     }
-    const legacy = JSON.parse(localStorage.getItem('firebaseConfig'));
-    if (legacy && legacy.apiKey) {
-      // Migrate legacy config into state
-      state.firebaseConfig = legacy;
+    const legacy = JSON.parse(localStorage.getItem('pbConfig'));
+    if (legacy && legacy.serverUrl) {
+      state.pbConfig = legacy;
       saveState();
       return legacy;
     }
@@ -3966,107 +4125,117 @@ function getFirebaseConfig() {
   } catch (e) { return null; }
 }
 
-function saveFirebaseConfig() {
-  const apiKey = document.getElementById('fbApiKey').value.trim();
-  const projectId = document.getElementById('fbProjectId').value.trim();
-  let authDomain = document.getElementById('fbAuthDomain').value.trim();
-  if (!apiKey || !projectId) { showToast('Enter API Key and Project ID'); return; }
-  if (!authDomain) authDomain = projectId + '.firebaseapp.com';
-  const config = { apiKey, authDomain, projectId };
-  state.firebaseConfig = config;
+function savePocketBaseConfig() {
+  const serverUrl = document.getElementById('pbServerUrl').value.trim();
+  const email = document.getElementById('pbEmail').value.trim();
+  const password = document.getElementById('pbPassword').value.trim();
+  if (!serverUrl) { showToast('Enter your server URL'); return; }
+  const config = { serverUrl, email, password };
+  state.pbConfig = { serverUrl, email };
   saveState();
-  localStorage.setItem('firebaseConfig', JSON.stringify(config)); // legacy backup
-  showToast('Firebase config saved');
-  initFirebase();
+  localStorage.setItem('pbConfig', JSON.stringify(config));
+  showToast('Config saved');
+  initPocketBase();
 }
 
-function initFirebase() {
-  const config = getFirebaseConfig();
-  if (!config || !config.apiKey) return false;
+function initPocketBase() {
+  const config = getPocketBaseConfig();
+  const stored = JSON.parse(localStorage.getItem('pbConfig') || '{}');
+  if (!config || !config.serverUrl) return false;
 
-  // Fill in the config fields if present
-  const apiKeyEl = document.getElementById('fbApiKey');
-  const projIdEl = document.getElementById('fbProjectId');
-  const authDomEl = document.getElementById('fbAuthDomain');
-  if (apiKeyEl && config.apiKey) apiKeyEl.value = config.apiKey;
-  if (projIdEl && config.projectId) projIdEl.value = config.projectId;
-  if (authDomEl && config.authDomain) authDomEl.value = config.authDomain;
+  const urlEl = document.getElementById('pbServerUrl');
+  const emailEl = document.getElementById('pbEmail');
+  if (urlEl) urlEl.value = config.serverUrl;
+  if (emailEl) emailEl.value = config.email || '';
 
   try {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(config);
+    pb = new PocketBase(config.serverUrl);
+
+    // Restore saved auth if available
+    const savedAuth = localStorage.getItem('pbAuth');
+    if (savedAuth) {
+      try {
+        const parsed = JSON.parse(savedAuth);
+        pb.authStore.save(parsed.token, parsed.record);
+      } catch (e) { /* ignore bad auth */ }
     }
-    db = firebase.firestore();
-    firebaseReady = true;
-    document.getElementById('googleSignInBtn').style.display = 'block';
 
-    // Handle redirect result (for mobile sign-in)
-    firebase.auth().getRedirectResult().then(result => {
-      if (result && result.user) {
-        showToast('Signed in as ' + result.user.displayName);
-      }
-    }).catch(err => {
-      if (err.code && err.code !== 'auth/popup-closed-by-user') {
-        console.warn('Redirect sign-in error:', err);
-      }
-    });
+    pbReady = true;
+    document.getElementById('pbSignInBtn').style.display = 'block';
 
-    // Check for existing auth state
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        showSignedInUI(user);
-        // Auto-sync on sign-in
-        autoSyncEnabled = localStorage.getItem('autoSync') === 'true';
-        const toggle = document.getElementById('autoSyncToggle');
-        if (toggle) toggle.checked = autoSyncEnabled;
+    // Check if already authenticated
+    if (pb.authStore.isValid && pb.authStore.record) {
+      currentUser = pb.authStore.record;
+      showSignedInUI(currentUser);
+      autoSyncEnabled = localStorage.getItem('autoSync') === 'true';
+      const toggle = document.getElementById('autoSyncToggle');
+      if (toggle) toggle.checked = autoSyncEnabled;
+      // Verify auth is still valid with server
+      pb.collection('users').authRefresh().then(() => {
+        currentUser = pb.authStore.record;
         syncFromCloud();
-      } else {
+      }).catch(() => {
+        // Auth expired, sign out
+        pb.authStore.clear();
+        localStorage.removeItem('pbAuth');
         currentUser = null;
         showSignedOutUI();
-      }
-    });
+        showToast('Session expired, please sign in again');
+      });
+    } else {
+      showSignedOutUI();
+    }
     return true;
   } catch (e) {
-    console.warn('Firebase init error:', e);
+    console.warn('PocketBase init error:', e);
     updateSyncStatus('red', 'Config error: ' + e.message);
     return false;
   }
 }
 
-function signInWithGoogle() {
-  if (!firebaseReady) { showToast('Save Firebase config first'); return; }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  // Use popup on all platforms (enable popups in Safari Settings if on iPhone)
-  firebase.auth().signInWithPopup(provider).then(result => {
-    showToast('Signed in as ' + result.user.displayName);
+function signInPocketBase() {
+  if (!pbReady || !pb) { showToast('Save config first'); return; }
+  const stored = JSON.parse(localStorage.getItem('pbConfig') || '{}');
+  const email = stored.email || document.getElementById('pbEmail').value.trim();
+  const password = stored.password || document.getElementById('pbPassword').value.trim();
+  if (!email || !password) { showToast('Enter email and password'); return; }
+
+  pb.collection('users').authWithPassword(email, password).then(result => {
+    currentUser = result.record;
+    // Save auth token (not password) for session persistence
+    localStorage.setItem('pbAuth', JSON.stringify({ token: pb.authStore.token, record: pb.authStore.record }));
+    // Clear password from stored config after successful login
+    const cfg = JSON.parse(localStorage.getItem('pbConfig') || '{}');
+    delete cfg.password;
+    localStorage.setItem('pbConfig', JSON.stringify(cfg));
+    document.getElementById('pbPassword').value = '';
+    showSignedInUI(currentUser);
+    showToast('Signed in!');
+    syncFromCloud();
   }).catch(err => {
     console.warn('Sign-in error:', err);
-    if (err.code === 'auth/popup-blocked') {
-      showToast('Please allow popups for this site in Safari Settings, then try again');
-    } else if (err.code !== 'auth/popup-closed-by-user') {
-      showToast('Sign-in failed: ' + err.message);
-    }
+    showToast('Sign-in failed. Check email/password.');
   });
 }
 
-function signOutFirebase() {
-  firebase.auth().signOut().then(() => {
-    currentUser = null;
-    firebaseReady = false;
-    autoSyncEnabled = false;
-    showSignedOutUI();
-    showToast('Signed out');
-  });
+function signOutPocketBase() {
+  if (pb) pb.authStore.clear();
+  localStorage.removeItem('pbAuth');
+  currentUser = null;
+  pbReady = false;
+  autoSyncEnabled = false;
+  showSignedOutUI();
+  showToast('Signed out');
 }
 
 function showSignedInUI(user) {
   document.getElementById('syncSignedOut').style.display = 'none';
   document.getElementById('syncSignedIn').style.display = 'block';
-  document.getElementById('syncUserName').textContent = user.displayName || 'User';
+  document.getElementById('syncUserName').textContent = user.name || user.email || 'User';
   document.getElementById('syncUserEmail').textContent = user.email || '';
   const avatar = document.getElementById('syncUserAvatar');
-  if (user.displayName) avatar.textContent = user.displayName.charAt(0).toUpperCase();
+  const displayName = user.name || user.email || '?';
+  avatar.textContent = displayName.charAt(0).toUpperCase();
   updateSyncStatus('green', 'Connected');
 }
 
@@ -4084,12 +4253,12 @@ function updateSyncStatus(color, text) {
 function toggleAutoSync() {
   autoSyncEnabled = document.getElementById('autoSyncToggle').checked;
   localStorage.setItem('autoSync', autoSyncEnabled ? 'true' : 'false');
-  showToast(autoSyncEnabled ? 'Auto-sync enabled' : 'Auto-sync disabled');
+  showToast(autoSyncEnabled ? 'Auto-sync on' : 'Auto-sync off');
   if (autoSyncEnabled && currentUser) syncToCloud();
 }
 
 function syncToCloud() {
-  if (!firebaseReady || !currentUser || !db) {
+  if (!pbReady || !currentUser || !pb || !pb.authStore.isValid) {
     updateSyncStatus('red', 'Not connected');
     return Promise.resolve();
   }
@@ -4097,44 +4266,58 @@ function syncToCloud() {
   const dataToSync = JSON.parse(JSON.stringify(state));
   dataToSync.lastModified = new Date().toISOString();
   dataToSync.syncedFrom = navigator.userAgent.includes('Mobile') ? 'phone' : 'desktop';
+  // Don't sync the pbConfig or firebaseConfig
+  delete dataToSync.pbConfig;
+  delete dataToSync.firebaseConfig;
 
-  return db.collection('users').doc(currentUser.uid).set({
-    state: dataToSync,
-    lastModified: firebase.firestore.FieldValue.serverTimestamp(),
-    email: currentUser.email
-  }, { merge: true }).then(() => {
+  const payload = {
+    user: currentUser.id,
+    appState: JSON.stringify(dataToSync),
+    lastModified: new Date().toISOString()
+  };
+
+  // Try to find existing record for this user
+  return pb.collection('app_sync').getList(1, 1, { filter: 'user = "' + currentUser.id + '"' }).then(result => {
+    if (result.items.length > 0) {
+      return pb.collection('app_sync').update(result.items[0].id, payload);
+    } else {
+      return pb.collection('app_sync').create(payload);
+    }
+  }).then(() => {
     updateSyncStatus('green', 'Synced ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+    localStorage.removeItem('syncPending');
   }).catch(err => {
     console.warn('Sync push error:', err);
     updateSyncStatus('red', 'Push failed');
-    // Queue for retry when online
     localStorage.setItem('syncPending', 'true');
   });
 }
 
 function syncFromCloud() {
-  if (!firebaseReady || !currentUser || !db) return Promise.resolve();
+  if (!pbReady || !currentUser || !pb || !pb.authStore.isValid) return Promise.resolve();
   updateSyncStatus('yellow', 'Pulling...');
 
-  return db.collection('users').doc(currentUser.uid).get().then(doc => {
-    if (!doc.exists || !doc.data().state) {
-      // No cloud data — push local to cloud
+  return pb.collection('app_sync').getList(1, 1, { filter: 'user = "' + currentUser.id + '"' }).then(result => {
+    if (result.items.length === 0 || !result.items[0].appState) {
       updateSyncStatus('green', 'First sync! Pushing local data');
       return syncToCloud();
     }
-    const cloudState = doc.data().state;
+    let cloudState;
+    try { cloudState = JSON.parse(result.items[0].appState); } catch (e) {
+      updateSyncStatus('red', 'Bad cloud data');
+      return;
+    }
     const localTime = new Date(state.lastModified || 0).getTime();
     const cloudTime = new Date(cloudState.lastModified || 0).getTime();
 
     if (cloudTime > localTime) {
-      // Cloud is newer — pull it
       const mergedState = { ...state, ...cloudState };
       // Preserve arrays properly (merge by id, cloud wins for conflicts)
-      ['income', 'expenses', 'mileage', 'receipts', 'invoices', 'clients', 'cards'].forEach(key => {
+      ['income', 'expenses', 'mileage', 'receipts', 'invoices', 'clients', 'cards', 'leads', 'adminTime'].forEach(key => {
         if (cloudState[key] && Array.isArray(cloudState[key])) {
           const merged = new Map();
           (state[key] || []).forEach(item => { if (item.id) merged.set(item.id, item); });
-          cloudState[key].forEach(item => { if (item.id) merged.set(item.id, item); }); // Cloud wins
+          cloudState[key].forEach(item => { if (item.id) merged.set(item.id, item); });
           mergedState[key] = Array.from(merged.values());
         }
       });
@@ -4145,6 +4328,8 @@ function syncFromCloud() {
           mergedState.learned[k] = { ...(state.learned || {})[k], ...(cloudState.learned || {})[k] };
         });
       }
+      // Restore local-only config
+      mergedState.pbConfig = state.pbConfig;
       state = mergedState;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       refreshAll();
@@ -4161,14 +4346,14 @@ function syncFromCloud() {
 
 // Retry sync when coming back online
 window.addEventListener('online', () => {
-  if (localStorage.getItem('syncPending') === 'true' && firebaseReady && currentUser) {
+  if (localStorage.getItem('syncPending') === 'true' && pbReady && currentUser) {
     localStorage.removeItem('syncPending');
     syncToCloud();
   }
 });
 
-// Init Firebase on page load if config exists
-setTimeout(() => { initFirebase(); }, 500);
+// Init PocketBase on page load if config exists
+setTimeout(() => { initPocketBase(); }, 500);
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'garden-faery-books-v11';
+const CACHE_NAME = 'garden-faery-books-v13';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -16,14 +16,11 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Don't intercept Firebase Auth or Google sign-in requests
-  if (url.hostname.includes('firebaseapp.com') ||
+  // Don't intercept PocketBase API requests or CDN scripts
+  if (url.pathname.startsWith('/api/') ||
+      url.hostname.includes('jsdelivr.net') ||
       url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('google.com') ||
-      url.hostname.includes('gstatic.com') ||
-      url.hostname.includes('firebaseio.com') ||
-      url.hostname.includes('cloudfunctions.net') ||
-      url.pathname.startsWith('/__/auth/')) {
+      url.hostname.includes('gstatic.com')) {
     return;
   }
 
