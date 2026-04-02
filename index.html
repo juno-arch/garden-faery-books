@@ -591,6 +591,22 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
     </div>
 
+    <!-- ─── WEEKLY DIGEST ─── -->
+    <div class="card" id="weeklyDigestCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="card-title" style="margin:0;">Weekly Digest</div>
+        <div id="digestWeekLabel" style="font-size:11px;color:var(--gray);font-weight:600;"></div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+        <div class="stat-box"><div class="value" id="digestHours">0</div><div class="label">Field Hrs</div></div>
+        <div class="stat-box"><div class="value" id="digestEarned">$0</div><div class="label">Earned</div></div>
+        <div class="stat-box"><div class="value" id="digestAdminHrs">0</div><div class="label">Admin Hrs</div></div>
+        <div class="stat-box"><div class="value" id="digestNet">$0</div><div class="label">Net</div></div>
+      </div>
+      <div id="digestClients" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
+      <div id="digestOutstanding" style="margin-top:4px;font-size:12px;color:var(--sparkle-gold);font-weight:600;"></div>
+    </div>
+
     <!-- ─── WEEKLY EARNINGS ─── -->
     <div class="card">
       <div class="card-title">This Week</div>
@@ -734,8 +750,23 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         </div>
       </div>
       <div id="calMonth" style="display:none;">
-        <div class="calendar-container">
-          <iframe id="gcalIframe" src="https://calendar.google.com/calendar/embed?src=gardenfaeryy%40gmail.com&ctz=America/Los_Angeles&mode=MONTH&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23fffbf0" loading="lazy"></iframe>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <button onclick="changeCalMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
+          <div id="calMonthLabel" style="font-weight:700;font-family:var(--font-heading);color:var(--warm-dark);font-size:16px;"></div>
+          <button onclick="changeCalMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:11px;text-align:center;">
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Sun</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Mon</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Tue</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Wed</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Thu</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Fri</div>
+          <div style="font-weight:700;color:var(--gray);padding:4px;">Sat</div>
+        </div>
+        <div id="calMonthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
+        <div style="margin-top:12px;text-align:center;">
+          <a href="https://cal.com/gardenfaery" target="_blank" rel="noopener" style="font-size:13px;color:var(--mushroom);font-weight:600;text-decoration:none;">Book a visit at cal.com/gardenfaery &rarr;</a>
         </div>
       </div>
     </div>
@@ -1252,6 +1283,7 @@ function switchCalView(view, btn) {
   btn.classList.add('active');
   document.getElementById('calUpcoming').style.display = view === 'upcoming' ? 'block' : 'none';
   document.getElementById('calMonth').style.display = view === 'month' ? 'block' : 'none';
+  if (view === 'month') renderCalMonth();
 }
 
 function loadCalendarEvents() {
@@ -1335,6 +1367,97 @@ function renderEventCard(evt) {
     '<div class="event-time">' + dayName + ', ' + month + ' · ' + time + (evt.allDay ? '' : endTime) + '</div>' +
     (evt.location ? '<div class="event-location">' + evt.location + '</div>' : '') +
     '</div>';
+}
+
+// Native month calendar view
+let calViewMonth = new Date().getMonth();
+let calViewYear = new Date().getFullYear();
+
+function changeCalMonth(delta) {
+  calViewMonth += delta;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+  renderCalMonth();
+}
+
+function renderCalMonth() {
+  const label = document.getElementById('calMonthLabel');
+  const grid = document.getElementById('calMonthGrid');
+  if (!label || !grid) return;
+
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  label.textContent = months[calViewMonth] + ' ' + calViewYear;
+
+  const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
+  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+  const todayStr = dateStr(new Date());
+
+  // Get events for this month
+  const events = getCalendarSyncData();
+  const eventDays = {};
+  events.forEach(evt => {
+    const d = new Date(evt.start);
+    if (d.getMonth() === calViewMonth && d.getFullYear() === calViewYear) {
+      const day = d.getDate();
+      if (!eventDays[day]) eventDays[day] = [];
+      eventDays[day].push(evt);
+    }
+  });
+
+  // Also check income entries for this month
+  (state.income || []).forEach(inc => {
+    const d = new Date(inc.date + 'T00:00:00');
+    if (d.getMonth() === calViewMonth && d.getFullYear() === calViewYear) {
+      const day = d.getDate();
+      if (!eventDays[day]) eventDays[day] = [];
+      // Avoid duplicates
+      if (!eventDays[day].some(e => (e.client||'').toLowerCase() === (inc.client||'').toLowerCase())) {
+        eventDays[day].push({ summary: inc.client, client: inc.client, service: inc.service });
+      }
+    }
+  });
+
+  let html = '';
+  // Blank cells before first day
+  for (let i = 0; i < firstDay; i++) {
+    html += '<div style="padding:6px;min-height:36px;"></div>';
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateCheck = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    const isToday = dateCheck === todayStr;
+    const hasEvents = eventDays[day];
+    const bg = isToday ? 'var(--text-primary)' : hasEvents ? 'var(--card-glow)' : 'transparent';
+    const color = isToday ? 'white' : 'var(--warm-dark)';
+    const border = hasEvents && !isToday ? '1px solid var(--accent-border)' : 'none';
+
+    html += '<div style="padding:4px 2px;min-height:36px;text-align:center;background:' + bg + ';color:' + color + ';border-radius:6px;border:' + border + ';font-size:12px;cursor:' + (hasEvents ? 'pointer' : 'default') + ';" ' +
+      (hasEvents ? 'onclick="showCalDayDetail(' + day + ')" ' : '') +
+      'title="' + (hasEvents ? hasEvents.map(e => (e.client || e.summary || '')).join(', ') : '') + '">' +
+      '<div style="font-weight:' + (isToday || hasEvents ? '700' : '400') + ';">' + day + '</div>' +
+      (hasEvents ? '<div style="width:5px;height:5px;border-radius:50%;background:' + (isToday ? 'white' : 'var(--mushroom)') + ';margin:2px auto 0;"></div>' : '') +
+      '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+function showCalDayDetail(day) {
+  const dateCheck = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+  const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === dateCheck);
+  const income = (state.income || []).filter(i => i.date === dateCheck);
+
+  let msg = new Date(calViewYear, calViewMonth, day).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ':\n';
+  events.forEach(e => {
+    const time = new Date(e.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    msg += '\n' + (e.client || e.summary) + ' at ' + time;
+    if (e.location) msg += '\n  ' + e.location;
+  });
+  if (income.length) {
+    msg += '\n\nLogged: ';
+    income.forEach(i => { msg += '\n' + i.client + ': $' + i.total + ' (' + i.service + ')'; });
+  }
+  alert(msg);
 }
 
 // Seed calendar with synced Google Calendar events
@@ -3436,6 +3559,7 @@ function refreshDashboard() {
       '<div style="display:flex;align-items:center;gap:8px;">' +
       '<span style="font-weight:700;color:var(--warm-dark);">$' + amt.toFixed(0) + '</span>' +
       '<button onclick="sendChat_(\'/invoice ' + esc(name) + '\')" style="font-size:11px;padding:3px 8px;border:1px solid var(--mushroom);border-radius:6px;background:var(--fairy-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);">Invoice</button>' +
+      '<button onclick="shareReceipt(\'' + esc(name) + '\',' + amt.toFixed(2) + ')" style="font-size:11px;padding:3px 8px;border:1px solid var(--accent-border);border-radius:6px;background:white;color:var(--warm-dark);cursor:pointer;font-family:var(--font);">Send</button>' +
       '</div></div>'
     ).join('') +
     '<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;color:var(--sparkle-gold);"><span>Total Outstanding</span><span>$' + totalOwed.toFixed(0) + '</span></div>';
@@ -3485,6 +3609,108 @@ function sendChat_(text) {
     document.getElementById('chatInput').value = text;
     sendChat();
   }, 100);
+}
+
+// ═══════════════════════════════════════
+// WEEKLY DIGEST
+// ═══════════════════════════════════════
+function renderWeeklyDigest() {
+  // Show last full week (Mon-Sun) summary
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+  // Last Monday
+  const lastMonday = new Date(now);
+  lastMonday.setDate(now.getDate() - dayOfWeek - 6);
+  const lastSunday = new Date(lastMonday);
+  lastSunday.setDate(lastMonday.getDate() + 6);
+
+  const startStr = dateStr(lastMonday);
+  const endStr = dateStr(lastSunday);
+
+  const label = document.getElementById('digestWeekLabel');
+  if (label) label.textContent = fmtDate(startStr) + ' to ' + fmtDate(endStr);
+
+  // Field hours + earnings
+  const weekIncome = state.income.filter(i => i.date >= startStr && i.date <= endStr);
+  const weekExpenses = state.expenses.filter(e => e.date >= startStr && e.date <= endStr);
+  const fieldHrs = weekIncome.reduce((s, i) => s + (i.hours || 0), 0);
+  const earned = weekIncome.reduce((s, i) => s + (i.total || 0), 0);
+  const spent = weekExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+
+  // Admin hours
+  const weekAdmin = (state.adminTime || []).filter(a => a.date >= startStr && a.date <= endStr);
+  const adminHrs = weekAdmin.reduce((s, a) => s + (a.hours || 0), 0);
+
+  document.getElementById('digestHours').textContent = fieldHrs.toFixed(1);
+  document.getElementById('digestEarned').textContent = '$' + earned.toFixed(0);
+  document.getElementById('digestAdminHrs').textContent = adminHrs.toFixed(1);
+  document.getElementById('digestNet').textContent = '$' + (earned - spent).toFixed(0);
+
+  // Clients seen
+  const clients = [...new Set(weekIncome.map(i => i.client).filter(Boolean))];
+  const clientsEl = document.getElementById('digestClients');
+  if (clientsEl) {
+    clientsEl.textContent = clients.length ? 'Clients: ' + clients.join(', ') : 'No client visits last week';
+  }
+
+  // Outstanding
+  const totalOwed = state.income.filter(i => !i.invoiced).reduce((s, i) => s + (i.total || 0), 0);
+  const outEl = document.getElementById('digestOutstanding');
+  if (outEl) {
+    outEl.textContent = totalOwed > 0 ? '$' + totalOwed.toFixed(0) + ' outstanding' : 'All caught up!';
+  }
+}
+
+// ═══════════════════════════════════════
+// RECEIPT / INVOICE SHARING
+// ═══════════════════════════════════════
+function shareReceipt(clientName, amount) {
+  // Find this client's recent uninvoiced income entries
+  const entries = state.income.filter(i => !i.invoiced && (i.client || '').toLowerCase() === clientName.toLowerCase());
+  const total = entries.reduce((s, i) => s + (i.total || 0), 0);
+
+  let text = 'Garden Faery Receipt\n';
+  text += '--------------------\n';
+  text += 'Client: ' + clientName + '\n\n';
+
+  entries.forEach(e => {
+    text += fmtDate(e.date) + ': ' + (e.service || 'Garden Care');
+    if (e.hours) text += ' (' + e.hours + ' hrs)';
+    text += ', $' + (e.total || 0).toFixed(0) + '\n';
+  });
+
+  text += '\nTotal: $' + total.toFixed(0) + '\n';
+  text += 'Payment: Cash\n';
+  text += '\nThank you for growing with Garden Faery! 🌿\n';
+  text += 'Taya, taya@gardenfaery.love';
+
+  // Try Web Share API (works great on mobile)
+  if (navigator.share) {
+    navigator.share({
+      title: 'Garden Faery Receipt for ' + clientName,
+      text: text
+    }).catch(() => {
+      // Fallback to clipboard
+      copyReceiptToClipboard(text);
+    });
+  } else {
+    copyReceiptToClipboard(text);
+  }
+}
+
+function copyReceiptToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Receipt copied! Paste it in a text or email 🌿');
+  }).catch(() => {
+    // Last resort fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Receipt copied!');
+  });
 }
 
 // ═══════════════════════════════════════
@@ -4097,7 +4323,7 @@ function importData(input) {
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
-function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); renderAdminTime(); }
+function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); renderAdminTime(); renderWeeklyDigest(); }
 function dateStr(d) { return d.toISOString().split('T')[0]; }
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function fmtDate(s) { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
