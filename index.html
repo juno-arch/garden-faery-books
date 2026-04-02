@@ -167,6 +167,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   font-size: 14px; line-height: 1.5; animation: fadeIn 0.2s ease;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes timerPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 .chat-bubble.user {
   background: var(--warm-dark); color: white; margin-left: auto;
   border-bottom-right-radius: 4px;
@@ -643,7 +644,35 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
     <div class="card" id="adminTimeCard">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div class="card-title" style="margin:0;">Admin Time</div>
-        <button onclick="toggleAdminForm()" id="adminFormToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">+ Log Time</button>
+        <div style="display:flex;gap:6px;">
+          <button onclick="toggleAdminTimer()" id="adminTimerToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">Start Timer</button>
+          <button onclick="toggleAdminForm()" id="adminFormToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">+ Log</button>
+        </div>
+      </div>
+
+      <!-- Active timer display (hidden by default) -->
+      <div id="adminTimerPanel" style="display:none;padding:14px;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.25);border-radius:var(--radius);margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#2e7d32;text-transform:uppercase;letter-spacing:0.5px;">Timer Running</div>
+            <div id="adminTimerDisplay" style="font-size:28px;font-weight:800;color:var(--warm-dark);font-family:var(--font);letter-spacing:1px;">0:00:00</div>
+          </div>
+          <div id="adminTimerDot" style="width:10px;height:10px;border-radius:50%;background:#4caf50;animation:timerPulse 1.5s ease infinite;"></div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <div class="filter-pills" id="adminTimerCatPills" style="flex-wrap:wrap;">
+            <button class="filter-pill active" onclick="pickAdminTimerCat(this)" data-cat="Admin">Admin</button>
+            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Scheduling">Scheduling</button>
+            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Planning">Planning</button>
+            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Claude Session">Claude Session</button>
+            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Marketing">Marketing</button>
+            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Bookkeeping">Bookkeeping</button>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <input type="text" id="adminTimerNotes" placeholder="What are you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
+        </div>
+        <button onclick="stopAdminTimer()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--red);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Stop and Save</button>
       </div>
 
       <!-- Admin time summary -->
@@ -2827,6 +2856,136 @@ function logQuickMileage(client, miles, date) {
 // ═══════════════════════════════════════
 // ADMIN TIME TRACKER
 // ═══════════════════════════════════════
+let adminTimer = null; // { startTime: Date, interval: id }
+
+function toggleAdminTimer() {
+  if (adminTimer) {
+    // Timer is running, stop it
+    stopAdminTimer();
+  } else {
+    startAdminTimer();
+  }
+}
+
+function startAdminTimer(category, notes) {
+  if (adminTimer) return; // Already running
+  adminTimer = {
+    startTime: new Date(),
+    interval: setInterval(updateTimerDisplay, 1000)
+  };
+  // Save start time to localStorage so it survives page reloads
+  localStorage.setItem('adminTimerStart', adminTimer.startTime.toISOString());
+  localStorage.setItem('adminTimerCat', category || '');
+  localStorage.setItem('adminTimerNotes', notes || '');
+
+  const panel = document.getElementById('adminTimerPanel');
+  const btn = document.getElementById('adminTimerToggle');
+  if (panel) panel.style.display = 'block';
+  if (btn) { btn.textContent = 'Stop'; btn.style.background = 'rgba(192,57,43,0.1)'; btn.style.color = 'var(--red)'; btn.style.borderColor = 'var(--red)'; }
+
+  // Set category pill if provided
+  if (category) {
+    document.querySelectorAll('#adminTimerCatPills .filter-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.cat === category);
+    });
+  }
+  if (notes) {
+    const notesEl = document.getElementById('adminTimerNotes');
+    if (notesEl) notesEl.value = notes;
+  }
+
+  updateTimerDisplay();
+  showToast('Timer started! 🕐');
+}
+
+function stopAdminTimer() {
+  if (!adminTimer) return;
+  clearInterval(adminTimer.interval);
+  const elapsed = (new Date() - adminTimer.startTime) / 3600000; // hours
+  const hours = Math.round(elapsed * 4) / 4; // Round to nearest 15 min
+
+  const catEl = document.querySelector('#adminTimerCatPills .filter-pill.active');
+  const category = catEl ? catEl.dataset.cat : 'Admin';
+  const notes = (document.getElementById('adminTimerNotes') || {}).value || '';
+  const rate = state.settings.adminRate || 25;
+
+  if (hours >= 0.08) { // At least ~5 minutes
+    state.adminTime.push({
+      id: uid(),
+      date: dateStr(new Date()),
+      hours: Math.max(0.25, hours), // Minimum 15 min
+      category: category,
+      notes: notes,
+      cost: +(Math.max(0.25, hours) * rate).toFixed(2)
+    });
+    saveState();
+    refreshDashboard();
+    renderAdminTime();
+    showToast(Math.max(0.25, hours).toFixed(2) + 'h of ' + category + ' logged! Seeds planted 🌱');
+  } else {
+    showToast('Less than 5 minutes, not logged');
+  }
+
+  adminTimer = null;
+  localStorage.removeItem('adminTimerStart');
+  localStorage.removeItem('adminTimerCat');
+  localStorage.removeItem('adminTimerNotes');
+
+  const panel = document.getElementById('adminTimerPanel');
+  const btn = document.getElementById('adminTimerToggle');
+  if (panel) panel.style.display = 'none';
+  if (btn) { btn.textContent = 'Start Timer'; btn.style.background = 'var(--card-glow)'; btn.style.color = 'var(--warm-dark)'; btn.style.borderColor = 'var(--accent-border)'; }
+  if (document.getElementById('adminTimerDisplay')) document.getElementById('adminTimerDisplay').textContent = '0:00:00';
+}
+
+function updateTimerDisplay() {
+  if (!adminTimer) return;
+  const elapsed = Math.floor((new Date() - adminTimer.startTime) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  const display = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  const el = document.getElementById('adminTimerDisplay');
+  if (el) el.textContent = display;
+}
+
+function pickAdminTimerCat(el) {
+  document.querySelectorAll('#adminTimerCatPills .filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  localStorage.setItem('adminTimerCat', el.dataset.cat);
+}
+
+// Restore timer on page load (survives reload/navigation)
+function restoreAdminTimer() {
+  const startStr = localStorage.getItem('adminTimerStart');
+  if (startStr) {
+    const startTime = new Date(startStr);
+    // Check if it's less than 12 hours old (safety limit)
+    if ((new Date() - startTime) < 12 * 3600000) {
+      adminTimer = { startTime: startTime, interval: setInterval(updateTimerDisplay, 1000) };
+      const panel = document.getElementById('adminTimerPanel');
+      const btn = document.getElementById('adminTimerToggle');
+      if (panel) panel.style.display = 'block';
+      if (btn) { btn.textContent = 'Stop'; btn.style.background = 'rgba(192,57,43,0.1)'; btn.style.color = 'var(--red)'; btn.style.borderColor = 'var(--red)'; }
+      // Restore category and notes
+      const cat = localStorage.getItem('adminTimerCat');
+      if (cat) {
+        document.querySelectorAll('#adminTimerCatPills .filter-pill').forEach(p => {
+          p.classList.toggle('active', p.dataset.cat === cat);
+        });
+      }
+      const notes = localStorage.getItem('adminTimerNotes');
+      if (notes) { const el = document.getElementById('adminTimerNotes'); if (el) el.value = notes; }
+      updateTimerDisplay();
+    } else {
+      // Stale timer, clean up
+      localStorage.removeItem('adminTimerStart');
+      localStorage.removeItem('adminTimerCat');
+      localStorage.removeItem('adminTimerNotes');
+    }
+  }
+}
+
 function toggleAdminForm() {
   const panel = document.getElementById('adminFormPanel');
   const btn = document.getElementById('adminFormToggle');
@@ -4014,6 +4173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   refreshAll();
+  restoreAdminTimer();
   seedCalendarFromKnown();
   syncClientsFromCalendar();
   document.getElementById('settingsRate').value = state.settings.rate || 25;
