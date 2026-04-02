@@ -1873,7 +1873,7 @@ function handleCommand(text) {
       if (matching.length > 1) msgLines.push('Total: $' + total.toFixed(2));
       msgLines.push('');
       msgLines.push('Cash is great! You can leave it in your usual spot if I miss you.');
-      msgLines.push('Thank you! —Garden Faery');
+      msgLines.push('Thank you! ~ Garden Faery');
       const plainMsg = msgLines.join('\n');
 
       // Build the HTML display
@@ -3956,10 +3956,10 @@ function renderClientsList() {
   state.clients.forEach(c => {
     html += '<tr>';
     html += '<td style="font-weight:600;white-space:nowrap;">' + esc(c.name) + (c.email ? '<br><a href="mailto:' + esc(c.email) + '" style="font-weight:400;font-size:11px;">' + esc(c.email) + '</a>' : '') + '</td>';
-    html += '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#ccc;">—</span>') + '</td>';
-    html += '<td>' + (c.address ? esc(c.address) : '<span style="color:#ccc;">—</span>') + '</td>';
-    html += '<td style="text-align:center;">' + (c.miles ? c.miles : '<span style="color:#ccc;">—</span>') + '</td>';
-    html += '<td>' + (c.hidySpot ? esc(c.hidySpot) : '<span style="color:#ccc;">—</span>') + '</td>';
+    html += '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#ccc;">-</span>') + '</td>';
+    html += '<td>' + (c.address ? esc(c.address) : '<span style="color:#ccc;">-</span>') + '</td>';
+    html += '<td style="text-align:center;">' + (c.miles ? c.miles : '<span style="color:#ccc;">-</span>') + '</td>';
+    html += '<td>' + (c.hidySpot ? esc(c.hidySpot) : '<span style="color:#ccc;">-</span>') + '</td>';
     html += '<td class="actions-cell"><button class="tbl-edit" onclick="editClient(\'' + c.id + '\')">Edit</button><button class="tbl-del" onclick="delClient(\'' + c.id + '\')">&times;</button></td>';
     html += '</tr>';
   });
