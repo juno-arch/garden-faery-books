@@ -6,7 +6,7 @@
   "scope": "/garden-faery-books/",
   "display": "standalone",
   "background_color": "#fffbf0",
-  "theme_color": "#4a3520",
+  "theme_color": "#4a1942",
   "orientation": "portrait",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
