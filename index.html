@@ -1010,6 +1010,16 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
         <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
       </div>
       <div class="card">
+        <div class="card-title">Cal.com Booking Sync</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Auto-import bookings from Cal.com as income, visits, and mileage. Syncs every time you open the app.</p>
+        <div class="form-group"><label>Cal.com API Key</label><input type="password" id="settingsCalApiKey" placeholder="cal_live_..."></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="saveCalApiKey()">Save Key</button>
+          <button class="btn btn-outline" onclick="syncFromCal()">Sync Now 🌱</button>
+        </div>
+        <div id="calSyncStatus" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
+      </div>
+      <div class="card">
         <div class="card-title">Receipt Scanner</div>
         <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Google Cloud Vision auto-reads receipts. Free for 1,000/month.</p>
         <div class="form-group"><label>Vision API Key</label><input type="password" id="settingsVisionKey" placeholder="Paste API key"></div>
@@ -1085,7 +1095,7 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
       <div class="card">
         <div class="card-title">About</div>
-        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.4<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Syncs across devices with PocketBase. Private and offline-ready.</p>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.5<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Cal.com booking sync. Syncs across devices with PocketBase. Private and offline-ready.</p>
       </div>
   </div>
 
@@ -1127,7 +1137,7 @@ let state = {
   invoices: [], clients: [], cards: [], leads: [],
   adminTime: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
-  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25 },
+  settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25, calApiKey: '', calLastSync: '' },
   version: 4
 };
 
@@ -3453,6 +3463,178 @@ function syncWebsiteLeads() {
     });
 }
 
+// ═══════════════════════════════════════
+// CAL.COM BOOKING SYNC
+// ═══════════════════════════════════════
+function saveCalApiKey() {
+  const key = document.getElementById('settingsCalApiKey').value.trim();
+  if (!key) { showToast('Paste your Cal.com API key first'); return; }
+  state.settings.calApiKey = key;
+  saveState();
+  showToast('Cal.com API key saved! 🌿');
+  document.getElementById('calSyncStatus').textContent = 'Key saved. Tap "Sync Now" to pull bookings.';
+}
+
+async function syncFromCal() {
+  const key = state.settings.calApiKey;
+  if (!key) { showToast('Add your Cal.com API key in Settings first'); return; }
+
+  const statusEl = document.getElementById('calSyncStatus');
+  if (statusEl) statusEl.textContent = 'Fetching bookings from Cal.com...';
+
+  try {
+    // Fetch past bookings (completed ones we can log as income)
+    const params = new URLSearchParams({
+      status: 'past',
+      sortStart: 'desc',
+      limit: '50'
+    });
+    // If we synced before, only get bookings after last sync
+    if (state.settings.calLastSync) {
+      params.set('afterStart', state.settings.calLastSync);
+    }
+
+    const resp = await fetch('https://api.cal.com/v2/bookings?' + params.toString(), {
+      headers: {
+        'Authorization': 'Bearer ' + key,
+        'cal-api-version': '2024-08-13',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error('Cal.com API error ' + resp.status + ': ' + errText.substring(0, 100));
+    }
+
+    const json = await resp.json();
+    const bookings = json.data || [];
+
+    if (bookings.length === 0) {
+      if (statusEl) statusEl.textContent = 'All caught up! No new bookings to sync.';
+      return;
+    }
+
+    let incomeAdded = 0;
+    let mileageAdded = 0;
+    const rate = state.settings.rate || 25;
+
+    bookings.forEach(b => {
+      // Skip cancelled bookings
+      if (b.status === 'cancelled') return;
+
+      // Build a unique booking ID to prevent duplicates
+      const calBookingId = 'cal_' + (b.uid || b.id);
+
+      // Check if we already imported this booking
+      if (state.income.some(i => i.calBookingId === calBookingId)) return;
+
+      // Extract booking details
+      const startDate = b.start ? new Date(b.start) : new Date();
+      const endDate = b.end ? new Date(b.end) : null;
+      const dateStr = startDate.toISOString().split('T')[0];
+      const durationMin = b.duration || (endDate ? Math.round((endDate - startDate) / 60000) : 0);
+      const hours = Math.round(durationMin / 15) * 0.25; // Round to 15 min
+
+      // Get attendee info (client name, phone, email)
+      const attendee = (b.attendees || [])[0] || {};
+      const clientName = attendee.name || 'Cal.com Booking';
+      const clientEmail = attendee.email || '';
+      const clientPhone = attendee.phoneNumber || '';
+
+      // Get location (client's garden address)
+      const location = b.location || '';
+
+      // Get event type name for service description
+      const eventTitle = b.title || 'Garden Care';
+
+      // Create income entry
+      const incomeId = uid();
+      const total = hours * rate;
+      state.income.push({
+        id: incomeId,
+        calBookingId: calBookingId,
+        client: clientName,
+        date: dateStr,
+        hours: hours,
+        rate: rate,
+        total: total,
+        payment: 'Cash',
+        service: eventTitle,
+        notes: [
+          location ? 'Location: ' + location : '',
+          clientPhone ? 'Phone: ' + clientPhone : '',
+          clientEmail ? 'Email: ' + clientEmail : ''
+        ].filter(Boolean).join(' | ')
+      });
+      incomeAdded++;
+
+      // Auto-create mileage if client has saved miles
+      const savedClient = (state.clients || []).find(c =>
+        c.name && c.name.toLowerCase() === clientName.toLowerCase()
+      );
+      if (savedClient && savedClient.miles > 0) {
+        state.mileage.push({
+          id: uid(),
+          date: dateStr,
+          destination: clientName,
+          purpose: 'Client Visit',
+          miles: savedClient.miles,
+          deduction: savedClient.miles * (state.settings.irsRate || 0.70),
+          notes: 'Auto-logged from Cal.com booking'
+        });
+        mileageAdded++;
+      }
+
+      // Auto-create or update client record if not already in clients list
+      if (!state.clients.some(c => c.name && c.name.toLowerCase() === clientName.toLowerCase())) {
+        state.clients.push({
+          id: uid(),
+          name: clientName,
+          email: clientEmail,
+          phone: clientPhone,
+          address: location,
+          miles: 0,
+          hidySpot: '',
+          notes: 'Auto-added from Cal.com booking',
+          created: new Date().toISOString()
+        });
+      }
+    });
+
+    // Update last sync timestamp
+    state.settings.calLastSync = new Date().toISOString();
+    saveState();
+    refreshAll();
+
+    // Show results
+    let msg = '';
+    if (incomeAdded > 0) msg += '🌱 ' + incomeAdded + ' booking' + (incomeAdded > 1 ? 's' : '') + ' planted as income!';
+    if (mileageAdded > 0) msg += ' 🚗 ' + mileageAdded + ' trip' + (mileageAdded > 1 ? 's' : '') + ' auto-logged.';
+    if (!msg) msg = 'All caught up! No new bookings to sync.';
+    if (statusEl) statusEl.textContent = msg;
+    showToast(msg);
+
+  } catch (err) {
+    console.warn('Cal.com sync error:', err);
+    if (statusEl) statusEl.textContent = 'Sync failed: ' + err.message;
+    showToast('Cal.com sync failed. Check your API key.');
+  }
+}
+
+// Auto-sync Cal.com on app load (if key is configured)
+function autoSyncCal() {
+  if (!state.settings.calApiKey) return;
+  // Only auto-sync if it's been at least 30 minutes since last sync
+  if (state.settings.calLastSync) {
+    const last = new Date(state.settings.calLastSync);
+    const now = new Date();
+    if ((now - last) < 30 * 60 * 1000) return;
+  }
+  // Quiet sync (no toast unless new bookings found)
+  syncFromCal();
+}
+
 // DASHBOARD
 // ═══════════════════════════════════════
 let viewMonth = new Date().getMonth();
@@ -4406,7 +4588,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsGoal').value = state.settings.goal || 2000;
   if (state.settings.visionKey) document.getElementById('settingsVisionKey').value = state.settings.visionKey;
   if (state.settings.formsUrl) document.getElementById('settingsFormsUrl').value = state.settings.formsUrl;
+  if (state.settings.calApiKey) document.getElementById('settingsCalApiKey').value = state.settings.calApiKey;
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
+
+  // Auto-sync Cal.com bookings on app open
+  autoSyncCal();
 
   // Welcome message in chat
   const msgs = document.getElementById('chatMessages');
