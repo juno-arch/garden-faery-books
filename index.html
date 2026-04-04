@@ -474,6 +474,91 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
 .line-item-row .form-group { margin-bottom: 0; }
 .add-line-btn { background: none; border: 2px dashed #CCC; border-radius: 8px; padding: 10px; width: 100%; font-family: var(--font); font-size: 13px; color: var(--gray); cursor: pointer; margin-bottom: 12px; }
 .add-line-btn:hover { border-color: var(--mushroom); color: var(--mushroom); }
+
+/* ─── MODAL (bottom sheet) ─── */
+.gf-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(74,25,66,0.25); z-index: 200;
+  align-items: flex-end; justify-content: center;
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+}
+.gf-modal.active { display: flex; }
+.gf-modal-content {
+  background: var(--cream); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 560px;
+  max-height: 85vh; overflow-y: auto;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0));
+  border-top: 2px solid var(--accent-border);
+}
+.gf-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.gf-modal-header h3 {
+  font-family: var(--font-heading); font-size: 20px; font-weight: 600;
+  color: var(--warm-dark);
+}
+.gf-modal-close {
+  background: none; border: none; font-size: 24px; cursor: pointer;
+  color: var(--gray); padding: 4px;
+}
+
+/* ─── TASK / FILTER CHIPS ─── */
+.stat-chip {
+  flex-shrink: 0; padding: 6px 12px; border-radius: 20px;
+  font-family: var(--font-heading); font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--accent-border); background: white; color: var(--gray);
+  transition: all 0.2s;
+}
+.stat-chip.active {
+  background: var(--mushroom); color: white;
+  border-color: var(--mushroom);
+}
+.stat-chip .count { margin-left: 4px; }
+
+/* ─── SUPPLIER CARDS ─── */
+.supplier-card .card-title { border-bottom: 1px dashed var(--accent-border); padding-bottom: 10px; }
+.supplier-price { font-size: 15px; margin-bottom: 6px; }
+.supplier-name { font-weight: 700; color: var(--warm-dark); }
+.supplier-address { font-size: 13px; color: var(--gray); }
+.supplier-phone { color: var(--mushroom); text-decoration: none; font-weight: 600; }
+.supplier-alt { font-size: 12px; color: var(--gray); margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--accent-border-xlt); }
+
+/* ─── EMPTY STATE ─── */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--gray); }
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state p { font-size: 14px; line-height: 1.5; }
+
+/* ─── FORM ELEMENTS for modals (form-label and form-input enhanced) ─── */
+.form-label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--gray); margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  font-family: var(--font-heading);
+}
+.form-input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--accent-border); border-radius: 12px;
+  font-size: 16px; font-family: var(--font-body);
+  background: var(--cream);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: var(--text-primary);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--mushroom);
+  background: white;
+  box-shadow: 0 0 0 3px var(--accent-border-xlt);
+}
+.form-input::placeholder { color: var(--accent-border); }
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 36px;
+}
+textarea.form-input { resize: vertical; min-height: 60px; }
 </style>
 </head>
 <body>
@@ -539,6 +624,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       <button class="sidebar-item" onclick="openSidebarTab('reports')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Reports
+      </button>
+      <button class="sidebar-item" onclick="openSidebarTab('supply')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Supply
       </button>
       <div class="sidebar-divider"></div>
       <button class="sidebar-item" onclick="openSidebarTab('settings')">
@@ -1095,8 +1184,138 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
       </div>
       <div class="card">
         <div class="card-title">About</div>
-        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v5.5<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Cal.com booking sync. Syncs across devices with PocketBase. Private and offline-ready.</p>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v6.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Cal.com booking sync. Syncs across devices with PocketBase. Private and offline-ready.</p>
       </div>
+  </div>
+
+  <!-- ═══ VISITS TAB ═══ -->
+  <div class="tab-pane" id="tab-visits">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h2 style="font-family:var(--font-heading); font-size:22px; color:var(--warm-dark);">Garden Care Visits</h2>
+      <button style="padding:8px 16px; border-radius:12px; border:2px solid var(--mushroom); background:var(--mushroom); color:white; font-family:var(--font-heading); font-size:14px; font-weight:600; cursor:pointer;" onclick="openVisitModal()">+ Log Visit</button>
+    </div>
+
+    <div class="card" id="visit-summary" style="border:2px dashed var(--sparkle-gold); background:var(--fairy-glow);">
+      <div class="card-title">This Week</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
+        <div>
+          <div style="font-size:22px; font-weight:700; color:var(--warm-dark);" id="visit-week-hrs">0</div>
+          <div style="font-size:11px; color:var(--gray);">Hours</div>
+        </div>
+        <div>
+          <div style="font-size:22px; font-weight:700; color:var(--sparkle-gold);" id="visit-week-earned">$0</div>
+          <div style="font-size:11px; color:var(--gray);">Earned</div>
+        </div>
+        <div>
+          <div style="font-size:22px; font-weight:700; color:var(--mushroom);" id="visit-week-count">0</div>
+          <div style="font-size:11px; color:var(--gray);">Visits</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="upcoming-visits"></div>
+    <div id="visits-list"></div>
+  </div>
+
+  <!-- VISIT MODAL -->
+  <div class="gf-modal" id="visit-modal" onclick="closeVisitModal(event)">
+    <div class="gf-modal-content" onclick="event.stopPropagation()">
+      <div class="gf-modal-header">
+        <h3 id="visit-modal-title">Log Visit</h3>
+        <button class="gf-modal-close" onclick="closeVisitModal()">&times;</button>
+      </div>
+      <input type="hidden" id="visit-edit-id">
+      <div class="form-group">
+        <label class="form-label">Client</label>
+        <select class="form-input" id="v-client">
+          <option value="">Select client...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="v-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hours worked</label>
+        <input type="number" class="form-input" id="v-hours" placeholder="2.5" step="0.25" min="0.25">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tasks completed</label>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;" id="v-task-pills">
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Weeding</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Watering</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Pruning</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Planting</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Mulching</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Mowing</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Cleanup</button>
+          <button type="button" class="stat-chip" onclick="toggleTaskPill(this)">Harvest</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Schedule</label>
+        <select class="form-input" id="v-recurring">
+          <option value="none">One-time visit</option>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Every two weeks</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="v-notes" rows="2" placeholder="How did the garden look?"></textarea>
+      </div>
+      <button style="width:100%; padding:12px; border-radius:12px; border:none; background:var(--mushroom); color:white; font-family:var(--font-heading); font-size:16px; font-weight:700; cursor:pointer; margin-top:8px;" onclick="saveVisit()">Plant This Visit</button>
+      <div id="visit-delete-row" style="display:none; margin-top:12px; text-align:center;">
+        <button onclick="deleteVisit()" style="background:none; border:none; color:var(--red); font-size:13px; cursor:pointer; font-family:var(--font-heading);">Delete this visit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SUPPLY TAB ═══ -->
+  <div class="tab-pane" id="tab-supply">
+    <h2 style="font-family:var(--font-heading); font-size:22px; color:var(--warm-dark); margin-bottom:14px;">Materials & Suppliers</h2>
+    <p style="font-size:13px; color:var(--gray); margin-bottom:16px; font-style:italic;">Local suppliers near Arcata. Prices last checked March 2026.</p>
+
+    <div class="card supplier-card">
+      <div class="card-title">Cedar Lumber</div>
+      <div class="supplier-price"><strong>2x12 Cedar</strong>: $4.75/ft</div>
+      <div class="supplier-address" style="margin-bottom:6px;">
+        <span class="supplier-name">Almquist Lumber</span>, 5301 Boyd Rd, Arcata<br>
+        <a href="tel:7078260078" class="supplier-phone">(707) 826-0078</a>
+      </div>
+      <div class="supplier-alt">Also check: <strong>The Mill Yard</strong> (4949 West End Rd) · <strong>Pierson Building Center</strong> (Eureka) · <strong>Schmidbauer Lumber</strong></div>
+    </div>
+
+    <div class="card supplier-card">
+      <div class="card-title">Hardware Cloth</div>
+      <div class="supplier-price"><strong>3ft roll</strong>: $2.90/ft <span style="color:var(--gray); font-size:12px;">($0.97/sq ft)</span></div>
+      <div class="supplier-price"><strong>4ft roll</strong>: $3.80/ft <span style="color:var(--gray); font-size:12px;">($0.95/sq ft)</span></div>
+      <div class="supplier-address">
+        <span class="supplier-name">Almquist Lumber</span>, 5301 Boyd Rd, Arcata<br>
+        <a href="tel:7078260078" class="supplier-phone">(707) 826-0078</a>
+      </div>
+    </div>
+
+    <div class="card supplier-card">
+      <div class="card-title">Soil & Compost</div>
+      <div class="supplier-price"><strong>Potting soil</strong>: $200/yd</div>
+      <div class="supplier-price"><strong>Fir compost</strong>: $60/yd</div>
+      <div class="supplier-address" style="margin-bottom:6px;">
+        <span class="supplier-name">Mad River Gardens</span>, 3384 Janes Rd, Arcata<br>
+        <a href="tel:7078227049" class="supplier-phone">(707) 822-7049</a>
+      </div>
+      <div class="supplier-alt">Also check: <strong>Wes Green Company</strong> (1500 Glendale Dr · <a href="tel:7078228537" class="supplier-phone">707-822-8537</a>) · <strong>Powell Landscape Materials</strong> (Eureka · <a href="tel:7074442026" class="supplier-phone">707-444-2026</a>) · <strong>Full Cycle Compost</strong></div>
+    </div>
+
+    <div class="card supplier-card">
+      <div class="card-title">Screws & Hardware</div>
+      <div class="supplier-price">Deck screws, corner brackets, landscape fabric</div>
+      <div class="supplier-address">
+        <span class="supplier-name">Hensel's Ace Hardware</span>, Arcata<br>
+        <span class="supplier-name">Pierson Building Center</span>, Eureka
+      </div>
+    </div>
   </div>
 
 </div>
@@ -1114,6 +1333,10 @@ body.test-mode .test-toggle { background: #e74c3c; border-color: #e74c3c; }
   <button class="tab-btn" onclick="switchTab('clients',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     Clients
+  </button>
+  <button class="tab-btn" onclick="switchTab('visits',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Visits
   </button>
   <button class="tab-btn" onclick="switchTab('estimate',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -1135,7 +1358,7 @@ let realStateBackup = null;
 let state = {
   income: [], expenses: [], mileage: [], receipts: [],
   invoices: [], clients: [], cards: [], leads: [],
-  adminTime: [],
+  adminTime: [], visits: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
   settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25, calApiKey: '', calLastSync: '' },
   version: 4
@@ -1147,7 +1370,7 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
-      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime'].forEach(k => {
+      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime','visits'].forEach(k => {
         if (!state[k]) state[k] = [];
       });
       if (!state.learned) state.learned = { vendors: {}, aliases: {}, categories: {} };
@@ -1259,6 +1482,7 @@ function switchTab(name, btn) {
   document.querySelector('.main-content').scrollTop = 0;
   if (name === 'chat') document.getElementById('chatInput').focus();
   if (name === 'home') loadCalendarEvents();
+  if (name === 'visits') renderVisits();
   if (name === 'estimate') { document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0]; }
 }
 
@@ -3633,6 +3857,240 @@ function autoSyncCal() {
   }
   // Quiet sync (no toast unless new bookings found)
   syncFromCal();
+}
+
+// ═══════════════════════════════════════
+// VISITS
+// ═══════════════════════════════════════
+function renderVisits() {
+  if (!state.visits) state.visits = [];
+  const visits = state.visits;
+
+  // This week summary (Mon-Sun)
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - mondayOffset);
+  monday.setHours(0,0,0,0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23,59,59,999);
+
+  const weekVisits = visits.filter(v => {
+    const d = new Date(v.date + 'T12:00:00');
+    return d >= monday && d <= sunday;
+  });
+  const weekHrs = weekVisits.reduce((sum, v) => sum + (v.hours || 0), 0);
+  const weekEarned = weekHrs * (state.settings.rate || 25);
+
+  document.getElementById('visit-week-hrs').textContent = weekHrs.toFixed(1);
+  document.getElementById('visit-week-earned').textContent = '$' + weekEarned.toFixed(0);
+  document.getElementById('visit-week-count').textContent = weekVisits.length;
+
+  // Upcoming recurring visits
+  const recurringVisits = visits.filter(v => v.recurring && v.recurring !== 'none');
+  const upcomingHtml = [];
+  const today = new Date().toISOString().split('T')[0];
+
+  recurringVisits.forEach(v => {
+    const lastDate = new Date(v.date + 'T12:00:00');
+    let nextDate = new Date(lastDate);
+    if (v.recurring === 'weekly') nextDate.setDate(lastDate.getDate() + 7);
+    else if (v.recurring === 'biweekly') nextDate.setDate(lastDate.getDate() + 14);
+    else if (v.recurring === 'monthly') nextDate.setMonth(lastDate.getMonth() + 1);
+
+    const nextStr = nextDate.toISOString().split('T')[0];
+    if (nextStr >= today) {
+      const freqLabel = v.recurring === 'weekly' ? 'Weekly' : v.recurring === 'biweekly' ? 'Every 2 wks' : 'Monthly';
+      upcomingHtml.push(`
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--accent-border-xlt);">
+          <div>
+            <strong>${esc(v.clientName || 'Unknown')}</strong>
+            <div style="font-size:12px; color:var(--gray);">${freqLabel} &middot; ${v.hours || 0}hrs</div>
+          </div>
+          <div style="font-size:13px; color:var(--mushroom); font-weight:600;">${fmtDate(nextStr)}</div>
+        </div>
+      `);
+    }
+  });
+
+  if (upcomingHtml.length > 0) {
+    document.getElementById('upcoming-visits').innerHTML = `
+      <div class="card">
+        <div class="card-title">Upcoming</div>
+        ${upcomingHtml.slice(0, 5).join('')}
+      </div>`;
+  } else {
+    document.getElementById('upcoming-visits').innerHTML = '';
+  }
+
+  // Recent visits list
+  const sorted = [...visits].sort((a, b) => b.date.localeCompare(a.date));
+  if (sorted.length === 0) {
+    document.getElementById('visits-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🌿</div>
+        <p>No visits logged yet!<br>Tap <strong>+ Log Visit</strong> after your next garden care session.</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('visits-list').innerHTML = `
+    <div class="card">
+      <div class="card-title">Recent Visits</div>
+      ${sorted.slice(0, 20).map(v => {
+        const freqBadge = v.recurring && v.recurring !== 'none'
+          ? `<span style="font-size:10px; background:var(--fairy-glow); color:var(--warm-dark); padding:2px 6px; border-radius:8px; margin-left:6px;">${v.recurring}</span>`
+          : '';
+        return `
+        <div style="padding:10px 0; border-bottom:1px solid var(--accent-border-xlt); cursor:pointer;" onclick="editVisit('${v.id}')">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${esc(v.clientName || 'Unknown')}</strong>
+            <span style="font-size:13px; font-weight:600; color:var(--sparkle-gold);">${v.hours}hrs</span>
+          </div>
+          <div style="font-size:12px; color:var(--gray); margin-top:2px;">
+            ${fmtDate(v.date)}${freqBadge}
+          </div>
+          ${v.tasks ? `<div style="font-size:12px; color:var(--mushroom); margin-top:4px;">${esc(v.tasks)}</div>` : ''}
+          ${v.notes ? `<div style="font-size:12px; color:var(--gray); margin-top:2px; font-style:italic;">${esc(v.notes)}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function toggleTaskPill(el) {
+  el.classList.toggle('active');
+}
+
+function getSelectedTasks() {
+  return Array.from(document.querySelectorAll('#v-task-pills .stat-chip.active'))
+    .map(el => el.textContent.trim());
+}
+
+function populateVisitClients() {
+  const clients = state.clients || [];
+  const sel = document.getElementById('v-client');
+  sel.innerHTML = '<option value="">Select client...</option>' +
+    clients.map(c => `<option value="${c.id || c.name}">${esc(c.name)}</option>`).join('');
+}
+
+function openVisitModal(id) {
+  populateVisitClients();
+  document.getElementById('visit-modal').classList.add('active');
+  document.getElementById('visit-edit-id').value = id || '';
+  document.getElementById('visit-modal-title').textContent = id ? 'Edit Visit' : 'Log Visit';
+  document.getElementById('visit-delete-row').style.display = id ? 'block' : 'none';
+
+  // Reset task pills
+  document.querySelectorAll('#v-task-pills .stat-chip').forEach(el => el.classList.remove('active'));
+
+  if (id) {
+    const visit = (state.visits || []).find(v => v.id === id);
+    if (visit) {
+      document.getElementById('v-client').value = visit.clientId || '';
+      document.getElementById('v-date').value = visit.date || '';
+      document.getElementById('v-hours').value = visit.hours || '';
+      document.getElementById('v-recurring').value = visit.recurring || 'none';
+      document.getElementById('v-notes').value = visit.notes || '';
+      const tasks = (visit.tasks || '').split(', ');
+      document.querySelectorAll('#v-task-pills .stat-chip').forEach(el => {
+        if (tasks.includes(el.textContent.trim())) el.classList.add('active');
+      });
+    }
+  } else {
+    document.getElementById('v-client').value = '';
+    document.getElementById('v-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('v-hours').value = '';
+    document.getElementById('v-recurring').value = 'none';
+    document.getElementById('v-notes').value = '';
+  }
+}
+
+function closeVisitModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('visit-modal').classList.remove('active');
+}
+
+function editVisit(id) { openVisitModal(id); }
+
+function saveVisit() {
+  if (!state.visits) state.visits = [];
+  const editId = document.getElementById('visit-edit-id').value;
+  const clientVal = document.getElementById('v-client').value;
+  const client = (state.clients || []).find(c => (c.id || c.name) === clientVal);
+
+  const visit = {
+    id: editId || 'visit_' + Date.now(),
+    clientId: clientVal,
+    clientName: client ? client.name : document.getElementById('v-client').selectedOptions[0]?.text || '',
+    date: document.getElementById('v-date').value,
+    hours: parseFloat(document.getElementById('v-hours').value) || 0,
+    tasks: getSelectedTasks().join(', '),
+    recurring: document.getElementById('v-recurring').value,
+    notes: document.getElementById('v-notes').value.trim(),
+    created: editId ? ((state.visits.find(v => v.id === editId) || {}).created || new Date().toISOString()) : new Date().toISOString(),
+    updated: new Date().toISOString()
+  };
+
+  if (!visit.date || !visit.hours) {
+    showToast('Please fill in date and hours!');
+    return;
+  }
+
+  if (editId) {
+    const idx = state.visits.findIndex(v => v.id === editId);
+    if (idx >= 0) state.visits[idx] = visit;
+  } else {
+    state.visits.push(visit);
+  }
+
+  // Also create an income entry for this visit
+  const rate = state.settings.rate || 25;
+  const incomeEntry = {
+    id: uid(),
+    client: visit.clientName,
+    date: visit.date,
+    hours: visit.hours,
+    rate: rate,
+    total: visit.hours * rate,
+    payment: 'Cash',
+    service: visit.tasks || 'Garden Care',
+    notes: 'From visit log' + (visit.notes ? ': ' + visit.notes : ''),
+    visitId: visit.id
+  };
+  // Remove old income entry for this visit if editing
+  if (editId) {
+    state.income = state.income.filter(i => i.visitId !== editId);
+  }
+  state.income.push(incomeEntry);
+
+  saveState();
+  closeVisitModal();
+  renderVisits();
+  showToast('Visit logged!');
+}
+
+function deleteVisit() {
+  const editId = document.getElementById('visit-edit-id').value;
+  if (!editId) return;
+  if (!confirm('Delete this visit?')) return;
+  state.visits = (state.visits || []).filter(v => v.id !== editId);
+  // Also remove associated income entry
+  state.income = state.income.filter(i => i.visitId !== editId);
+  saveState();
+  closeVisitModal();
+  renderVisits();
+}
+
+function logVisitForClient(clientName) {
+  switchTab('visits', document.querySelector('.tab-btn[onclick*="visits"]'));
+  openVisitModal();
+  // Try to select the client by name
+  const sel = document.getElementById('v-client');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].text === clientName) { sel.selectedIndex = i; break; }
+  }
 }
 
 // DASHBOARD

@@ -1,6 +1,7 @@
 /**
  * ADD THIS to the existing "Garden Faery Forms" Apps Script project.
  * (The one at gardenfaeryy@gmail.com that handles website form submissions.)
+ * NOTE: gardenfaeryy@gmail.com was disabled by Google Apr 3, 2026. This Apps Script may no longer be accessible.
  *
  * This adds a doGet handler so the bookkeeping app can pull
  * new contact submissions and subscribers.
