@@ -4340,10 +4340,10 @@ function refreshDashboard() {
   // ─── THIS WEEK ───
   const weekIncome = state.income.filter(i => i.date >= weekStr && i.date <= todayStr);
   const weekExpenses = state.expenses.filter(e => e.date >= weekStr && e.date <= todayStr);
-  document.getElementById('dashWeekIncome').textContent = '$' + weekIncome.reduce((s,i) => s+(i.total||0), 0).toFixed(0);
-  document.getElementById('dashWeekHours').textContent = weekIncome.reduce((s,i) => s+(i.hours||0), 0).toFixed(1);
-  document.getElementById('dashWeekExpenses').textContent = '$' + weekExpenses.reduce((s,e) => s+(e.amount||0), 0).toFixed(0);
-  document.getElementById('dashWeekJobs').textContent = weekIncome.length;
+  const dwi = document.getElementById('dashWeekIncome'); if (dwi) dwi.textContent = '$' + weekIncome.reduce((s,i) => s+(i.total||0), 0).toFixed(0);
+  const dwh = document.getElementById('dashWeekHours'); if (dwh) dwh.textContent = weekIncome.reduce((s,i) => s+(i.hours||0), 0).toFixed(1);
+  const dwe = document.getElementById('dashWeekExpenses'); if (dwe) dwe.textContent = '$' + weekExpenses.reduce((s,e) => s+(e.amount||0), 0).toFixed(0);
+  const dwj = document.getElementById('dashWeekJobs'); if (dwj) dwj.textContent = weekIncome.length;
 
   // ─── MONTHLY GOAL ───
   const mi = state.income.filter(i => { const d = new Date(i.date+'T00:00:00'); return d.getMonth()===viewMonth && d.getFullYear()===viewYear; });
@@ -4403,18 +4403,21 @@ function refreshDashboard() {
     owedList.innerHTML = '<div style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">All caught up! No outstanding invoices.</div>';
   }
 
-  // Category breakdown
+  // Category breakdown (element may not exist after layout changes)
   const catCard = document.getElementById('catBreakdownCard');
-  if (me.length > 0) {
-    catCard.style.display = 'block';
-    const byCat = {};
-    me.forEach(e => { byCat[e.category||'Other'] = (byCat[e.category||'Other']||0)+e.amount; });
-    const sorted = Object.entries(byCat).sort((a,b) => b[1]-a[1]);
-    const maxAmt = sorted[0][1];
-    document.getElementById('catBreakdownList').innerHTML = sorted.map(([cat,amt]) =>
-      `<div class="cat-row"><div class="cat-label">${esc(cat)}</div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${(amt/maxAmt*100).toFixed(0)}%"></div></div><div class="cat-amount">$${amt.toFixed(0)}</div></div>`
-    ).join('');
-  } else { catCard.style.display = 'none'; }
+  if (catCard) {
+    if (me.length > 0) {
+      catCard.style.display = 'block';
+      const byCat = {};
+      me.forEach(e => { byCat[e.category||'Other'] = (byCat[e.category||'Other']||0)+e.amount; });
+      const sorted = Object.entries(byCat).sort((a,b) => b[1]-a[1]);
+      const maxAmt = sorted[0][1];
+      const catList = document.getElementById('catBreakdownList');
+      if (catList) catList.innerHTML = sorted.map(([cat,amt]) =>
+        `<div class="cat-row"><div class="cat-label">${esc(cat)}</div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${(amt/maxAmt*100).toFixed(0)}%"></div></div><div class="cat-amount">$${amt.toFixed(0)}</div></div>`
+      ).join('');
+    } else { catCard.style.display = 'none'; }
+  }
 
   // Recent activity (under chat)
   const recent = [
@@ -4476,10 +4479,10 @@ function renderWeeklyDigest() {
   const weekAdmin = (state.adminTime || []).filter(a => a.date >= startStr && a.date <= endStr);
   const adminHrs = weekAdmin.reduce((s, a) => s + (a.hours || 0), 0);
 
-  document.getElementById('digestHours').textContent = fieldHrs.toFixed(1);
-  document.getElementById('digestEarned').textContent = '$' + earned.toFixed(0);
-  document.getElementById('digestAdminHrs').textContent = adminHrs.toFixed(1);
-  document.getElementById('digestNet').textContent = '$' + (earned - spent).toFixed(0);
+  const dh = document.getElementById('digestHours'); if (dh) dh.textContent = fieldHrs.toFixed(1);
+  const de = document.getElementById('digestEarned'); if (de) de.textContent = '$' + earned.toFixed(0);
+  const da = document.getElementById('digestAdminHrs'); if (da) da.textContent = adminHrs.toFixed(1);
+  const dn = document.getElementById('digestNet'); if (dn) dn.textContent = '$' + (earned - spent).toFixed(0);
 
   // Clients seen
   const clients = [...new Set(weekIncome.map(i => i.client).filter(Boolean))];
