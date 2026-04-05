@@ -1,4 +1,4 @@
-const CACHE_NAME = 'garden-faery-books-v16';
+const CACHE_NAME = 'garden-faery-books-v17';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -16,11 +16,15 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Don't intercept PocketBase API requests or CDN scripts
+  // Don't intercept external API requests or CDN scripts
   if (url.pathname.startsWith('/api/') ||
       url.hostname.includes('jsdelivr.net') ||
       url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('gstatic.com')) {
+      url.hostname.includes('gstatic.com') ||
+      url.hostname.includes('cal.com') ||
+      url.hostname.includes('corsproxy.io') ||
+      url.hostname.includes('httpbin.org') ||
+      url.hostname !== location.hostname) {
     return;
   }
 
