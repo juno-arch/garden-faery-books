@@ -704,7 +704,26 @@ textarea.form-input { resize: vertical; min-height: 60px; }
   <!-- ═══ HOME TAB ═══ -->
   <div class="tab-pane active" id="tab-home">
 
-    <!-- ─── TODAY'S STATUS ─── -->
+    <!-- ─── CALENDAR (month view first) ─── -->
+    <div class="card" style="padding-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <button onclick="changeCalMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
+        <div id="calMonthLabel" style="font-weight:700;color:var(--warm-dark);font-size:16px;"></div>
+        <button onclick="changeCalMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:11px;text-align:center;">
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Sun</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Mon</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Tue</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Wed</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Thu</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Fri</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">Sat</div>
+      </div>
+      <div id="calMonthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
+    </div>
+
+    <!-- ─── TODAY ─── -->
     <div class="card" id="dashTodayCard">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div class="card-title" style="margin:0;">Today</div>
@@ -718,26 +737,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       </div>
     </div>
 
-    <!-- ─── WEEKLY DIGEST ─── -->
-    <div class="card" id="weeklyDigestCard">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div class="card-title" style="margin:0;">Weekly Digest</div>
-        <div id="digestWeekLabel" style="font-size:11px;color:var(--gray);font-weight:600;"></div>
-      </div>
-      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-        <div class="stat-box"><div class="value" id="digestHours">0</div><div class="label">Field Hrs</div></div>
-        <div class="stat-box"><div class="value" id="digestEarned">$0</div><div class="label">Earned</div></div>
-        <div class="stat-box"><div class="value" id="digestAdminHrs">0</div><div class="label">Admin Hrs</div></div>
-        <div class="stat-box"><div class="value" id="digestNet">$0</div><div class="label">Net</div></div>
-      </div>
-      <div id="digestClients" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
-      <div id="digestOutstanding" style="margin-top:4px;font-size:12px;color:var(--sparkle-gold);font-weight:600;"></div>
-    </div>
-
-    <!-- ─── WEEKLY EARNINGS ─── -->
+    <!-- ─── THIS WEEK ─── -->
     <div class="card">
       <div class="card-title">This Week</div>
-      <div class="stats-grid">
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
         <div class="stat-box"><div class="value" id="dashWeekIncome">$0</div><div class="label">Income</div></div>
         <div class="stat-box"><div class="value" id="dashWeekHours">0</div><div class="label">Hours</div></div>
         <div class="stat-box red"><div class="value" id="dashWeekExpenses">$0</div><div class="label">Expenses</div></div>
@@ -745,12 +748,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       </div>
     </div>
 
-    <!-- ─── MONTHLY GOAL ─── -->
+    <!-- ─── MONTHLY ─── -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="card-title" style="margin:0;">
-          <span id="monthLabel">March 2026</span>
-        </div>
+        <div class="card-title" style="margin:0;"><span id="monthLabel">April 2026</span></div>
         <div style="display:flex;gap:8px;">
           <button onclick="changeMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
           <button onclick="changeMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
@@ -764,16 +765,16 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       <div class="stats-grid" style="margin-top:10px;">
         <div class="stat-box"><div class="value" id="statIncome">$0</div><div class="label">Income</div></div>
         <div class="stat-box red"><div class="value" id="statExpenses">$0</div><div class="label">Expenses</div></div>
-        <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net Profit</div></div>
+        <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net</div></div>
         <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
         <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
-        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Vehicle Deduction</div></div>
+        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Vehicle Ded.</div></div>
       </div>
     </div>
 
     <!-- ─── WHO OWES ME ─── -->
     <div class="card" id="dashOwedCard">
-      <div class="card-title">Who Owes Me (Thyme to Pay Up!)</div>
+      <div class="card-title">Who Owes Me</div>
       <div id="dashOwedList" style="font-size:14px;"></div>
     </div>
 
@@ -792,8 +793,6 @@ textarea.form-input { resize: vertical; min-height: 60px; }
           <button onclick="toggleAdminForm()" id="adminFormToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">+ Log</button>
         </div>
       </div>
-
-      <!-- Active timer display (hidden by default) -->
       <div id="adminTimerPanel" style="display:none;padding:14px;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.25);border-radius:var(--radius);margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
           <div>
@@ -817,15 +816,11 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         </div>
         <button onclick="stopAdminTimer()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--red);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Stop and Save</button>
       </div>
-
-      <!-- Admin time summary -->
       <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
         <div class="stat-box"><div class="value" id="adminWeekHrs">0</div><div class="label">This Week</div></div>
         <div class="stat-box"><div class="value" id="adminMonthHrs">0</div><div class="label">This Month</div></div>
         <div class="stat-box"><div class="value" id="adminMonthCost">$0</div><div class="label">Cost</div></div>
       </div>
-
-      <!-- Quick log form (hidden by default) -->
       <div id="adminFormPanel" style="display:none;padding:12px;background:var(--card-glow);border-radius:var(--radius);margin-bottom:10px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <div>
@@ -852,50 +847,9 @@ textarea.form-input { resize: vertical; min-height: 60px; }
           <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Notes (optional)</label>
           <input type="text" id="adminNotes" placeholder="What were you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
         </div>
-        <button onclick="saveAdminTime()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--text-primary);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Plant This Time 🌱</button>
+        <button onclick="saveAdminTime()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--text-primary);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Save</button>
       </div>
-
-      <!-- Recent admin entries -->
       <div id="adminRecentList" style="font-size:13px;"></div>
-    </div>
-
-    <!-- ─── CALENDAR ─── -->
-    <div class="card">
-      <div class="card-title">Calendar</div>
-      <div class="calendar-toggle" id="calViewToggle">
-        <button class="active" onclick="switchCalView('upcoming',this)">Upcoming</button>
-        <button onclick="switchCalView('month',this)">Month View</button>
-      </div>
-      <div id="calUpcoming">
-        <div class="card">
-          <div class="card-title">This Week</div>
-          <div id="calThisWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading calendar...</p></div>
-        </div>
-        <div class="card" style="margin-top:12px;">
-          <div class="card-title">Next Week</div>
-          <div id="calNextWeek"><p style="text-align:center;color:var(--gray);padding:16px;font-size:13px">Loading...</p></div>
-        </div>
-      </div>
-      <div id="calMonth" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <button onclick="changeCalMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
-          <div id="calMonthLabel" style="font-weight:700;font-family:var(--font-heading);color:var(--warm-dark);font-size:16px;"></div>
-          <button onclick="changeCalMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:11px;text-align:center;">
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Sun</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Mon</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Tue</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Wed</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Thu</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Fri</div>
-          <div style="font-weight:700;color:var(--gray);padding:4px;">Sat</div>
-        </div>
-        <div id="calMonthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
-        <div style="margin-top:12px;text-align:center;">
-          <a href="https://cal.com/gardenfaery" target="_blank" rel="noopener" style="font-size:13px;color:var(--mushroom);font-weight:600;text-decoration:none;">Book a visit at cal.com/gardenfaery &rarr;</a>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1664,11 +1618,8 @@ let calendarEvents = [];
 let calendarLoaded = false;
 
 function switchCalView(view, btn) {
-  document.querySelectorAll('#calViewToggle button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('calUpcoming').style.display = view === 'upcoming' ? 'block' : 'none';
-  document.getElementById('calMonth').style.display = view === 'month' ? 'block' : 'none';
-  if (view === 'month') renderCalMonth();
+  // Month view is now always visible on home tab
+  renderCalMonth();
 }
 
 function loadCalendarEvents() {
@@ -5590,7 +5541,7 @@ function importData(input) {
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
-function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); renderAdminTime(); renderWeeklyDigest(); }
+function refreshAll() { refreshDashboard(); renderHistory(); renderReports(); renderClientsList(); renderLeads(); renderAdminTime(); renderWeeklyDigest(); loadCalendarEvents(); }
 function dateStr(d) { return d.toISOString().split('T')[0]; }
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function fmtDate(s) { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
