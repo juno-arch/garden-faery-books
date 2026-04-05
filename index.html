@@ -3906,14 +3906,15 @@ async function syncFromCal() {
       const location = b.location || '';
       const eventTitle = b.title || 'Garden Care';
 
-      const total = hours * rate;
+      const isFree = /free|consultation|consult/i.test(eventTitle);
+      const total = isFree ? 0 : hours * rate;
       state.income.push({
         id: uid(),
         calBookingId: calBookingId,
         client: clientName,
         date: bDateStr,
         hours: hours,
-        rate: rate,
+        rate: isFree ? 0 : rate,
         total: total,
         payment: 'Cash',
         service: eventTitle,
