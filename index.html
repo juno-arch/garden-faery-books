@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 :root {
   /* ─── Constants (never change) ─── */
@@ -993,46 +994,6 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       </div>
     </div>
 
-    <!-- ─── LOCAL SUPPLIERS ─── -->
-    <div class="card">
-      <div class="card-title">Local Suppliers</div>
-      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;">Arcata area · Prices last checked March 2026</p>
-
-      <div style="margin-bottom:16px;">
-        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🪵 Cedar Lumber</div>
-        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          2×12 Cedar: <b>$4.75/ft</b><br>
-          <b>Almquist Lumber</b>, 5301 Boyd Rd, Arcata · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a><br>
-          Also: The Mill Yard (4949 West End Rd) · Pierson Building Center (Eureka) · Schmidbauer Lumber
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🧷 Hardware Cloth</div>
-        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          3ft roll: <b>$2.90/ft</b> ($0.97/sq ft)<br>
-          4ft roll: <b>$3.80/ft</b> ($0.95/sq ft)<br>
-          <b>Almquist Lumber</b> · <a href="tel:7078260078" style="color:var(--accent-1);">(707) 826-0078</a>
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🌱 Soil &amp; Compost</div>
-        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          Potting soil: <b>$200/yd</b> · Fir compost: <b>$60/yd</b><br>
-          <b>Mad River Gardens</b>, 3384 Janes Rd, Arcata · <a href="tel:7078227049" style="color:var(--accent-1);">(707) 822-7049</a><br>
-          Also: Wes Green Company · Powell Landscape Materials · Full Cycle Compost
-        </div>
-      </div>
-
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">🔩 Screws &amp; Hardware</div>
-        <div style="font-size:13px;line-height:1.6;color:var(--gray);">
-          Deck screws, corner brackets, landscape fabric<br>
-          <b>Hensel's Ace Hardware</b> (Arcata) · <b>Pierson Building Center</b> (Eureka)
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- ═══ HISTORY TAB (sidebar) ═══ -->
@@ -1118,9 +1079,18 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       </div>
       <div class="card">
         <div class="card-title">Data</div>
-        <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:8px;">Export All (JSON)</button>
-        <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
-        <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-primary" onclick="exportExcel()">Export Excel</button>
+          <button class="btn btn-primary" onclick="document.getElementById('importExcelInput').click()">Import Excel</button>
+        </div>
+        <input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none;" onchange="importExcel(this)">
+        <div style="font-size:11px;color:var(--gray);margin-bottom:12px;text-align:center;">Excel = editable spreadsheet you own. Use it as your backup or your daily tool.</div>
+        <div style="border-top:1px solid var(--accent-border-xlt);padding-top:8px;margin-top:4px;">
+          <div style="font-size:12px;font-weight:600;color:var(--gray);margin-bottom:6px;">Advanced</div>
+          <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:8px;font-size:12px;">Export JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('importInput').click()" style="font-size:12px;">Import JSON</button>
+          <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
+        </div>
       </div>
       <div class="card" id="cloudSyncCard">
         <div class="card-title">Cloud Sync</div>
@@ -1157,7 +1127,7 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       </div>
       <div class="card">
         <div class="card-title">About</div>
-        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v6.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Cal.com booking sync. Syncs across devices with PocketBase. Private and offline-ready.</p>
+        <p style="font-size:12px; color:var(--gray);">Garden Faery Books v7.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Excel import/export. Cal.com sync. PocketBase cloud sync. Private and offline-ready.</p>
       </div>
   </div>
 
@@ -1594,48 +1564,8 @@ function loadCalendarEvents() {
 }
 
 function renderUpcomingFromState() {
-  const thisWeekEl = document.getElementById('calThisWeek');
-  const nextWeekEl = document.getElementById('calNextWeek');
-
-  // Build events from Cal.com bookings + visits + income
   calendarEvents = getCalendarSyncData();
-
-  if (calendarEvents.length > 0) {
-    renderUpcomingEvents();
-    return;
-  }
-
-  // No events yet - show setup hint
-  const hasKey = state.settings.calApiKey;
-  thisWeekEl.innerHTML = '<div style="text-align:center;padding:12px;">' +
-    (hasKey
-      ? '<p style="color:var(--gray);font-size:13px;">No upcoming bookings found. Tap <strong>Sync Now</strong> in Settings to refresh.</p>'
-      : '<p style="color:var(--gray);font-size:13px;">Add your Cal.com API key in <strong>Settings</strong> to see your schedule here.</p>') +
-    '</div>';
-  nextWeekEl.innerHTML = '';
-}
-
-function renderUpcomingEvents() {
-  const thisWeekEl = document.getElementById('calThisWeek');
-  const nextWeekEl = document.getElementById('calNextWeek');
-  const today = new Date();
-  const endOfWeek = new Date(today);
-  endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
-  const endOfNextWeek = new Date(endOfWeek);
-  endOfNextWeek.setDate(endOfWeek.getDate() + 7);
-
-  let thisWeekHTML = '';
-  let nextWeekHTML = '';
-
-  calendarEvents.forEach(evt => {
-    const start = new Date(evt.start);
-    const html = renderEventCard(evt);
-    if (start >= today && start <= endOfWeek) thisWeekHTML += html;
-    else if (start > endOfWeek && start <= endOfNextWeek) nextWeekHTML += html;
-  });
-
-  thisWeekEl.innerHTML = thisWeekHTML || '<p style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">No events this week</p>';
-  nextWeekEl.innerHTML = nextWeekHTML || '<p style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">No events next week</p>';
+  renderCalMonth();
 }
 
 function renderEventCard(evt) {
@@ -1862,24 +1792,9 @@ function getCalendarTimeRange(evt) {
 }
 
 // Auto-sync client contacts from calendar data
+// (Client info now comes from Cal.com bookings — no hardcoded data)
 function syncClientsFromCalendar() {
-  const calClients = [
-    { name: 'Dena', phone: '(707) 599-5014', address: '1112 Spear Ave, Arcata CA 95521' },
-    { name: 'Elizabeth', address: '3168 Deer Fern Ct' },
-    { name: 'Edith', address: '1641 Old Arcata Road, Bayside CA 95524' },
-    { name: 'Sarah', address: '' },
-    { name: 'Anna Peck', address: '565 Hilton LN, Arcata CA 95521' },
-  ];
-  for (const cd of calClients) {
-    const existing = (state.clients || []).find(c => c.name.toLowerCase() === cd.name.toLowerCase());
-    if (existing) {
-      if (cd.phone && !existing.phone) existing.phone = cd.phone;
-      if (cd.address && !existing.address) existing.address = cd.address;
-    } else {
-      state.clients.push({ id: uid(), name: cd.name, phone: cd.phone || '', email: '', address: cd.address || '', miles: 0 });
-    }
-  }
-  saveState();
+  // This function is now a no-op; client sync happens via syncFromCal()
 }
 
 // ═══════════════════════════════════════
@@ -5460,6 +5375,197 @@ function importData(input) {
     catch (err) { showToast('Invalid file'); }
   };
   reader.readAsText(file); input.value = '';
+}
+
+// ═══════════════════════════════════════
+// EXCEL EXPORT / IMPORT (SheetJS)
+// ═══════════════════════════════════════
+function exportExcel() {
+  if (typeof XLSX === 'undefined') { showToast('Excel library loading...'); return; }
+  const wb = XLSX.utils.book_new();
+
+  // Income sheet
+  const incData = [['Date','Client','Hours','Rate','Total','Service','Payment','Notes']];
+  (state.income||[]).forEach(i => incData.push([i.date, i.client, i.hours||0, i.rate||state.settings.rate, i.total||0, i.service||'', i.payment||'Cash', i.notes||'']));
+  const incWs = XLSX.utils.aoa_to_sheet(incData);
+  XLSX.utils.book_append_sheet(wb, incWs, 'Income');
+
+  // Expenses sheet
+  const expData = [['Date','Vendor','Amount','Category','Description','Receipt','Truck Expense']];
+  (state.expenses||[]).forEach(e => {
+    const isTruck = /gas|fuel|insurance|repair|maintenance/i.test(e.category||'');
+    expData.push([e.date, e.vendor||'', e.amount||0, e.category||'', e.description||'', e.receipt?'Yes':'No', isTruck?'Yes':'No']);
+  });
+  const expWs = XLSX.utils.aoa_to_sheet(expData);
+  XLSX.utils.book_append_sheet(wb, expWs, 'Expenses');
+
+  // Mileage sheet
+  const milData = [['Date','Destination','Purpose','Miles','IRS Rate','Deduction','Notes']];
+  (state.mileage||[]).forEach(m => milData.push([m.date, m.destination||'', m.purpose||'', m.miles||0, IRS_RATE, (m.miles||0)*IRS_RATE, m.notes||'']));
+  const milWs = XLSX.utils.aoa_to_sheet(milData);
+  XLSX.utils.book_append_sheet(wb, milWs, 'Mileage');
+
+  // Clients sheet
+  const cliData = [['Name','Phone','Email','Address','Round-Trip Miles','Hidy Spot','Last Seen','Notes']];
+  (state.clients||[]).forEach(c => cliData.push([c.name, c.phone||'', c.email||'', c.address||'', c.miles||0, c.hidySpot||'', c.lastSeen||'', c.notes||'']));
+  const cliWs = XLSX.utils.aoa_to_sheet(cliData);
+  XLSX.utils.book_append_sheet(wb, cliWs, 'Clients');
+
+  // Admin Time sheet
+  const admData = [['Date','Hours','Rate','Total','Category','Notes']];
+  (state.adminTime||[]).forEach(a => admData.push([a.date, a.hours||0, a.rate||state.settings.adminRate||25, (a.hours||0)*(a.rate||25), a.category||'Admin', a.notes||'']));
+  const admWs = XLSX.utils.aoa_to_sheet(admData);
+  XLSX.utils.book_append_sheet(wb, admWs, 'Admin Time');
+
+  // Visits sheet
+  const visData = [['Date','Client','Hours','Tasks','Schedule','Notes']];
+  (state.visits||[]).forEach(v => visData.push([v.date, v.clientName||'', v.hours||0, v.tasks||'', v.recurring||'', v.notes||'']));
+  const visWs = XLSX.utils.aoa_to_sheet(visData);
+  XLSX.utils.book_append_sheet(wb, visWs, 'Visits');
+
+  // Odometer sheet
+  const odoData = [['Date','Reading','Vehicle','Notes']];
+  (state.odometer||[]).forEach(o => odoData.push([o.date, o.reading||0, o.vehicle||'', o.notes||'']));
+  const odoWs = XLSX.utils.aoa_to_sheet(odoData);
+  XLSX.utils.book_append_sheet(wb, odoWs, 'Odometer');
+
+  // Column widths
+  [incWs,expWs,milWs,cliWs,admWs,visWs,odoWs].forEach(ws => {
+    if (!ws['!cols']) ws['!cols'] = [];
+    for (let i = 0; i < 8; i++) ws['!cols'].push({wch:16});
+  });
+
+  XLSX.writeFile(wb, `GardenFaeryBooks-${dateStr(new Date())}.xlsx`);
+  showToast('Excel exported!');
+}
+
+function importExcel(input) {
+  const file = input.files[0]; if (!file) return;
+  if (typeof XLSX === 'undefined') { showToast('Excel library loading...'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array'});
+      let imported = 0;
+
+      // Income
+      if (wb.SheetNames.includes('Income')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Income']);
+        rows.forEach(r => {
+          if (!r.Date && !r.Client) return;
+          const d = parseExcelDate(r.Date);
+          // Skip if already exists (same date + client + total)
+          if (state.income.some(i => i.date===d && i.client===(r.Client||'') && i.total===Number(r.Total||0))) return;
+          state.income.push({id:uid(), date:d, client:r.Client||'', hours:Number(r.Hours||0), rate:Number(r.Rate||25), total:Number(r.Total||0), service:r.Service||'', payment:r.Payment||'Cash', notes:r.Notes||''});
+          imported++;
+        });
+      }
+
+      // Expenses
+      if (wb.SheetNames.includes('Expenses')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Expenses']);
+        rows.forEach(r => {
+          if (!r.Date && !r.Vendor) return;
+          const d = parseExcelDate(r.Date);
+          if (state.expenses.some(e => e.date===d && e.vendor===(r.Vendor||'') && e.amount===Number(r.Amount||0))) return;
+          state.expenses.push({id:uid(), date:d, vendor:r.Vendor||'', amount:Number(r.Amount||0), category:r.Category||'Other', description:r.Description||''});
+          imported++;
+        });
+      }
+
+      // Mileage
+      if (wb.SheetNames.includes('Mileage')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Mileage']);
+        rows.forEach(r => {
+          if (!r.Date && !r.Miles) return;
+          const d = parseExcelDate(r.Date);
+          const miles = Number(r.Miles||0);
+          if (state.mileage.some(m => m.date===d && m.destination===(r.Destination||'') && m.miles===miles)) return;
+          state.mileage.push({id:uid(), date:d, destination:r.Destination||'', purpose:r.Purpose||'', miles:miles, deduction:miles*IRS_RATE, notes:r.Notes||''});
+          imported++;
+        });
+      }
+
+      // Clients
+      if (wb.SheetNames.includes('Clients')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Clients']);
+        rows.forEach(r => {
+          if (!r.Name) return;
+          const existing = state.clients.find(c => c.name && c.name.toLowerCase() === (r.Name||'').toLowerCase());
+          if (existing) {
+            if (r.Phone && !existing.phone) existing.phone = r.Phone;
+            if (r.Email && !existing.email) existing.email = r.Email;
+            if (r.Address && !existing.address) existing.address = r.Address;
+            if (r['Round-Trip Miles']) existing.miles = Number(r['Round-Trip Miles']);
+            if (r['Hidy Spot']) existing.hidySpot = r['Hidy Spot'];
+          } else {
+            state.clients.push({id:uid(), name:r.Name, phone:r.Phone||'', email:r.Email||'', address:r.Address||'', miles:Number(r['Round-Trip Miles']||0), hidySpot:r['Hidy Spot']||''});
+            imported++;
+          }
+        });
+      }
+
+      // Admin Time
+      if (wb.SheetNames.includes('Admin Time')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Admin Time']);
+        rows.forEach(r => {
+          if (!r.Date && !r.Hours) return;
+          const d = parseExcelDate(r.Date);
+          if (state.adminTime.some(a => a.date===d && a.hours===Number(r.Hours||0) && a.category===(r.Category||''))) return;
+          state.adminTime.push({id:uid(), date:d, hours:Number(r.Hours||0), rate:Number(r.Rate||25), category:r.Category||'Admin', notes:r.Notes||''});
+          imported++;
+        });
+      }
+
+      // Visits
+      if (wb.SheetNames.includes('Visits')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Visits']);
+        rows.forEach(r => {
+          if (!r.Date && !r.Client) return;
+          const d = parseExcelDate(r.Date);
+          if (state.visits.some(v => v.date===d && v.clientName===(r.Client||''))) return;
+          state.visits.push({id:uid(), date:d, clientName:r.Client||'', hours:Number(r.Hours||0), tasks:r.Tasks||'', recurring:r.Schedule||'none', notes:r.Notes||''});
+          imported++;
+        });
+      }
+
+      // Odometer
+      if (wb.SheetNames.includes('Odometer')) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets['Odometer']);
+        rows.forEach(r => {
+          if (!r.Reading) return;
+          const d = parseExcelDate(r.Date);
+          const reading = Number(r.Reading||0);
+          if (state.odometer.some(o => o.reading===reading)) return;
+          state.odometer.push({id:uid(), date:d, reading:reading, vehicle:r.Vehicle||'', notes:r.Notes||''});
+          imported++;
+        });
+      }
+
+      saveState();
+      refreshAll();
+      showToast(imported + ' entries imported from Excel!');
+    } catch (err) {
+      console.error('Excel import error:', err);
+      showToast('Error reading Excel file');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  input.value = '';
+}
+
+function parseExcelDate(val) {
+  if (!val) return dateStr(new Date());
+  // If it's already a string like "2026-04-05"
+  if (typeof val === 'string' && /\d{4}-\d{2}-\d{2}/.test(val)) return val.slice(0,10);
+  // Excel serial date number
+  if (typeof val === 'number') {
+    const d = new Date((val - 25569) * 86400000);
+    return dateStr(d);
+  }
+  // Try parsing as date string
+  const d = new Date(val);
+  return isNaN(d) ? dateStr(new Date()) : dateStr(d);
 }
 
 // ═══════════════════════════════════════
