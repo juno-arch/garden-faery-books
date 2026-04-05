@@ -559,6 +559,24 @@ select.form-input {
   padding-right: 36px;
 }
 textarea.form-input { resize: vertical; min-height: 60px; }
+
+/* Manual tab */
+.manual-cmd { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--accent-border-xlt); font-size: 13px; }
+.manual-cmd code { background: var(--card-glow); padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--warm-dark); white-space: nowrap; flex-shrink: 0; }
+.manual-cmd span { color: var(--gray); line-height: 1.4; }
+.manual-example { background: var(--card-glow); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--warm-dark); margin-bottom: 6px; font-family: monospace; }
+.manual-format { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--accent-border-xlt); font-size: 13px; }
+.manual-format-label { font-weight: 600; color: var(--mushroom); min-width: 70px; flex-shrink: 0; }
+.manual-format span:last-child { color: var(--gray); }
+
+/* Vehicle tab */
+.odo-entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--accent-border-xlt); }
+.odo-reading { font-weight: 700; font-size: 15px; color: var(--warm-dark); }
+.odo-diff { font-size: 12px; color: var(--sage); font-weight: 600; }
+.odo-meta { font-size: 12px; color: var(--gray); }
+.truck-exp-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--accent-border-xlt); font-size: 13px; }
+.truck-exp-cat { font-weight: 600; color: var(--warm-dark); }
+.truck-exp-amt { color: var(--mushroom); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -625,11 +643,19 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Reports
       </button>
+      <button class="sidebar-item" onclick="openSidebarTab('vehicle')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v5h-3"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Vehicle
+      </button>
       <button class="sidebar-item" onclick="openSidebarTab('supply')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Supply
       </button>
       <div class="sidebar-divider"></div>
+      <button class="sidebar-item" onclick="openSidebarTab('manual')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Manual
+      </button>
       <button class="sidebar-item" onclick="openSidebarTab('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
@@ -1043,6 +1069,8 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <button class="filter-pill" onclick="filterHistory('income',this)">Income</button>
         <button class="filter-pill" onclick="filterHistory('expense',this)">Expenses</button>
         <button class="filter-pill" onclick="filterHistory('mileage',this)">Mileage</button>
+        <button class="filter-pill" onclick="filterHistory('visit',this)">Visits</button>
+        <button class="filter-pill" onclick="filterHistory('odometer',this)">Odometer</button>
         <button class="filter-pill" onclick="filterHistory('admin',this)">Admin</button>
       </div>
       <div class="card">
@@ -1185,6 +1213,95 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       <div class="card">
         <div class="card-title">About</div>
         <p style="font-size:12px; color:var(--gray);">Garden Faery Books v6.0<br>Chat-first bookkeeping + estimator for Taya's garden business.<br>Cal.com booking sync. Syncs across devices with PocketBase. Private and offline-ready.</p>
+      </div>
+  </div>
+
+  <!-- ═══ VEHICLE TAB (sidebar) ═══ -->
+  <div class="tab-pane" id="tab-vehicle">
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span>Vehicle</span>
+          <span style="font-size:12px; color:var(--gray); font-weight:400;" id="vehicleName"></span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input type="text" id="vehicleNameInput" class="form-input" placeholder="e.g. Old Truck" style="flex:1;">
+          <button class="btn btn-primary" onclick="setVehicleName()">Set</button>
+        </div>
+        <p style="font-size:12px;color:var(--gray);margin-bottom:4px;">Switch vehicles when you trade in. Each vehicle tracks separately.</p>
+      </div>
+      <div class="card">
+        <div class="card-title" style="justify-content:space-between;">
+          <span>Odometer Log</span>
+          <span style="font-size:12px; color:var(--gray); font-weight:400;" id="odoCount"></span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input type="number" id="odoInput" class="form-input" placeholder="e.g. 45230" inputmode="numeric" style="flex:1;">
+          <button class="btn btn-primary" onclick="logOdoFromForm()">Log</button>
+        </div>
+        <ul class="entry-list" id="odoList"></ul>
+      </div>
+      <div class="card">
+        <div class="card-title">Deduction Comparison</div>
+        <div id="vehicleDeductionCompare"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Truck Expenses This Year</div>
+        <div id="vehicleTruckExpenses"></div>
+      </div>
+  </div>
+
+  <!-- ═══ MANUAL TAB (sidebar) ═══ -->
+  <div class="tab-pane" id="tab-manual">
+      <div class="card">
+        <div class="card-title">Chat Commands</div>
+        <div style="font-weight:600;font-size:13px;color:var(--mushroom);margin-bottom:6px;">On the Job</div>
+        <div class="manual-cmd"><code>/clockin</code><span>Arrive at a job. Pulls today's calendar and starts timer.</span></div>
+        <div class="manual-cmd"><code>/clockout</code><span>Finish up. Logs hours, income, and auto-adds mileage if client has miles saved.</span></div>
+        <div class="manual-cmd"><code>/yesterday</code><span>Missed a clock-in? Log from yesterday's calendar instead.</span></div>
+        <div class="manual-cmd"><code>/status</code><span>Check if you're clocked in and see today's earnings so far.</span></div>
+
+        <div style="font-weight:600;font-size:13px;color:var(--mushroom);margin:12px 0 6px;">Tracking</div>
+        <div class="manual-cmd"><code>/miles</code><span>Find trips this week that are missing mileage and log them all at once.</span></div>
+        <div class="manual-cmd"><code>/odo 45230</code><span>Log an odometer reading. Use start-of-month readings to track total miles.</span></div>
+        <div class="manual-cmd"><code>/vehicle Old Truck</code><span>Set or switch your current vehicle. Odometer readings track per vehicle.</span></div>
+        <div class="manual-cmd"><code>/truck</code><span>Compare standard mileage deduction vs actual truck expenses side by side.</span></div>
+        <div class="manual-cmd"><code>/invoice Dena</code><span>Generate an end-of-day text message for a client with what you did and what they owe.</span></div>
+        <div class="manual-cmd"><code>/today</code><span>Show today's calendar — all scheduled jobs and Cal.com bookings.</span></div>
+        <div class="manual-cmd"><code>/undo</code><span>Remove the last entry you logged.</span></div>
+
+        <div style="font-weight:600;font-size:13px;color:var(--mushroom);margin:12px 0 6px;">Reports</div>
+        <div class="manual-cmd"><code>/summary</code><span>This week's income, expenses, miles, and hours at a glance.</span></div>
+        <div class="manual-cmd"><code>/month</code><span>Monthly totals with goal progress and breakdown by client.</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Natural Language</div>
+        <p style="font-size:13px;color:var(--gray);margin-bottom:10px;">You can also just talk to it. Here are some things it understands:</p>
+
+        <div style="font-weight:600;font-size:13px;color:var(--mushroom);margin-bottom:6px;">Logging Work</div>
+        <div class="manual-example">Dena 3hrs weeding pruning</div>
+        <div class="manual-example">Elizabeth 2.5h garden care $62.50</div>
+        <div class="manual-example">gas $45 shell</div>
+        <div class="manual-example">odometer 45230</div>
+
+        <div style="font-weight:600;font-size:13px;color:var(--mushroom);margin:12px 0 6px;">Questions</div>
+        <div class="manual-example">how much did I make this week?</div>
+        <div class="manual-example">how much did I spend this month?</div>
+        <div class="manual-example">who owes me?</div>
+        <div class="manual-example">what's tomorrow?</div>
+        <div class="manual-example">Dena's number</div>
+        <div class="manual-example">client list</div>
+        <div class="manual-example">how many jobs this month?</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Entry Formats</div>
+        <p style="font-size:13px;color:var(--gray);margin-bottom:10px;">The chat parser recognizes these patterns:</p>
+        <div class="manual-format"><span class="manual-format-label">Income</span><span>Client name + hours + tasks or dollar amount</span></div>
+        <div class="manual-format"><span class="manual-format-label">Expense</span><span>Category + amount + vendor (e.g. "gas $40 shell")</span></div>
+        <div class="manual-format"><span class="manual-format-label">Mileage</span><span>Miles + destination (e.g. "12 miles to Dena")</span></div>
+        <div class="manual-format"><span class="manual-format-label">Odometer</span><span>"odometer 45230" or "/odo 45230"</span></div>
+        <div class="manual-format"><span class="manual-format-label">Admin</span><span>"admin 1h bookkeeping" or use /clockin for timed sessions</span></div>
       </div>
   </div>
 
@@ -1515,6 +1632,7 @@ function openSidebarTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.querySelector('.main-content').scrollTop = 0;
+  if (name === 'vehicle') renderVehicleTab();
 }
 
 // ═══════════════════════════════════════
@@ -4583,6 +4701,109 @@ function renderWeeklyDigest() {
 }
 
 // ═══════════════════════════════════════
+// VEHICLE TAB
+// ═══════════════════════════════════════
+function setVehicleName() {
+  const name = document.getElementById('vehicleNameInput').value.trim();
+  if (!name) return;
+  state.settings.currentVehicle = name;
+  saveState();
+  renderVehicleTab();
+  showToast('Vehicle set to ' + name);
+}
+
+function logOdoFromForm() {
+  const input = document.getElementById('odoInput');
+  const reading = parseFloat(input.value);
+  if (!reading || reading < 100) { showToast('Enter a valid reading'); return; }
+  const vehicle = state.settings.currentVehicle || 'Truck';
+  state.odometer.push({ id: uid(), date: dateStr(new Date()), reading: reading, vehicle: vehicle });
+  saveState();
+  input.value = '';
+  renderVehicleTab();
+  showToast('Logged ' + reading.toLocaleString() + ' mi');
+}
+
+function deleteOdo(id) {
+  if (!confirm('Delete this odometer reading?')) return;
+  state.odometer = state.odometer.filter(o => o.id !== id);
+  saveState();
+  renderVehicleTab();
+}
+
+function renderVehicleTab() {
+  const vehicle = state.settings.currentVehicle || 'Truck';
+  document.getElementById('vehicleName').textContent = vehicle;
+  document.getElementById('vehicleNameInput').value = vehicle;
+  const yr = new Date().getFullYear().toString();
+
+  // Odometer list
+  const odos = (state.odometer || []).filter(o => o.vehicle === vehicle).sort((a,b) => b.date.localeCompare(a.date));
+  document.getElementById('odoCount').textContent = odos.length + ' readings';
+  const odoList = document.getElementById('odoList');
+  if (!odos.length) {
+    odoList.innerHTML = '<li style="text-align:center;color:var(--gray);padding:20px;font-size:13px;">No odometer readings yet. Log one above or type <b>/odo 45230</b> in chat.</li>';
+  } else {
+    odoList.innerHTML = odos.map((o, i) => {
+      const next = odos[i+1];
+      const diff = next ? o.reading - next.reading : 0;
+      return `<li class="odo-entry">
+        <div>
+          <div class="odo-reading">${o.reading.toLocaleString()} mi</div>
+          <div class="odo-meta">${fmtDate(o.date)}${diff > 0 ? ' · <span class="odo-diff">+' + diff.toLocaleString() + ' mi</span>' : ''}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteOdo('${o.id}')">&times;</button>
+      </li>`;
+    }).join('');
+  }
+
+  // Deduction comparison
+  const allOdos = odos.slice().reverse();
+  const yearOdos = allOdos.filter(o => o.date.startsWith(yr));
+  let odoMiles = 0;
+  if (yearOdos.length >= 2) odoMiles = yearOdos[yearOdos.length-1].reading - yearOdos[0].reading;
+  const tripMiles = (state.mileage||[]).filter(m => m.date.startsWith(yr)).reduce((s,m) => s+m.miles, 0);
+  const bestMiles = odoMiles > 0 ? odoMiles : tripMiles;
+  const irsRate = state.settings.irsRate || 0.70;
+  const standardDed = bestMiles * irsRate;
+
+  const truckCats = ['gas','fuel','insurance','repair','repairs','maintenance','truck','vehicle','oil','tires','registration','parking','tolls','car wash','depreciation'];
+  const yearExps = (state.expenses||[]).filter(e => e.date.startsWith(yr));
+  const truckExps = yearExps.filter(e => {
+    const cat = (e.category||'').toLowerCase();
+    const desc = (e.description||e.vendor||'').toLowerCase();
+    return truckCats.some(tc => cat.includes(tc) || desc.includes(tc));
+  });
+  const actualDed = truckExps.reduce((s,e) => s+(e.amount||0), 0);
+  const winner = standardDed >= actualDed ? 'Standard Mileage' : 'Actual Expenses';
+  const winAmt = Math.max(standardDed, actualDed);
+
+  const compEl = document.getElementById('vehicleDeductionCompare');
+  compEl.innerHTML = `
+    <div class="truck-exp-row"><span>Standard: ${bestMiles.toLocaleString()} mi × $${irsRate.toFixed(2)}</span><span class="truck-exp-amt">$${standardDed.toFixed(2)}</span></div>
+    <div class="truck-exp-row"><span>Actual: truck expenses</span><span class="truck-exp-amt">$${actualDed.toFixed(2)}</span></div>
+    <div style="margin-top:8px;padding:10px;background:var(--card-glow);border-radius:8px;">
+      <div style="font-weight:700;color:var(--warm-dark);">Claim: ${winner}</div>
+      <div style="font-size:13px;color:var(--gray);">$${winAmt.toFixed(2)} deduction${winAmt > 0 ? ' (saves ~$' + (winAmt * 0.25).toFixed(0) + ' in taxes)' : ''}</div>
+    </div>`;
+
+  // Truck expenses breakdown
+  const expEl = document.getElementById('vehicleTruckExpenses');
+  if (!truckExps.length) {
+    expEl.innerHTML = '<div style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">No truck expenses this year. Log them in chat:<br><b>gas $40 shell</b> or <b>insurance $120</b></div>';
+  } else {
+    const byCat = {};
+    truckExps.forEach(e => { const c = e.category || e.vendor || 'Truck'; byCat[c] = (byCat[c]||0) + (e.amount||0); });
+    let html = '';
+    Object.entries(byCat).sort((a,b) => b[1]-a[1]).forEach(([c, a]) => {
+      html += `<div class="truck-exp-row"><span class="truck-exp-cat">${esc(c)}</span><span class="truck-exp-amt">$${a.toFixed(2)}</span></div>`;
+    });
+    html += `<div class="truck-exp-row" style="font-weight:700;margin-top:4px;border-top:2px solid var(--accent-border-xlt);padding-top:8px;"><span>Total</span><span>$${actualDed.toFixed(2)}</span></div>`;
+    expEl.innerHTML = html;
+  }
+}
+
+// ═══════════════════════════════════════
 // RECEIPT / INVOICE SHARING
 // ═══════════════════════════════════════
 function shareReceipt(clientName, amount) {
@@ -4657,6 +4878,17 @@ function renderHistory() {
   if (historyFilter === 'all' || historyFilter === 'mileage') {
     items.push(...state.mileage.map(m => ({...m, _type:'mileage', _sort:m.date, _display:`${esc(m.destination)}: ${m.miles} mi`, _detail:`${fmtDate(m.date)} · ${m.purpose} · $${m.deduction.toFixed(2)} deduction`, _id:m.id})));
   }
+  if (historyFilter === 'all' || historyFilter === 'visit') {
+    items.push(...(state.visits||[]).map(v => ({...v, _type:'visit', _sort:v.date, _display:`${esc(v.clientName||'Visit')}: ${v.hours||0}h`, _detail:`${fmtDate(v.date)} · ${v.tasks||'Garden Care'}${v.notes?' · '+esc(v.notes):''}`, _id:v.id})));
+  }
+  if (historyFilter === 'all' || historyFilter === 'odometer') {
+    const sortedOdos = (state.odometer||[]).sort((a,b) => a.date.localeCompare(b.date));
+    items.push(...sortedOdos.map((o, i) => {
+      const prev = sortedOdos[i-1];
+      const diff = prev ? ' (+' + (o.reading - prev.reading).toLocaleString() + ' mi)' : '';
+      return {...o, _type:'odometer', _sort:o.date, _display:`${o.reading.toLocaleString()} mi${diff}`, _detail:`${fmtDate(o.date)} · ${esc(o.vehicle||'Truck')}`, _id:o.id};
+    }));
+  }
   if (historyFilter === 'all' || historyFilter === 'admin') {
     items.push(...(state.adminTime||[]).map(a => ({...a, _type:'admin', _sort:a.date, _display:`🕐 ${esc(a.category)}: ${a.hours}h`, _detail:`${fmtDate(a.date)}${a.notes?' · '+esc(a.notes):''} · $${(a.cost||0).toFixed(0)} cost`, _id:a.id})));
   }
@@ -4671,7 +4903,7 @@ function renderHistory() {
         <div class="entry-detail">${r._detail}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${r._type==='income'?'var(--fairy-glow)':r._type==='expense'?'var(--red-light)':r._type==='admin'?'rgba(212,194,122,0.2)':'rgba(184,169,201,0.2)'};color:${r._type==='income'?'var(--warm-dark)':r._type==='expense'?'var(--red)':r._type==='admin'?'var(--sparkle-gold)':'var(--lavender)'};font-weight:600;">${r._type}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${{'income':'var(--fairy-glow)','expense':'var(--red-light)','admin':'rgba(212,194,122,0.2)','visit':'rgba(163,184,140,0.2)','odometer':'rgba(196,139,176,0.2)','mileage':'rgba(184,169,201,0.2)'}[r._type]||'rgba(184,169,201,0.2)'};color:${{'income':'var(--warm-dark)','expense':'var(--red)','admin':'var(--sparkle-gold)','visit':'var(--sage)','odometer':'var(--mushroom)','mileage':'var(--lavender)'}[r._type]||'var(--lavender)'};font-weight:600;">${r._type}</span>
         <button class="delete-btn" onclick="delEntry('${r._type}','${r._id}')">&times;</button>
       </div>
     </li>`).join('');
@@ -4682,6 +4914,8 @@ function delEntry(type, id) {
   if (type==='income') state.income = state.income.filter(i => i.id !== id);
   if (type==='expense') state.expenses = state.expenses.filter(e => e.id !== id);
   if (type==='mileage') state.mileage = state.mileage.filter(m => m.id !== id);
+  if (type==='visit') state.visits = (state.visits||[]).filter(v => v.id !== id);
+  if (type==='odometer') state.odometer = (state.odometer||[]).filter(o => o.id !== id);
   if (type==='admin') state.adminTime = (state.adminTime||[]).filter(a => a.id !== id);
   saveState(); refreshAll(); showToast('Deleted');
 }
