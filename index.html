@@ -723,6 +723,14 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       <div id="calMonthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
     </div>
 
+    <!-- ─── SNAP A RECEIPT ─── -->
+    <div class="card" style="text-align:center;padding:14px;">
+      <div class="camera-area" onclick="document.getElementById('receiptInput').click()" style="margin:0;padding:12px;cursor:pointer;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--mushroom)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p style="margin:4px 0 0;font-size:14px;font-weight:600;color:var(--warm-dark);">Snap a Receipt</p>
+      </div>
+    </div>
+
     <!-- ─── TODAY ─── -->
     <div class="card" id="dashTodayCard">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
