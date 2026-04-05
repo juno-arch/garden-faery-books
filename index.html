@@ -664,6 +664,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         Supply
       </button>
       <div class="sidebar-divider"></div>
+      <button class="sidebar-item" onclick="closeSidebar();toggleAdminTimer()" id="adminTimerToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Admin Timer
+      </button>
       <button class="sidebar-item" onclick="openSidebarTab('manual')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         Manual
@@ -704,7 +708,7 @@ textarea.form-input { resize: vertical; min-height: 60px; }
   <!-- ═══ HOME TAB ═══ -->
   <div class="tab-pane active" id="tab-home">
 
-    <!-- ─── CALENDAR (month view first) ─── -->
+    <!-- ─── CALENDAR ─── -->
     <div class="card" style="padding-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <button onclick="changeCalMonth(-1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&larr;</button>
@@ -712,51 +716,53 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <button onclick="changeCalMonth(1)" style="background:none;border:1px solid var(--accent-border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px;">&rarr;</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:11px;text-align:center;">
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Sun</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Mon</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Tue</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Wed</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Thu</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Fri</div>
-        <div style="font-weight:700;color:var(--gray);padding:4px;">Sat</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">S</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">M</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">T</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">W</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">T</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">F</div>
+        <div style="font-weight:700;color:var(--gray);padding:4px;">S</div>
       </div>
       <div id="calMonthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;"></div>
     </div>
 
-    <!-- ─── SNAP A RECEIPT ─── -->
-    <div class="card" style="text-align:center;padding:14px;">
-      <div class="camera-area" onclick="document.getElementById('receiptInput').click()" style="margin:0;padding:12px;cursor:pointer;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--mushroom)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p style="margin:4px 0 0;font-size:14px;font-weight:600;color:var(--warm-dark);">Snap a Receipt</p>
-      </div>
-    </div>
-
     <!-- ─── TODAY ─── -->
     <div class="card" id="dashTodayCard">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <div class="card-title" style="margin:0;">Today</div>
         <div id="dashClockBadge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:#eee8dd;color:var(--gray);"></div>
       </div>
-      <div id="dashTodaySchedule" style="margin-bottom:8px;"></div>
-      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;">
-        <div class="stat-box"><div class="value" id="dashTodayEarned">$0</div><div class="label">Earned</div></div>
-        <div class="stat-box red"><div class="value" id="dashTodaySpent">$0</div><div class="label">Spent</div></div>
-        <div class="stat-box"><div class="value" id="dashTodayHours">0</div><div class="label">Hours</div></div>
-      </div>
+      <div id="dashTodaySchedule"></div>
     </div>
 
-    <!-- ─── THIS WEEK ─── -->
+    <!-- ─── RECEIPT SCANNER ─── -->
     <div class="card">
-      <div class="card-title">This Week</div>
-      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-        <div class="stat-box"><div class="value" id="dashWeekIncome">$0</div><div class="label">Income</div></div>
-        <div class="stat-box"><div class="value" id="dashWeekHours">0</div><div class="label">Hours</div></div>
-        <div class="stat-box red"><div class="value" id="dashWeekExpenses">$0</div><div class="label">Expenses</div></div>
-        <div class="stat-box"><div class="value" id="dashWeekJobs">0</div><div class="label">Jobs</div></div>
+      <div class="card-title" style="margin-bottom:8px;">Snap a Receipt</div>
+      <div onclick="document.getElementById('receiptInput').click()" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card-glow);border-radius:10px;cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--mushroom)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size:14px;font-weight:600;color:var(--warm-dark);">Tap to photograph receipt</span>
+        <input type="file" id="receiptInput" accept="image/*" capture="environment" onchange="handleReceipt(this)" style="display:none;">
+      </div>
+      <div id="receiptPreviewArea" style="display:none; margin-top:12px;">
+        <img id="receiptPreview" class="receipt-preview">
+        <div id="ocrStatus" style="display:none; margin-top:8px;"></div>
+        <div class="form-row" style="margin-top:12px;">
+          <div class="form-group"><label>Vendor</label><input type="text" id="recVendor"></div>
+          <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" inputmode="decimal"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Date</label><input type="date" id="recDate"></div>
+          <div class="form-group"><label>Category</label><select id="recCategory"><option>Gas</option><option>Lumber &amp; Hardware</option><option>Soil &amp; Amendments</option><option>Plants &amp; Seeds</option><option>Tools &amp; Equipment</option><option>Insurance</option><option>Repairs</option><option>Supplies</option><option>Meals</option><option>Other</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-primary" onclick="saveReceipt()" style="flex:1;">Save</button>
+          <button class="btn btn-outline" onclick="cancelReceipt()">Cancel</button>
+        </div>
       </div>
     </div>
 
-    <!-- ─── MONTHLY ─── -->
+    <!-- ─── THIS MONTH ─── -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div class="card-title" style="margin:0;"><span id="monthLabel">April 2026</span></div>
@@ -770,13 +776,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <div class="goal-bar-text" id="goalText">0%</div>
       </div>
       <div class="goal-numbers"><span id="goalEarned">$0</span><span id="goalTarget">$1,000</span></div>
-      <div class="stats-grid" style="margin-top:10px;">
+      <div class="stats-grid" style="margin-top:10px;grid-template-columns:1fr 1fr 1fr;">
         <div class="stat-box"><div class="value" id="statIncome">$0</div><div class="label">Income</div></div>
         <div class="stat-box red"><div class="value" id="statExpenses">$0</div><div class="label">Expenses</div></div>
         <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net</div></div>
-        <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
-        <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
-        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Vehicle Ded.</div></div>
       </div>
     </div>
 
@@ -786,79 +789,45 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       <div id="dashOwedList" style="font-size:14px;"></div>
     </div>
 
-    <!-- ─── EXPENSE BREAKDOWN ─── -->
-    <div class="card" id="catBreakdownCard" style="display:none;">
-      <div class="card-title">Expenses by Category</div>
-      <div id="catBreakdownList"></div>
+    <!-- Hidden elements needed by JS -->
+    <div style="display:none;">
+      <span id="dashTodayEarned"></span><span id="dashTodaySpent"></span><span id="dashTodayHours"></span>
+      <span id="dashWeekIncome"></span><span id="dashWeekHours"></span><span id="dashWeekExpenses"></span><span id="dashWeekJobs"></span>
+      <span id="statHours"></span><span id="statJobs"></span><span id="statMileDed"></span>
+      <span id="catBreakdownList"></span>
+      <span id="adminWeekHrs"></span><span id="adminMonthHrs"></span><span id="adminMonthCost"></span>
+      <span id="adminRecentList"></span>
+      <span id="digestWeekLabel"></span><span id="digestHours"></span><span id="digestEarned"></span>
+      <span id="digestAdminHrs"></span><span id="digestNet"></span><span id="digestClients"></span><span id="digestOutstanding"></span>
     </div>
 
-    <!-- ─── ADMIN TIME TRACKER ─── -->
-    <div class="card" id="adminTimeCard">
+    <!-- Admin timer (hidden until activated) -->
+    <div id="adminTimerPanel" style="display:none;position:fixed;bottom:70px;left:12px;right:12px;z-index:200;padding:14px;background:white;border:2px solid rgba(76,175,80,0.4);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div class="card-title" style="margin:0;">Admin Time</div>
-        <div style="display:flex;gap:6px;">
-          <button onclick="toggleAdminTimer()" id="adminTimerToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">Start Timer</button>
-          <button onclick="toggleAdminForm()" id="adminFormToggle" style="font-size:12px;padding:4px 12px;border:1px solid var(--accent-border);border-radius:var(--radius-pill);background:var(--card-glow);color:var(--warm-dark);cursor:pointer;font-family:var(--font);font-weight:600;">+ Log</button>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#2e7d32;text-transform:uppercase;letter-spacing:0.5px;">Timer Running</div>
+          <div id="adminTimerDisplay" style="font-size:28px;font-weight:800;color:var(--warm-dark);letter-spacing:1px;">0:00:00</div>
+        </div>
+        <div id="adminTimerDot" style="width:10px;height:10px;border-radius:50%;background:#4caf50;animation:timerPulse 1.5s ease infinite;"></div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="filter-pills" id="adminTimerCatPills" style="flex-wrap:wrap;">
+          <button class="filter-pill active" onclick="pickAdminTimerCat(this)" data-cat="Admin">Admin</button>
+          <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Scheduling">Scheduling</button>
+          <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Planning">Planning</button>
+          <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Claude Session">Claude Session</button>
+          <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Marketing">Marketing</button>
+          <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Bookkeeping">Bookkeeping</button>
         </div>
       </div>
-      <div id="adminTimerPanel" style="display:none;padding:14px;background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.25);border-radius:var(--radius);margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div>
-            <div style="font-size:11px;font-weight:700;color:#2e7d32;text-transform:uppercase;letter-spacing:0.5px;">Timer Running</div>
-            <div id="adminTimerDisplay" style="font-size:28px;font-weight:800;color:var(--warm-dark);font-family:var(--font);letter-spacing:1px;">0:00:00</div>
-          </div>
-          <div id="adminTimerDot" style="width:10px;height:10px;border-radius:50%;background:#4caf50;animation:timerPulse 1.5s ease infinite;"></div>
-        </div>
-        <div style="margin-bottom:8px;">
-          <div class="filter-pills" id="adminTimerCatPills" style="flex-wrap:wrap;">
-            <button class="filter-pill active" onclick="pickAdminTimerCat(this)" data-cat="Admin">Admin</button>
-            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Scheduling">Scheduling</button>
-            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Planning">Planning</button>
-            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Claude Session">Claude Session</button>
-            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Marketing">Marketing</button>
-            <button class="filter-pill" onclick="pickAdminTimerCat(this)" data-cat="Bookkeeping">Bookkeeping</button>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;">
-          <input type="text" id="adminTimerNotes" placeholder="What are you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
-        </div>
-        <button onclick="stopAdminTimer()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--red);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Stop and Save</button>
+      <div style="margin-bottom:10px;">
+        <input type="text" id="adminTimerNotes" placeholder="What are you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:8px;font-size:14px;">
       </div>
-      <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px;">
-        <div class="stat-box"><div class="value" id="adminWeekHrs">0</div><div class="label">This Week</div></div>
-        <div class="stat-box"><div class="value" id="adminMonthHrs">0</div><div class="label">This Month</div></div>
-        <div class="stat-box"><div class="value" id="adminMonthCost">$0</div><div class="label">Cost</div></div>
-      </div>
-      <div id="adminFormPanel" style="display:none;padding:12px;background:var(--card-glow);border-radius:var(--radius);margin-bottom:10px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Date</label>
-            <input type="date" id="adminDate" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Hours</label>
-            <input type="number" id="adminHours" placeholder="1.5" step="0.25" min="0.25" max="24" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
-          </div>
-        </div>
-        <div style="margin-bottom:8px;">
-          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Category</label>
-          <div class="filter-pills" id="adminCatPills" style="flex-wrap:wrap;">
-            <button class="filter-pill active" onclick="pickAdminCat(this)" data-cat="Admin">Admin</button>
-            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Scheduling">Scheduling</button>
-            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Planning">Planning</button>
-            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Claude Session">Claude Session</button>
-            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Marketing">Marketing</button>
-            <button class="filter-pill" onclick="pickAdminCat(this)" data-cat="Bookkeeping">Bookkeeping</button>
-          </div>
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="font-size:11px;font-weight:700;color:var(--gray);display:block;margin-bottom:2px;">Notes (optional)</label>
-          <input type="text" id="adminNotes" placeholder="What were you working on?" style="width:100%;padding:8px;border:1px solid var(--accent-border);border-radius:var(--radius-sm);font-family:var(--font);font-size:14px;background:white;color:var(--warm-dark);">
-        </div>
-        <button onclick="saveAdminTime()" style="width:100%;padding:10px;border:none;border-radius:var(--radius);background:var(--text-primary);color:white;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;">Save</button>
-      </div>
-      <div id="adminRecentList" style="font-size:13px;"></div>
+      <button onclick="stopAdminTimer()" style="width:100%;padding:10px;border:none;border-radius:10px;background:var(--red);color:white;font-size:14px;font-weight:700;cursor:pointer;">Stop and Save</button>
     </div>
+    <div id="adminFormPanel" style="display:none;"></div>
+    <span id="adminFormToggle" style="display:none;"></span>
+    <span id="adminTimeCard" style="display:none;"></span>
   </div>
 
 
@@ -1128,38 +1097,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <div id="visionKeyStatus" style="margin-top:8px;"></div>
       </div>
       <div class="card">
-        <div class="card-title">Snap a Receipt</div>
-        <div class="camera-area" onclick="document.getElementById('receiptInput').click()">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <p>Tap to photograph receipt</p>
-          <input type="file" id="receiptInput" accept="image/*" capture="environment" onchange="handleReceipt(this)">
-        </div>
-        <div id="receiptPreviewArea" style="display:none; margin-top:12px;">
-          <img id="receiptPreview" class="receipt-preview">
-          <div id="ocrStatus" style="display:none; margin-top:8px;"></div>
-          <div class="form-row" style="margin-top:12px;">
-            <div class="form-group"><label>Vendor</label><input type="text" id="recVendor"></div>
-            <div class="form-group"><label>Amount</label><input type="number" id="recAmount" step="0.01" inputmode="decimal"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Date</label><input type="date" id="recDate"></div>
-            <div class="form-group"><label>Category</label><select id="recCategory"><option>Lumber &amp; Hardware</option><option>Soil &amp; Amendments</option><option>Plants &amp; Seeds</option><option>Tools &amp; Equipment</option><option>Transportation</option><option>Supplies</option><option>Marketing</option><option>Insurance</option><option>Meals</option><option>Other</option></select></div>
-          </div>
-          <button class="btn btn-primary" onclick="saveReceipt()" style="margin-top:8px;">Save Receipt</button>
-          <button class="btn btn-outline" onclick="cancelReceipt()" style="margin-top:8px;">Cancel</button>
-        </div>
-      </div>
-      <div class="card">
         <div class="card-title">Data</div>
         <button class="btn btn-outline" onclick="exportData()" style="margin-bottom:8px;">Export All (JSON)</button>
         <button class="btn btn-outline" onclick="document.getElementById('importInput').click()">Import (JSON)</button>
         <input type="file" id="importInput" accept=".json" style="display:none;" onchange="importData(this)">
-      </div>
-      <div class="card">
-        <div class="card-title">Website Lead Sync</div>
-        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Pull new leads from gardenfaery.love contact forms into your Leads list.</p>
-        <div class="form-group"><label>Forms Script URL</label><input type="text" id="settingsFormsUrl" placeholder="https://script.google.com/macros/s/..." style="font-size:12px;"></div>
-        <button class="btn btn-primary" onclick="saveFormsUrl()">Save URL</button>
       </div>
       <div class="card" id="cloudSyncCard">
         <div class="card-title">Cloud Sync</div>
@@ -3973,69 +3914,6 @@ function renderLeads() {
 // ═══════════════════════════════════════
 // WEBSITE LEAD SYNC
 // ═══════════════════════════════════════
-function saveFormsUrl() {
-  const url = document.getElementById('settingsFormsUrl').value.trim();
-  if (!url) { showToast('Paste the Forms Script URL first'); return; }
-  state.settings.formsUrl = url;
-  saveState();
-  showToast('Forms URL saved! 🌐');
-}
-
-function syncWebsiteLeads() {
-  const url = state.settings.formsUrl;
-  if (!url) { showToast('Set your Forms Script URL in Settings first'); return; }
-  const btn = document.getElementById('syncLeadsBtn');
-  const status = document.getElementById('syncLeadsStatus');
-  btn.disabled = true;
-  btn.textContent = '🔄 Syncing...';
-  status.style.display = 'block';
-  status.textContent = 'Fetching from website...';
-
-  fetch(url)
-    .then(r => r.json())
-    .then(data => {
-      if (!state.leads) state.leads = [];
-      const contacts = data.contacts || [];
-      let added = 0;
-      contacts.forEach(c => {
-        // Skip if we already have this contact (match by name+email)
-        const name = (c.name || '').trim();
-        const email = (c.email || '').trim();
-        if (!name && !email) return;
-        const exists = state.leads.some(l =>
-          (l.name || '').toLowerCase() === name.toLowerCase() &&
-          (l.contact || '').toLowerCase() === email.toLowerCase()
-        );
-        if (exists) return;
-        state.leads.push({
-          id: uid(),
-          name: name || email,
-          contact: [email, c.phone || ''].filter(Boolean).join(', '),
-          location: '',
-          needs: c.message || '',
-          status: 'new',
-          created: c.date_submitted || new Date().toISOString(),
-          source: 'website'
-        });
-        added++;
-      });
-      if (added > 0) {
-        saveState();
-        renderLeads();
-      }
-      status.textContent = added > 0
-        ? '🌱 ' + added + ' new lead' + (added > 1 ? 's' : '') + ' sprouted from the website!'
-        : '✓ All caught up. No new leads from the website.';
-      btn.disabled = false;
-      btn.textContent = '🌐 Sync from Website';
-    })
-    .catch(err => {
-      console.warn('Sync error:', err);
-      status.textContent = 'Sync failed. Check the URL in Settings.';
-      btn.disabled = false;
-      btn.textContent = '🌐 Sync from Website';
-    });
-}
 
 // ═══════════════════════════════════════
 // CAL.COM BOOKING SYNC
@@ -5631,7 +5509,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsRate').value = state.settings.rate || 25;
   document.getElementById('settingsGoal').value = state.settings.goal || 2000;
   if (state.settings.visionKey) document.getElementById('settingsVisionKey').value = state.settings.visionKey;
-  if (state.settings.formsUrl) document.getElementById('settingsFormsUrl').value = state.settings.formsUrl;
   if (state.settings.calApiKey) document.getElementById('settingsCalApiKey').value = state.settings.calApiKey;
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
 
