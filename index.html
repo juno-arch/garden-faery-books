@@ -1272,6 +1272,17 @@ textarea.form-input { resize: vertical; min-height: 60px; }
     </div>
   </div>
 
+  <!-- CALENDAR DAY DETAIL MODAL -->
+  <div class="gf-modal" id="cal-day-modal" onclick="closeCalDayModal(event)">
+    <div class="gf-modal-content" onclick="event.stopPropagation()">
+      <div class="gf-modal-header">
+        <h3 id="cal-day-title"></h3>
+        <button class="gf-modal-close" onclick="closeCalDayModal()">&times;</button>
+      </div>
+      <div id="cal-day-list"></div>
+    </div>
+  </div>
+
   <!-- ═══ SUPPLY TAB ═══ -->
   <div class="tab-pane" id="tab-supply">
     <h2 style="font-family:var(--font-heading); font-size:22px; color:var(--warm-dark); margin-bottom:14px;">Materials & Suppliers</h2>
@@ -1637,22 +1648,39 @@ function renderCalMonth() {
   let html = '';
   // Blank cells before first day
   for (let i = 0; i < firstDay; i++) {
-    html += '<div style="padding:6px;min-height:36px;"></div>';
+    html += '<div style="padding:4px 2px;min-height:54px;"></div>';
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dateCheck = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
     const isToday = dateCheck === todayStr;
-    const hasEvents = eventDays[day];
-    const bg = isToday ? 'var(--text-primary)' : hasEvents ? 'var(--card-glow)' : 'transparent';
+    const dayEvts = eventDays[day];
+    const bg = isToday ? 'var(--text-primary)' : dayEvts ? 'var(--card-glow)' : 'transparent';
     const color = isToday ? 'white' : 'var(--warm-dark)';
-    const border = hasEvents && !isToday ? '1px solid var(--accent-border)' : 'none';
+    const border = dayEvts && !isToday ? '1px solid var(--accent-border)' : 'none';
+    const subColor = isToday ? 'rgba(255,255,255,0.8)' : 'var(--mushroom)';
 
-    html += '<div style="padding:4px 2px;min-height:36px;text-align:center;background:' + bg + ';color:' + color + ';border-radius:6px;border:' + border + ';font-size:12px;cursor:' + (hasEvents ? 'pointer' : 'default') + ';" ' +
-      (hasEvents ? 'onclick="showCalDayDetail(' + day + ')" ' : '') +
-      'title="' + (hasEvents ? hasEvents.map(e => (e.client || e.summary || '')).join(', ') : '') + '">' +
-      '<div style="font-weight:' + (isToday || hasEvents ? '700' : '400') + ';">' + day + '</div>' +
-      (hasEvents ? '<div style="width:5px;height:5px;border-radius:50%;background:' + (isToday ? 'white' : 'var(--mushroom)') + ';margin:2px auto 0;"></div>' : '') +
+    // Build event labels: client name + time
+    let evtLabels = '';
+    if (dayEvts) {
+      dayEvts.slice(0, 3).forEach(e => {
+        const name = (e.client || e.summary || '').split(' ')[0]; // First name only
+        let timeStr = '';
+        if (e.start && e.start.includes('T')) {
+          const t = new Date(e.start);
+          if (!isNaN(t)) timeStr = t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(' ', '');
+        }
+        evtLabels += '<div style="font-size:8px;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:' + subColor + ';">' + esc(name) + (timeStr ? ' ' + timeStr : '') + '</div>';
+      });
+      if (dayEvts.length > 3) {
+        evtLabels += '<div style="font-size:8px;color:' + subColor + ';">+' + (dayEvts.length - 3) + ' more</div>';
+      }
+    }
+
+    html += '<div style="padding:3px 1px;min-height:54px;text-align:center;background:' + bg + ';color:' + color + ';border-radius:6px;border:' + border + ';font-size:12px;cursor:' + (dayEvts ? 'pointer' : 'default') + ';overflow:hidden;" ' +
+      (dayEvts ? 'onclick="showCalDayDetail(' + day + ')" ' : '') + '>' +
+      '<div style="font-weight:' + (isToday || dayEvts ? '700' : '400') + ';">' + day + '</div>' +
+      evtLabels +
       '</div>';
   }
 
@@ -1661,20 +1689,53 @@ function renderCalMonth() {
 
 function showCalDayDetail(day) {
   const dateCheck = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
-  const events = getCalendarSyncData().filter(e => e.start.split('T')[0] === dateCheck);
-  const income = (state.income || []).filter(i => i.date === dateCheck);
-
-  let msg = new Date(calViewYear, calViewMonth, day).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ':\n';
-  events.forEach(e => {
-    const time = new Date(e.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    msg += '\n' + (e.client || e.summary) + ' at ' + time;
-    if (e.location) msg += '\n  ' + e.location;
+  const events = getCalendarSyncData().filter(e => {
+    const eDate = e.start.includes('T') ? e.start.split('T')[0] : e.start;
+    return eDate === dateCheck;
   });
-  if (income.length) {
-    msg += '\n\nLogged: ';
-    income.forEach(i => { msg += '\n' + i.client + ': $' + i.total + ' (' + i.service + ')'; });
+  const income = (state.income || []).filter(i => i.date === dateCheck);
+  const dayLabel = new Date(calViewYear, calViewMonth, day).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  let html = '';
+  if (events.length) {
+    events.forEach(e => {
+      const t = new Date(e.start);
+      const time = !isNaN(t) ? t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+      const endT = e.end ? new Date(e.end) : null;
+      const endTime = endT && !isNaN(endT) ? ' - ' + endT.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+      html += '<div style="padding:10px 0;border-bottom:1px solid var(--accent-border-xlt);">' +
+        '<div style="font-weight:700;font-size:15px;">' + esc(e.client || e.summary || 'Booking') + '</div>' +
+        (time ? '<div style="font-size:13px;color:var(--mushroom);font-weight:600;">' + time + endTime + '</div>' : '') +
+        (e.service ? '<div style="font-size:12px;color:var(--gray);margin-top:2px;">' + esc(e.service) + '</div>' : '') +
+        (e.location ? '<div style="font-size:12px;color:var(--gray);margin-top:2px;">📍 ' + esc(e.location) + '</div>' : '') +
+        '</div>';
+    });
   }
-  alert(msg);
+  if (income.length) {
+    income.forEach(i => {
+      // Skip if already shown as a calendar event
+      if (events.some(e => (e.client||'').toLowerCase() === (i.client||'').toLowerCase())) return;
+      html += '<div style="padding:10px 0;border-bottom:1px solid var(--accent-border-xlt);">' +
+        '<div style="font-weight:700;font-size:15px;">' + esc(i.client) + '</div>' +
+        '<div style="font-size:13px;color:var(--sparkle-gold);font-weight:600;">$' + (i.total||0) + ' logged</div>' +
+        (i.service ? '<div style="font-size:12px;color:var(--gray);">' + esc(i.service) + '</div>' : '') +
+        '</div>';
+    });
+  }
+  if (!html) html = '<div style="padding:16px;text-align:center;color:var(--gray);">No events this day</div>';
+
+  // Show in modal
+  const modal = document.getElementById('cal-day-modal');
+  if (modal) {
+    document.getElementById('cal-day-title').textContent = dayLabel;
+    document.getElementById('cal-day-list').innerHTML = html;
+    modal.classList.add('active');
+  }
+}
+
+function closeCalDayModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('cal-day-modal').classList.remove('active');
 }
 
 // Seed calendar with synced Google Calendar events
@@ -2360,6 +2421,54 @@ function handleQuery(lower) {
         total += amt;
       });
       html += parsedRow('<b>Total</b>', '<b>$' + total.toFixed(2) + '</b>');
+      html += '</div>';
+      addChatBubble(html, 'bot', true);
+    }
+    return true;
+  }
+
+  // Client lookup: "Dena's number", "Elizabeth address", "client list", etc.
+  const clientLookup = lower.match(/(?:what(?:'s| is)|give me|show me|look up|find)?\s*(\w+?)(?:'s|s)?\s+(number|phone|email|address|info|contact|miles|details)/i);
+  const clientListQ = /(?:client list|my clients|all clients|list clients|show clients|who are my clients)/i.test(lower);
+  if (clientLookup || clientListQ) {
+    if (clientListQ) {
+      const clients = state.clients || [];
+      if (!clients.length) {
+        addChatBubble('No clients saved yet. They get added when you log income or sync from Cal.com.', 'bot');
+      } else {
+        let html = '<div style="font-weight:700;margin-bottom:8px;">Your Clients (' + clients.length + ')</div><div class="parsed-data">';
+        clients.sort((a,b) => (a.name||'').localeCompare(b.name||'')).forEach(c => {
+          const details = [c.phone, c.email].filter(Boolean).join(' · ') || 'No contact info';
+          html += parsedRow(esc(c.name), details);
+        });
+        html += '</div>';
+        addChatBubble(html, 'bot', true);
+      }
+      return true;
+    }
+    const searchName = clientLookup[1].toLowerCase();
+    const field = clientLookup[2].toLowerCase();
+    const match = (state.clients || []).find(c => c.name && c.name.toLowerCase().includes(searchName));
+    if (!match) {
+      addChatBubble('No client found matching "' + esc(clientLookup[1]) + '". Try "client list" to see everyone.', 'bot');
+    } else {
+      let html = '<div style="font-weight:700;margin-bottom:8px;">' + esc(match.name) + '</div><div class="parsed-data">';
+      if (field === 'number' || field === 'phone' || field === 'contact' || field === 'info' || field === 'details') {
+        html += parsedRow('Phone', match.phone || 'Not saved');
+      }
+      if (field === 'email' || field === 'contact' || field === 'info' || field === 'details') {
+        html += parsedRow('Email', match.email || 'Not saved');
+      }
+      if (field === 'address' || field === 'contact' || field === 'info' || field === 'details') {
+        html += parsedRow('Address', match.address || 'Not saved');
+      }
+      if (field === 'miles' || field === 'details') {
+        html += parsedRow('Miles', match.miles ? match.miles + ' mi' : 'Not saved');
+      }
+      if (field === 'info' || field === 'details') {
+        html += parsedRow('Hidy Spot', match.hidySpot || 'Not saved');
+        if (match.notes) html += parsedRow('Notes', esc(match.notes));
+      }
       html += '</div>';
       addChatBubble(html, 'bot', true);
     }
