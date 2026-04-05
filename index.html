@@ -1358,7 +1358,7 @@ let realStateBackup = null;
 let state = {
   income: [], expenses: [], mileage: [], receipts: [],
   invoices: [], clients: [], cards: [], leads: [],
-  adminTime: [], visits: [],
+  adminTime: [], visits: [], calBookings: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
   settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25, calApiKey: '', calLastSync: '' },
   version: 4
@@ -1370,7 +1370,7 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
-      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime','visits'].forEach(k => {
+      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime','visits','calBookings'].forEach(k => {
         if (!state[k]) state[k] = [];
       });
       if (!state.learned) state.learned = { vendors: {}, aliases: {}, categories: {} };
@@ -1522,49 +1522,32 @@ function switchCalView(view, btn) {
 
 function loadCalendarEvents() {
   if (calendarLoaded) return;
-  // Calendar events are loaded from Google Calendar embed (month view)
-  // and from cached events stored in localStorage (upcoming view)
-  const cached = localStorage.getItem('gf_calendar_cache');
-  if (cached) {
-    try {
-      const data = JSON.parse(cached);
-      // Only use cache if less than 30 min old
-      if (Date.now() - data.timestamp < 30 * 60 * 1000) {
-        calendarEvents = data.events;
-        renderUpcomingEvents();
-        calendarLoaded = true;
-        return;
-      }
-    } catch(e) {}
-  }
+  // Build calendar from Cal.com bookings + visits stored in state
+  calendarEvents = getCalendarSyncData();
   renderUpcomingFromState();
   calendarLoaded = true;
 }
 
 function renderUpcomingFromState() {
-  // Show events we know about from the app's own income schedule + saved info
-  const today = new Date();
-  const endOfWeek = new Date(today);
-  endOfWeek.setDate(today.getDate() + (7 - today.getDay()));
-  const endOfNextWeek = new Date(endOfWeek);
-  endOfNextWeek.setDate(endOfWeek.getDate() + 7);
-
-  // Build events from income entries that are scheduled (future dates)
   const thisWeekEl = document.getElementById('calThisWeek');
   const nextWeekEl = document.getElementById('calNextWeek');
 
-  // Use stored calendar events if available
+  // Build events from Cal.com bookings + visits + income
+  calendarEvents = getCalendarSyncData();
+
   if (calendarEvents.length > 0) {
     renderUpcomingEvents();
     return;
   }
 
-  // Show helpful message with embedded calendar link
+  // No events yet - show setup hint
+  const hasKey = state.settings.calApiKey;
   thisWeekEl.innerHTML = '<div style="text-align:center;padding:12px;">' +
-    '<p style="color:var(--gray);font-size:13px;margin-bottom:10px;">Switch to <strong>Month View</strong> to see your full Google Calendar</p>' +
-    '<p style="color:var(--gray);font-size:12px;">Your calendar syncs from your Google account</p>' +
+    (hasKey
+      ? '<p style="color:var(--gray);font-size:13px;">No upcoming bookings found. Tap <strong>Sync Now</strong> in Settings to refresh.</p>'
+      : '<p style="color:var(--gray);font-size:13px;">Add your Cal.com API key in <strong>Settings</strong> to see your schedule here.</p>') +
     '</div>';
-  nextWeekEl.innerHTML = '<p style="text-align:center;color:var(--gray);padding:12px;font-size:13px;">Switch to Month View for full schedule</p>';
+  nextWeekEl.innerHTML = '';
 }
 
 function renderUpcomingEvents() {
@@ -1701,20 +1684,41 @@ function seedCalendarFromKnown() {
 }
 
 function getCalendarSyncData() {
-  return [
-    { summary: 'GF - Dena', client: 'Dena', service: 'Weeding', start: '2026-03-16T10:00:00-07:00', end: '2026-03-16T15:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-19T09:00:00-07:00', end: '2026-03-19T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Dena', client: 'Dena', service: 'Garden Care', start: '2026-03-23T10:00:00-07:00', end: '2026-03-23T14:00:00-07:00', location: '1112 Spear Ave, Arcata CA 95521', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-03-24T09:00:00-07:00', end: '2026-03-24T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Consultation (Edith)', client: 'Edith', service: 'Consultation', start: '2026-03-26T11:00:00-07:00', end: '2026-03-26T12:00:00-07:00', location: '1641 Old Arcata Road, Bayside CA 95524', allDay: false },
-    { summary: 'GF - (TBD) Weeding (Sarah)', client: 'Sarah', service: 'Weeding', start: '2026-03-30T02:00:00-07:00', end: '2026-03-30T04:00:00-07:00', location: '', allDay: false },
-    { summary: 'Garden Faery (Consultation) - Anna Peck', client: 'Anna Peck', service: 'Consultation', start: '2026-04-01T09:00:00-07:00', end: '2026-04-01T09:30:00-07:00', location: '565 Hilton LN, Arcata CA 95521', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-02T09:00:00-07:00', end: '2026-04-02T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-09T09:00:00-07:00', end: '2026-04-09T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-16T09:00:00-07:00', end: '2026-04-16T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-23T09:00:00-07:00', end: '2026-04-23T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false },
-    { summary: 'GF - Elizabeth', client: 'Elizabeth', service: 'Garden Care', start: '2026-04-30T09:00:00-07:00', end: '2026-04-30T14:00:00-07:00', location: '3168 Deer Fern Ct', allDay: false }
-  ];
+  // Return live Cal.com bookings + logged visits (no more hardcoded data)
+  const events = [];
+
+  // Add Cal.com bookings from state
+  (state.calBookings || []).forEach(b => {
+    events.push({
+      summary: b.title || b.clientName || 'Booking',
+      client: b.clientName || '',
+      service: b.service || 'Garden Care',
+      start: b.start,
+      end: b.end,
+      location: b.location || '',
+      allDay: false
+    });
+  });
+
+  // Add logged visits as calendar events
+  (state.visits || []).forEach(v => {
+    // Skip if already represented by a Cal.com booking on same date+client
+    const vDate = v.date;
+    const alreadyShown = events.some(e => e.start.split('T')[0] === vDate && e.client.toLowerCase() === (v.clientName || '').toLowerCase());
+    if (!alreadyShown) {
+      events.push({
+        summary: v.clientName || 'Visit',
+        client: v.clientName || '',
+        service: v.tasks || 'Garden Care',
+        start: v.date + 'T09:00:00',
+        end: v.date + 'T' + String(9 + (v.hours || 2)).padStart(2,'0') + ':00:00',
+        location: '',
+        allDay: false
+      });
+    }
+  });
+
+  return events.sort((a, b) => a.start.localeCompare(b.start));
 }
 
 // Find a matching calendar event for a client on a given date
@@ -3706,80 +3710,99 @@ async function syncFromCal() {
   const statusEl = document.getElementById('calSyncStatus');
   if (statusEl) statusEl.textContent = 'Fetching bookings from Cal.com...';
 
+  const headers = {
+    'Authorization': 'Bearer ' + key,
+    'cal-api-version': '2024-08-13',
+    'Content-Type': 'application/json'
+  };
+
   try {
     // Fetch past bookings (completed ones we can log as income)
-    const params = new URLSearchParams({
-      status: 'past',
-      sortStart: 'desc',
-      limit: '50'
-    });
-    // If we synced before, only get bookings after last sync
+    const pastParams = new URLSearchParams({ status: 'past', sortStart: 'desc', limit: '50' });
     if (state.settings.calLastSync) {
-      params.set('afterStart', state.settings.calLastSync);
+      pastParams.set('afterStart', state.settings.calLastSync);
     }
 
-    const resp = await fetch('https://api.cal.com/v2/bookings?' + params.toString(), {
-      headers: {
-        'Authorization': 'Bearer ' + key,
-        'cal-api-version': '2024-08-13',
-        'Content-Type': 'application/json'
-      }
-    });
+    // Fetch upcoming bookings (for calendar display)
+    const upcomingParams = new URLSearchParams({ status: 'upcoming', sortStart: 'asc', limit: '50' });
 
-    if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error('Cal.com API error ' + resp.status + ': ' + errText.substring(0, 100));
+    const [pastResp, upcomingResp] = await Promise.all([
+      fetch('https://api.cal.com/v2/bookings?' + pastParams.toString(), { headers }),
+      fetch('https://api.cal.com/v2/bookings?' + upcomingParams.toString(), { headers })
+    ]);
+
+    if (!pastResp.ok) {
+      const errText = await pastResp.text();
+      throw new Error('Cal.com API error ' + pastResp.status + ': ' + errText.substring(0, 100));
     }
 
-    const json = await resp.json();
-    const bookings = json.data || [];
+    const pastJson = await pastResp.json();
+    const pastBookings = pastJson.data || [];
 
-    if (bookings.length === 0) {
-      if (statusEl) statusEl.textContent = 'All caught up! No new bookings to sync.';
-      return;
+    // Process upcoming bookings for calendar display
+    if (upcomingResp.ok) {
+      const upcomingJson = await upcomingResp.json();
+      const upcomingBookings = upcomingJson.data || [];
+      state.calBookings = upcomingBookings.filter(b => b.status !== 'cancelled').map(b => {
+        const attendee = (b.attendees || [])[0] || {};
+        return {
+          uid: b.uid || b.id,
+          title: b.title || 'Garden Care',
+          clientName: attendee.name || 'Booking',
+          service: b.title || 'Garden Care',
+          start: b.start || '',
+          end: b.end || '',
+          location: b.location || '',
+          status: b.status || 'accepted'
+        };
+      });
+      // Also add past bookings to calBookings for month view history
+      pastBookings.filter(b => b.status !== 'cancelled').forEach(b => {
+        const attendee = (b.attendees || [])[0] || {};
+        const calUid = b.uid || b.id;
+        if (!state.calBookings.some(cb => cb.uid === calUid)) {
+          state.calBookings.push({
+            uid: calUid,
+            title: b.title || 'Garden Care',
+            clientName: attendee.name || 'Booking',
+            service: b.title || 'Garden Care',
+            start: b.start || '',
+            end: b.end || '',
+            location: b.location || '',
+            status: 'past'
+          });
+        }
+      });
     }
 
     let incomeAdded = 0;
     let mileageAdded = 0;
     const rate = state.settings.rate || 25;
 
-    bookings.forEach(b => {
-      // Skip cancelled bookings
+    pastBookings.forEach(b => {
       if (b.status === 'cancelled') return;
-
-      // Build a unique booking ID to prevent duplicates
       const calBookingId = 'cal_' + (b.uid || b.id);
-
-      // Check if we already imported this booking
       if (state.income.some(i => i.calBookingId === calBookingId)) return;
 
-      // Extract booking details
       const startDate = b.start ? new Date(b.start) : new Date();
       const endDate = b.end ? new Date(b.end) : null;
-      const dateStr = startDate.toISOString().split('T')[0];
+      const bDateStr = startDate.toISOString().split('T')[0];
       const durationMin = b.duration || (endDate ? Math.round((endDate - startDate) / 60000) : 0);
-      const hours = Math.round(durationMin / 15) * 0.25; // Round to 15 min
+      const hours = Math.round(durationMin / 15) * 0.25;
 
-      // Get attendee info (client name, phone, email)
       const attendee = (b.attendees || [])[0] || {};
       const clientName = attendee.name || 'Cal.com Booking';
       const clientEmail = attendee.email || '';
       const clientPhone = attendee.phoneNumber || '';
-
-      // Get location (client's garden address)
       const location = b.location || '';
-
-      // Get event type name for service description
       const eventTitle = b.title || 'Garden Care';
 
-      // Create income entry
-      const incomeId = uid();
       const total = hours * rate;
       state.income.push({
-        id: incomeId,
+        id: uid(),
         calBookingId: calBookingId,
         client: clientName,
-        date: dateStr,
+        date: bDateStr,
         hours: hours,
         rate: rate,
         total: total,
@@ -3793,14 +3816,13 @@ async function syncFromCal() {
       });
       incomeAdded++;
 
-      // Auto-create mileage if client has saved miles
       const savedClient = (state.clients || []).find(c =>
         c.name && c.name.toLowerCase() === clientName.toLowerCase()
       );
       if (savedClient && savedClient.miles > 0) {
         state.mileage.push({
           id: uid(),
-          date: dateStr,
+          date: bDateStr,
           destination: clientName,
           purpose: 'Client Visit',
           miles: savedClient.miles,
@@ -3810,7 +3832,6 @@ async function syncFromCal() {
         mileageAdded++;
       }
 
-      // Auto-create or update client record if not already in clients list
       if (!state.clients.some(c => c.name && c.name.toLowerCase() === clientName.toLowerCase())) {
         state.clients.push({
           id: uid(),
@@ -3826,15 +3847,19 @@ async function syncFromCal() {
       }
     });
 
-    // Update last sync timestamp
     state.settings.calLastSync = new Date().toISOString();
     saveState();
+
+    // Refresh calendar views
+    calendarLoaded = false;
+    loadCalendarEvents();
     refreshAll();
 
-    // Show results
     let msg = '';
-    if (incomeAdded > 0) msg += '🌱 ' + incomeAdded + ' booking' + (incomeAdded > 1 ? 's' : '') + ' planted as income!';
-    if (mileageAdded > 0) msg += ' 🚗 ' + mileageAdded + ' trip' + (mileageAdded > 1 ? 's' : '') + ' auto-logged.';
+    if (incomeAdded > 0) msg += incomeAdded + ' booking' + (incomeAdded > 1 ? 's' : '') + ' planted as income!';
+    if (mileageAdded > 0) msg += ' ' + mileageAdded + ' trip' + (mileageAdded > 1 ? 's' : '') + ' auto-logged.';
+    const calCount = (state.calBookings || []).filter(b => b.status !== 'past').length;
+    if (calCount > 0) msg += (msg ? ' ' : '') + calCount + ' upcoming on calendar.';
     if (!msg) msg = 'All caught up! No new bookings to sync.';
     if (statusEl) statusEl.textContent = msg;
     showToast(msg);
