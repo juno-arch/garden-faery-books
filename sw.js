@@ -1,4 +1,4 @@
-const CACHE_NAME = 'garden-faery-books-v17';
+const CACHE_NAME = 'garden-faery-books-v18';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
