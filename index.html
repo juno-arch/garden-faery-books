@@ -729,7 +729,7 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <div class="stat-box gold"><div class="value" id="statProfit">$0</div><div class="label">Net Profit</div></div>
         <div class="stat-box"><div class="value" id="statHours">0</div><div class="label">Hours</div></div>
         <div class="stat-box"><div class="value" id="statJobs">0</div><div class="label">Jobs</div></div>
-        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Mile Deductions</div></div>
+        <div class="stat-box"><div class="value" id="statMileDed">$0</div><div class="label">Vehicle Deduction</div></div>
       </div>
     </div>
 
@@ -1369,7 +1369,7 @@ let realStateBackup = null;
 let state = {
   income: [], expenses: [], mileage: [], receipts: [],
   invoices: [], clients: [], cards: [], leads: [],
-  adminTime: [], visits: [], calBookings: [],
+  adminTime: [], visits: [], calBookings: [], odometer: [],
   learned: { vendors: {}, aliases: {}, categories: {} },
   settings: { rate: 25, goal: 2000, visionKey: '', irsRate: 0.70, formsUrl: '', adminRate: 25, calApiKey: '', calLastSync: '' },
   version: 4
@@ -1381,7 +1381,7 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       state = { ...state, ...parsed };
-      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime','visits','calBookings'].forEach(k => {
+      ['income','expenses','mileage','receipts','invoices','clients','cards','leads','adminTime','visits','calBookings','odometer'].forEach(k => {
         if (!state[k]) state[k] = [];
       });
       if (!state.learned) state.learned = { vendors: {}, aliases: {}, categories: {} };
@@ -1955,6 +1955,9 @@ function handleCommand(text) {
         '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin:8px 0 4px;">TRACKING</div>' +
         '<div class="parsed-data">' +
         parsedRow('/miles', 'Find & log missing mileage this week') +
+        parsedRow('/odo 45230', 'Log odometer reading') +
+        parsedRow('/truck', 'Compare standard vs actual deduction') +
+        parsedRow('/vehicle', 'Set/switch current vehicle') +
         parsedRow('/invoice Dena', 'Generate text message for client') +
         parsedRow('/today', 'Show today\'s calendar') +
         parsedRow('/undo', 'Remove the last entry') +
@@ -2145,6 +2148,124 @@ function handleCommand(text) {
         pendingMiles = missing;
         addChatBubble(html, 'bot', true);
       }
+      return true;
+    }
+
+    if (cmd === '/odo' || cmd === '/odometer') {
+      const reading = parseFloat(args);
+      if (!reading || reading < 100) {
+        // Show current odometer history
+        const odos = (state.odometer || []).sort((a,b) => b.date.localeCompare(a.date));
+        if (!odos.length) {
+          addChatBubble('No odometer readings yet. Log one: <b>/odo 45230</b>', 'bot', true);
+        } else {
+          let html = '<div style="font-weight:700;margin-bottom:6px;">Odometer Log</div>';
+          odos.forEach((o, i) => {
+            const prev = odos[i+1];
+            const diff = prev ? ' (+' + (o.reading - prev.reading).toLocaleString() + ' mi)' : '';
+            html += '<div class="upcoming-event"><div class="event-title">' + o.reading.toLocaleString() + ' mi' + diff + '</div>';
+            html += '<div class="event-time">' + fmtDate(o.date) + (o.vehicle ? ' · ' + esc(o.vehicle) : '') + '</div></div>';
+          });
+          // Show total miles this year
+          const yr = new Date().getFullYear();
+          const yearOdos = odos.filter(o => o.date.startsWith(yr));
+          const allOdos = odos.filter(o => o.vehicle === (odos[0] || {}).vehicle);
+          if (allOdos.length >= 2) {
+            const newest = allOdos[0].reading;
+            const oldest = allOdos[allOdos.length - 1].reading;
+            html += '<div style="margin-top:8px;font-weight:700;">Total tracked: ' + (newest - oldest).toLocaleString() + ' mi</div>';
+          }
+          addChatBubble(html, 'bot', true);
+        }
+        return true;
+      }
+      const vehicle = (state.settings.currentVehicle || 'Truck');
+      state.odometer.push({ id: uid(), date: dateStr(new Date()), reading: reading, vehicle: vehicle });
+      saveState();
+      const odos = state.odometer.filter(o => o.vehicle === vehicle).sort((a,b) => a.date.localeCompare(b.date));
+      let msg = 'Logged odometer: <b>' + reading.toLocaleString() + ' mi</b> for ' + esc(vehicle);
+      if (odos.length >= 2) {
+        const prev = odos[odos.length - 2];
+        const diff = reading - prev.reading;
+        msg += '<br><span style="font-size:12px;color:var(--gray);">+' + diff.toLocaleString() + ' mi since ' + fmtDate(prev.date) + '</span>';
+      }
+      addChatBubble(msg, 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/vehicle') {
+      const name = args.trim();
+      if (!name) {
+        addChatBubble('Current vehicle: <b>' + esc(state.settings.currentVehicle || 'Truck') + '</b><br><span style="font-size:12px;color:var(--gray);">Change it: /vehicle Old Truck</span>', 'bot', true);
+        return true;
+      }
+      state.settings.currentVehicle = name;
+      saveState();
+      addChatBubble('Vehicle set to <b>' + esc(name) + '</b>. Odometer readings will be logged under this vehicle.', 'bot', true);
+      return true;
+    }
+
+    if (cmd === '/truck' || cmd === '/deduction') {
+      // Show standard vs actual comparison
+      const yr = new Date().getFullYear().toString();
+      const vehicle = state.settings.currentVehicle || 'Truck';
+
+      // Standard mileage method: odometer readings this year
+      const odos = (state.odometer || []).filter(o => o.vehicle === vehicle).sort((a,b) => a.date.localeCompare(b.date));
+      const yearOdos = odos.filter(o => o.date.startsWith(yr));
+      let totalMilesOdo = 0;
+      if (yearOdos.length >= 2) {
+        totalMilesOdo = yearOdos[yearOdos.length - 1].reading - yearOdos[0].reading;
+      } else if (odos.length >= 2) {
+        totalMilesOdo = odos[odos.length - 1].reading - odos[0].reading;
+      }
+      // Also add per-trip mileage logs
+      const tripMiles = (state.mileage || []).filter(m => m.date.startsWith(yr)).reduce((s,m) => s + m.miles, 0);
+      const bestMiles = totalMilesOdo > 0 ? totalMilesOdo : tripMiles;
+      const irsRate = state.settings.irsRate || 0.70;
+      const standardDed = bestMiles * irsRate;
+
+      // Actual expense method: truck-related expenses
+      const truckCats = ['gas', 'fuel', 'insurance', 'repair', 'repairs', 'maintenance', 'truck', 'vehicle', 'oil', 'tires', 'registration', 'parking', 'tolls', 'car wash', 'depreciation'];
+      const truckExps = (state.expenses || []).filter(e => {
+        if (!e.date.startsWith(yr)) return false;
+        const cat = (e.category || '').toLowerCase();
+        const desc = (e.description || e.vendor || '').toLowerCase();
+        return truckCats.some(tc => cat.includes(tc) || desc.includes(tc));
+      });
+      const actualDed = truckExps.reduce((s,e) => s + (e.amount || 0), 0);
+
+      const winner = standardDed >= actualDed ? 'Standard Mileage' : 'Actual Expenses';
+      const winAmt = Math.max(standardDed, actualDed);
+
+      let html = '<div style="font-weight:700;margin-bottom:8px;">Vehicle Deduction Comparison (' + yr + ')</div>';
+      html += '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin-bottom:4px;">STANDARD MILEAGE</div>';
+      html += '<div class="parsed-data">';
+      html += '<div class="parsed-row"><span class="parsed-label">Miles</span><span class="parsed-value">' + bestMiles.toLocaleString() + (totalMilesOdo > 0 ? ' (odometer)' : tripMiles > 0 ? ' (trip logs)' : '') + '</span></div>';
+      html += '<div class="parsed-row"><span class="parsed-label">Rate</span><span class="parsed-value">$' + irsRate.toFixed(2) + '/mi</span></div>';
+      html += '<div class="parsed-row"><span class="parsed-label">Deduction</span><span class="parsed-value" style="font-weight:700;">$' + standardDed.toFixed(2) + '</span></div>';
+      html += '</div>';
+
+      html += '<div style="font-weight:600;font-size:12px;color:var(--mushroom);margin:8px 0 4px;">ACTUAL EXPENSES</div>';
+      html += '<div class="parsed-data">';
+      if (truckExps.length) {
+        const byCat = {};
+        truckExps.forEach(e => { const c = e.category || e.vendor || 'Truck'; byCat[c] = (byCat[c]||0) + (e.amount||0); });
+        Object.entries(byCat).sort((a,b) => b[1]-a[1]).forEach(([c,a]) => {
+          html += '<div class="parsed-row"><span class="parsed-label">' + esc(c) + '</span><span class="parsed-value">$' + a.toFixed(2) + '</span></div>';
+        });
+      } else {
+        html += '<div class="parsed-row"><span style="color:var(--gray)">No truck expenses logged yet</span></div>';
+      }
+      html += '<div class="parsed-row"><span class="parsed-label">Deduction</span><span class="parsed-value" style="font-weight:700;">$' + actualDed.toFixed(2) + '</span></div>';
+      html += '</div>';
+
+      html += '<div style="margin-top:10px;padding:10px;background:var(--sage-light,#e8edd9);border-radius:8px;">';
+      html += '<div style="font-weight:700;color:var(--warm-dark);">Claim: ' + winner + '</div>';
+      html += '<div style="font-size:13px;">$' + winAmt.toFixed(2) + ' deduction' + (winAmt > 0 ? ' (saves ~$' + (winAmt * 0.25).toFixed(0) + ' in taxes)' : '') + '</div>';
+      html += '</div>';
+
+      addChatBubble(html, 'bot', true);
       return true;
     }
 
@@ -2424,6 +2545,23 @@ function handleQuery(lower) {
       html += '</div>';
       addChatBubble(html, 'bot', true);
     }
+    return true;
+  }
+
+  // Natural odometer: "odometer 45230", "odo is 45230", "my truck is at 45230"
+  const odoMatch = lower.match(/(?:odometer|odo|truck(?:'s| is)? at|reading)\s*(?:is\s*)?(\d{3,6})/i);
+  if (odoMatch) {
+    const reading = parseFloat(odoMatch[1]);
+    const vehicle = state.settings.currentVehicle || 'Truck';
+    state.odometer.push({ id: uid(), date: dateStr(new Date()), reading: reading, vehicle: vehicle });
+    saveState();
+    const odos = state.odometer.filter(o => o.vehicle === vehicle).sort((a,b) => a.date.localeCompare(b.date));
+    let msg = 'Logged odometer: <b>' + reading.toLocaleString() + ' mi</b> for ' + esc(vehicle);
+    if (odos.length >= 2) {
+      const prev = odos[odos.length - 2];
+      msg += '<br><span style="font-size:12px;color:var(--gray);">+' + (reading - prev.reading).toLocaleString() + ' mi since ' + fmtDate(prev.date) + '</span>';
+    }
+    addChatBubble(msg, 'bot', true);
     return true;
   }
 
@@ -4302,6 +4440,14 @@ function refreshDashboard() {
   const totE = me.reduce((s,e) => s+(e.amount||0), 0);
   const totH = mi.reduce((s,i) => s+(i.hours||0), 0);
   const totMilDed = mm.reduce((s,m) => s+(m.deduction||0), 0);
+  // Vehicle deduction: compare standard mileage vs actual truck expenses for the month
+  const dashTruckCats = ['gas','fuel','insurance','repair','repairs','maintenance','truck','vehicle','oil','tires','registration','parking','tolls','car wash','depreciation'];
+  const dashTruckExp = me.filter(e => {
+    const cat = (e.category||'').toLowerCase(); const desc = (e.description||e.vendor||'').toLowerCase();
+    return dashTruckCats.some(tc => cat.includes(tc) || desc.includes(tc));
+  }).reduce((s,e) => s+(e.amount||0), 0);
+  const dashBestDed = Math.max(totMilDed, dashTruckExp);
+
   const goal = state.settings.goal || 2000;
   const pct = Math.min(100, (totI/goal)*100);
 
@@ -4314,7 +4460,7 @@ function refreshDashboard() {
   document.getElementById('statProfit').textContent = '$'+(totI-totE).toFixed(0);
   document.getElementById('statHours').textContent = totH.toFixed(1);
   document.getElementById('statJobs').textContent = mi.length;
-  document.getElementById('statMileDed').textContent = '$'+totMilDed.toFixed(0);
+  document.getElementById('statMileDed').textContent = '$'+dashBestDed.toFixed(0);
 
   // ─── WHO OWES ME ───
   const uninvoiced = {};
@@ -4603,11 +4749,38 @@ function renderReports() {
     : '<div class="pnl-row indent" style="color:var(--gray)">No expenses</div>';
   document.getElementById('pnlTotalExpenses').textContent = '-$'+totalE.toFixed(2);
 
-  // Deductions
+  // Deductions — compare standard mileage vs actual expenses
   const totalMiles = pMil.reduce((s,m) => s+m.miles, 0);
   const milDed = pMil.reduce((s,m) => s+m.deduction, 0);
-  document.getElementById('pnlDeductionRows').innerHTML = `<div class="pnl-row indent"><span>Mileage (${totalMiles.toFixed(0)} mi @ $${IRS_RATE}/mi)</span><span>$${milDed.toFixed(2)}</span></div>`;
-  document.getElementById('pnlTotalDeductions').textContent = '$'+milDed.toFixed(2);
+
+  // Odometer-based miles for the period
+  const vehicle = state.settings.currentVehicle || 'Truck';
+  const odos = (state.odometer || []).filter(o => o.vehicle === vehicle).sort((a,b) => a.date.localeCompare(b.date));
+  const periodOdos = odos.filter(o => {
+    const d = new Date(o.date + 'T00:00:00');
+    return d >= range.start && d <= range.end;
+  });
+  let odoMiles = 0;
+  if (periodOdos.length >= 2) odoMiles = periodOdos[periodOdos.length-1].reading - periodOdos[0].reading;
+  const bestMiles = odoMiles > 0 ? odoMiles : totalMiles;
+  const standardDed = bestMiles * IRS_RATE;
+
+  // Actual expense method
+  const truckCats = ['gas','fuel','insurance','repair','repairs','maintenance','truck','vehicle','oil','tires','registration','parking','tolls','car wash','depreciation'];
+  const truckExps = pExp.filter(e => {
+    const cat = (e.category || '').toLowerCase();
+    const desc = (e.description || e.vendor || '').toLowerCase();
+    return truckCats.some(tc => cat.includes(tc) || desc.includes(tc));
+  });
+  const actualDed = truckExps.reduce((s,e) => s + (e.amount||0), 0);
+  const bestDed = Math.max(standardDed, actualDed);
+  const bestMethod = standardDed >= actualDed ? 'Standard Mileage' : 'Actual Expenses';
+
+  let dedHtml = `<div class="pnl-row indent"><span>Standard: ${bestMiles.toLocaleString()} mi @ $${IRS_RATE}/mi</span><span>$${standardDed.toFixed(2)}</span></div>`;
+  dedHtml += `<div class="pnl-row indent"><span>Actual: truck expenses</span><span>$${actualDed.toFixed(2)}</span></div>`;
+  dedHtml += `<div class="pnl-row indent" style="color:var(--sage);font-weight:600;"><span>Best: ${bestMethod}</span><span>$${bestDed.toFixed(2)}</span></div>`;
+  document.getElementById('pnlDeductionRows').innerHTML = dedHtml;
+  document.getElementById('pnlTotalDeductions').textContent = '$'+bestDed.toFixed(2);
 
   const net = totalI - totalE;
   const netEl = document.getElementById('pnlNetProfit');
@@ -4622,7 +4795,21 @@ function renderTaxEstimates() {
   const yr = { start: new Date(reportYear,0,1), end: new Date(reportYear,11,31,23,59,59) };
   const annI = filterByRange(state.income,'date',yr).reduce((s,i)=>s+(i.total||0),0);
   const annE = filterByRange(state.expenses,'date',yr).reduce((s,e)=>s+(e.amount||0),0);
-  const annMD = filterByRange(state.mileage,'date',yr).reduce((s,m)=>s+m.deduction,0);
+  const annTripMD = filterByRange(state.mileage,'date',yr).reduce((s,m)=>s+m.deduction,0);
+  // Use best vehicle deduction: odometer-based or trip-based standard, vs actual truck expenses
+  const taxVehicle = state.settings.currentVehicle || 'Truck';
+  const taxOdos = (state.odometer || []).filter(o => o.vehicle === taxVehicle).sort((a,b) => a.date.localeCompare(b.date));
+  const taxYearOdos = taxOdos.filter(o => o.date.startsWith(String(reportYear)));
+  let taxOdoMiles = 0;
+  if (taxYearOdos.length >= 2) taxOdoMiles = taxYearOdos[taxYearOdos.length-1].reading - taxYearOdos[0].reading;
+  const taxBestMiles = taxOdoMiles > 0 ? taxOdoMiles : filterByRange(state.mileage,'date',yr).reduce((s,m)=>s+m.miles,0);
+  const taxStandardDed = taxBestMiles * IRS_RATE;
+  const taxTruckCats = ['gas','fuel','insurance','repair','repairs','maintenance','truck','vehicle','oil','tires','registration','parking','tolls','car wash','depreciation'];
+  const taxTruckExps = filterByRange(state.expenses,'date',yr).filter(e => {
+    const cat = (e.category||'').toLowerCase(); const desc = (e.description||e.vendor||'').toLowerCase();
+    return taxTruckCats.some(tc => cat.includes(tc) || desc.includes(tc));
+  }).reduce((s,e) => s+(e.amount||0), 0);
+  const annMD = Math.max(taxStandardDed, taxTruckExps);
   const netBiz = annI - annE - annMD;
   const taxable = Math.max(0, netBiz);
   const seBase = taxable * 0.9235;
@@ -5478,7 +5665,7 @@ function syncFromCloud() {
     if (cloudTime > localTime) {
       const mergedState = { ...state, ...cloudState };
       // Preserve arrays properly (merge by id, cloud wins for conflicts)
-      ['income', 'expenses', 'mileage', 'receipts', 'invoices', 'clients', 'cards', 'leads', 'adminTime'].forEach(key => {
+      ['income', 'expenses', 'mileage', 'receipts', 'invoices', 'clients', 'cards', 'leads', 'adminTime', 'visits', 'calBookings', 'odometer'].forEach(key => {
         if (cloudState[key] && Array.isArray(cloudState[key])) {
           const merged = new Map();
           (state[key] || []).forEach(item => { if (item.id) merged.set(item.id, item); });
