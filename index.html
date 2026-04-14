@@ -859,7 +859,7 @@ textarea.form-input { resize: vertical; min-height: 60px; }
       <h2 style="font-family:var(--font-heading);font-size:22px;color:var(--warm-dark);margin:0;">Clients</h2>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-outline" style="font-size:12px;" onclick="toggleClientForm()">+ Add</button>
-        <button class="btn btn-outline" style="font-size:12px;" onclick="syncFromCal()">Sync Cal.com</button>
+        <button class="btn btn-outline" style="font-size:12px;" onclick="syncFromBookings()">Sync Bookings</button>
       </div>
     </div>
     <div style="margin-bottom:12px;">
@@ -1061,12 +1061,12 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
       </div>
       <div class="card">
-        <div class="card-title">Cal.com Booking Sync</div>
-        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Auto-import bookings from Cal.com as income, visits, and mileage. Syncs every time you open the app.</p>
-        <div class="form-group"><label>Cal.com API Key</label><input type="password" id="settingsCalApiKey" placeholder="cal_live_..."></div>
+        <div class="card-title">Booking Sync</div>
+        <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Auto-import bookings from your self-hosted PocketBase as income, visits, and mileage. Syncs every time you open the app.</p>
+        <div class="form-group"><label>Bookings API URL</label><input type="text" id="settingsBookingsUrl" placeholder="https://bookings.gardenfaery.love" value="https://bookings.gardenfaery.love"></div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" onclick="saveCalApiKey()">Save Key</button>
-          <button class="btn btn-outline" onclick="syncFromCal()">Sync Now 🌱</button>
+          <button class="btn btn-primary" onclick="saveBookingsUrl()">Save URL</button>
+          <button class="btn btn-outline" onclick="syncFromBookings()">Sync Now 🌱</button>
         </div>
         <div id="calSyncStatus" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
       </div>
@@ -3845,18 +3845,172 @@ function renderLeads() {
 // ═══════════════════════════════════════
 
 // ═══════════════════════════════════════
-// CAL.COM BOOKING SYNC
+// BOOKING SYNC (self-hosted PocketBase — replaces Cal.com)
 // ═══════════════════════════════════════
-function saveCalApiKey() {
-  const key = document.getElementById('settingsCalApiKey').value.trim();
-  if (!key) { showToast('Paste your Cal.com API key first'); return; }
-  state.settings.calApiKey = key;
+function saveBookingsUrl() {
+  const url = document.getElementById('settingsBookingsUrl').value.trim().replace(/\/$/, '');
+  if (!url) { showToast('Enter your bookings URL'); return; }
+  state.settings.bookingsUrl = url;
   saveState();
-  showToast('Cal.com API key saved! 🌿');
-  document.getElementById('calSyncStatus').textContent = 'Key saved. Tap "Sync Now" to pull bookings.';
+  showToast('Bookings URL saved! 🌿');
+  document.getElementById('calSyncStatus').textContent = 'URL saved. Tap "Sync Now" to pull bookings.';
+}
+
+async function syncFromBookings() {
+  const baseUrl = (state.settings.bookingsUrl || 'https://bookings.gardenfaery.love').replace(/\/$/, '');
+  const statusEl = document.getElementById('calSyncStatus');
+  if (statusEl) statusEl.textContent = 'Fetching bookings from ' + baseUrl + '...';
+
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    // Pull everything (canceled filtered out below). 500 is plenty for a solo biz.
+    const url = baseUrl + '/api/collections/bookings/records?perPage=500&sort=-date';
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    const json = await resp.json();
+    const all = (json.items || []).filter(b => b.status !== 'canceled');
+
+    const past = all.filter(b => b.date && b.date < today);
+    const upcoming = all.filter(b => b.date && b.date >= today);
+
+    // Build upcoming calendar view (mirrors shape the rest of the app expects)
+    state.calBookings = upcoming.concat(past).map(b => {
+      const start = b.date + 'T' + toIso(b.time);
+      const end = b.date + 'T' + toIso(b.end_time || b.time);
+      return {
+        uid: 'pb_' + b.id,
+        title: b.event_name || 'Garden Care',
+        clientName: b.client_name || 'Booking',
+        service: b.event_name || 'Garden Care',
+        start: start,
+        end: end,
+        location: b.client_address || '',
+        status: b.date < today ? 'past' : 'accepted'
+      };
+    });
+
+    let incomeAdded = 0;
+    let mileageAdded = 0;
+    const rate = state.settings.rate || 25;
+
+    past.forEach(b => {
+      const pbBookingId = 'pb_' + b.id;
+      // Old Cal.com-sourced entries used `calBookingId`; keep compatibility.
+      if (state.income.some(i => i.calBookingId === pbBookingId || i.pbBookingId === pbBookingId)) return;
+
+      const hours = (Number(b.duration) || 0) / 60 || 0;
+      const title = b.event_name || 'Garden Care';
+      const isFree = /free|consult/i.test(title) || Number(b.price) === 0 && /consult/i.test(b.event_type || '');
+      const total = isFree ? 0 : (Number(b.price) > 0 ? Number(b.price) : hours * rate);
+
+      state.income.push({
+        id: uid(),
+        pbBookingId: pbBookingId,
+        calBookingId: pbBookingId, // back-compat flag so old dedupe logic still works
+        client: b.client_name || 'Booking',
+        date: b.date,
+        hours: Math.round(hours * 4) / 4,
+        rate: isFree ? 0 : rate,
+        total: total,
+        payment: b.payment_method || (b.paid ? 'Cash' : 'Unpaid'),
+        service: title,
+        notes: [
+          b.client_address ? 'Location: ' + b.client_address : '',
+          b.client_phone ? 'Phone: ' + b.client_phone : '',
+          b.client_email ? 'Email: ' + b.client_email : '',
+          b.paid ? 'Paid' : 'Unpaid'
+        ].filter(Boolean).join(' | ')
+      });
+      incomeAdded++;
+
+      const savedClient = (state.clients || []).find(c =>
+        c.name && c.name.toLowerCase() === (b.client_name || '').toLowerCase()
+      );
+      if (savedClient && savedClient.miles > 0) {
+        state.mileage.push({
+          id: uid(),
+          date: b.date,
+          destination: b.client_name,
+          purpose: 'Client Visit',
+          miles: savedClient.miles,
+          deduction: savedClient.miles * (state.settings.irsRate || 0.70),
+          notes: 'Auto-logged from booking'
+        });
+        mileageAdded++;
+      }
+
+      if (b.client_name) {
+        const existing = state.clients.find(c => c.name && c.name.toLowerCase() === b.client_name.toLowerCase());
+        if (existing) {
+          if (!existing.email && b.client_email) existing.email = b.client_email;
+          if (!existing.phone && b.client_phone) existing.phone = b.client_phone;
+          if (!existing.address && b.client_address) existing.address = b.client_address;
+          existing.lastSeen = b.date;
+        } else {
+          state.clients.push({
+            id: uid(),
+            name: b.client_name,
+            email: b.client_email || '',
+            phone: b.client_phone || '',
+            address: b.client_address || '',
+            miles: 0,
+            hidySpot: '',
+            notes: 'Auto-added from booking',
+            lastSeen: b.date,
+            created: new Date().toISOString()
+          });
+        }
+      }
+    });
+
+    state.settings.bookingsLastSync = new Date().toISOString();
+    saveState();
+
+    calendarLoaded = false;
+    loadCalendarEvents();
+    refreshAll();
+
+    let msg = '';
+    if (incomeAdded > 0) msg += incomeAdded + ' booking' + (incomeAdded > 1 ? 's' : '') + ' planted as income!';
+    if (mileageAdded > 0) msg += ' ' + mileageAdded + ' trip' + (mileageAdded > 1 ? 's' : '') + ' auto-logged.';
+    const upcomingCount = upcoming.length;
+    if (upcomingCount > 0) msg += (msg ? ' ' : '') + upcomingCount + ' upcoming on calendar.';
+    if (!msg) msg = 'All caught up! No new bookings to sync.';
+    if (statusEl) statusEl.textContent = msg;
+    showToast(msg);
+
+  } catch (err) {
+    console.warn('Bookings sync error:', err);
+    if (statusEl) statusEl.textContent = 'Sync failed: ' + err.message;
+    showToast('Sync failed: ' + err.message);
+  }
+}
+
+// Convert "9:00am" / "2:30pm" to ISO time component "09:00:00"
+function toIso(timeStr) {
+  if (!timeStr) return '00:00:00';
+  const m = timeStr.toLowerCase().match(/^(\d{1,2}):(\d{2})\s*(am|pm)?/);
+  if (!m) return '00:00:00';
+  let h = parseInt(m[1], 10);
+  const mm = m[2];
+  if (m[3] === 'pm' && h < 12) h += 12;
+  if (m[3] === 'am' && h === 12) h = 0;
+  return String(h).padStart(2, '0') + ':' + mm + ':00';
+}
+
+// Legacy Cal.com stubs — kept so older saved calls don't throw after update.
+function saveCalApiKey() {
+  showToast('Cal.com sync is retired. Use Booking Sync (PocketBase) instead.');
+  const statusEl = document.getElementById('calSyncStatus');
+  if (statusEl) statusEl.textContent = 'Cal.com sync retired — sync from PocketBase bookings now.';
 }
 
 async function syncFromCal() {
+  // Cal.com retired 2026-04-14. Redirect to the new PocketBase sync.
+  return syncFromBookings();
+}
+
+async function _deprecated_syncFromCal_original() {
   const key = state.settings.calApiKey;
   if (!key) { showToast('Add your Cal.com API key in Settings first'); return; }
 
@@ -4033,17 +4187,16 @@ async function syncFromCal() {
   }
 }
 
-// Auto-sync Cal.com on app load (if key is configured)
-function autoSyncCal() {
-  if (!state.settings.calApiKey) return;
+// Auto-sync bookings on app load (from self-hosted PocketBase)
+function autoSyncCal() { autoSyncBookings(); }
+function autoSyncBookings() {
   // Only auto-sync if it's been at least 30 minutes since last sync
-  if (state.settings.calLastSync) {
-    const last = new Date(state.settings.calLastSync);
+  if (state.settings.bookingsLastSync) {
+    const last = new Date(state.settings.bookingsLastSync);
     const now = new Date();
     if ((now - last) < 30 * 60 * 1000) return;
   }
-  // Quiet sync (no toast unless new bookings found)
-  syncFromCal();
+  syncFromBookings();
 }
 
 // ═══════════════════════════════════════
