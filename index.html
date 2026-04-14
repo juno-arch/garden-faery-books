@@ -1064,8 +1064,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
         <div class="card-title">Booking Sync</div>
         <p style="font-size:12px; color:var(--gray); margin-bottom:12px;">Auto-import bookings from your self-hosted PocketBase as income, visits, and mileage. Syncs every time you open the app.</p>
         <div class="form-group"><label>Bookings API URL</label><input type="text" id="settingsBookingsUrl" placeholder="https://bookings.gardenfaery.love" value="https://bookings.gardenfaery.love"></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" onclick="saveBookingsUrl()">Save URL</button>
+        <div class="form-group"><label>PB Admin Email</label><input type="email" id="settingsPbEmail" placeholder="taya@gardenfaery.love" autocomplete="username"></div>
+        <div class="form-group"><label>PB Admin Password</label><input type="password" id="settingsPbPassword" placeholder="Superuser password" autocomplete="current-password"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="saveBookingsUrl()">Save Settings</button>
           <button class="btn btn-outline" onclick="syncFromBookings()">Sync Now 🌱</button>
         </div>
         <div id="calSyncStatus" style="margin-top:8px;font-size:12px;color:var(--gray);"></div>
@@ -3851,9 +3853,30 @@ function saveBookingsUrl() {
   const url = document.getElementById('settingsBookingsUrl').value.trim().replace(/\/$/, '');
   if (!url) { showToast('Enter your bookings URL'); return; }
   state.settings.bookingsUrl = url;
+  const email = document.getElementById('settingsPbEmail').value.trim();
+  const password = document.getElementById('settingsPbPassword').value;
+  if (email) state.settings.pbEmail = email;
+  if (password) state.settings.pbPassword = password;
+  state.settings.pbToken = ''; // clear so we re-auth on next sync
   saveState();
-  showToast('Bookings URL saved! 🌿');
-  document.getElementById('calSyncStatus').textContent = 'URL saved. Tap "Sync Now" to pull bookings.';
+  showToast('Bookings settings saved! 🌿');
+  document.getElementById('calSyncStatus').textContent = 'Saved. Tap "Sync Now" to pull bookings.';
+}
+
+async function pbAdminAuth(baseUrl) {
+  const email = state.settings.pbEmail;
+  const password = state.settings.pbPassword;
+  if (!email || !password) throw new Error('PB admin login not set. Add email + password in Settings.');
+  const resp = await fetch(baseUrl + '/api/collections/_superusers/auth-with-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identity: email, password: password }),
+  });
+  if (!resp.ok) throw new Error('PB login failed (' + resp.status + '). Check email/password in Settings.');
+  const data = await resp.json();
+  state.settings.pbToken = data.token;
+  saveState();
+  return data.token;
 }
 
 async function syncFromBookings() {
@@ -3863,9 +3886,15 @@ async function syncFromBookings() {
 
   try {
     const today = new Date().toISOString().slice(0, 10);
-    // Pull everything (canceled filtered out below). 500 is plenty for a solo biz.
+    let token = state.settings.pbToken;
+    if (!token) token = await pbAdminAuth(baseUrl);
     const url = baseUrl + '/api/collections/bookings/records?perPage=500&sort=-date';
-    const resp = await fetch(url);
+    let resp = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (resp.status === 401 || resp.status === 403) {
+      // token expired — re-auth once
+      token = await pbAdminAuth(baseUrl);
+      resp = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    }
     if (!resp.ok) throw new Error('API error ' + resp.status);
     const json = await resp.json();
     const all = (json.items || []).filter(b => b.status !== 'canceled');
@@ -5810,6 +5839,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsGoal').value = state.settings.goal || 2000;
   if (state.settings.visionKey) document.getElementById('settingsVisionKey').value = state.settings.visionKey;
   if (state.settings.calApiKey) document.getElementById('settingsCalApiKey').value = state.settings.calApiKey;
+  if (state.settings.bookingsUrl) document.getElementById('settingsBookingsUrl').value = state.settings.bookingsUrl;
+  if (state.settings.pbEmail) document.getElementById('settingsPbEmail').value = state.settings.pbEmail;
+  if (state.settings.pbPassword) document.getElementById('settingsPbPassword').value = state.settings.pbPassword;
   document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
 
   // Auto-sync Cal.com bookings on app open
